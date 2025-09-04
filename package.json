@@ -1,0 +1,28 @@
+{
+  "name": "ender-quest-sb",
+  "version": "0.0.1",
+  "author": "palm1",
+  "description": "Main functionality for the Enderquest Skyblock server.",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsup",
+    "watch": "tsup --watch"
+  },
+  "keywords": [],
+  "peerDependencies": {
+    "@serenityjs/core": "*",
+    "@serenityjs/logger": "*",
+    "@serenityjs/nbt": "*",
+    "@serenityjs/plugins": "*",
+    "@serenityjs/protocol": "*"
+  },
+  "devDependencies": {
+    "@types/uuid": "^10.0.0",
+    "mongodb": "^6.19.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.6.3",
+    "uuid": "^11.1.0"
+  }
+}
