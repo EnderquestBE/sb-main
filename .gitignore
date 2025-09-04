@@ -1,3 +1,6 @@
+# Mongo DB configuration
+src/Configuration/Database/database.ts
+
 # Logs
 logs
 *.log
