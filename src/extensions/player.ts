@@ -23,10 +23,10 @@ declare module "@serenityjs/core" {
     setPermission(permission: PERMISSION_INTEGER): Promise<OperationResult>;
 
     // Balance
-    getCoins(): number;
-    addCoins(amount: number): Promise<OperationResult>;
-    removeCoins(amount: number): Promise<OperationResult>;
-    setCoins(amount: number): Promise<OperationResult>;
+    getMoney(): number;
+    addMoney(amount: number): Promise<OperationResult>;
+    removeMoney(amount: number): Promise<OperationResult>;
+    setMoney(amount: number): Promise<OperationResult>;
     getXp(): number;
     addXp(amount: number): Promise<OperationResult>;
     removeXp(amount: number): Promise<OperationResult>;
@@ -121,24 +121,24 @@ Player.prototype.setPermission = async function (this: Player, permission: PERMI
 }
 
 // Balance
-Player.prototype.getCoins = function (this: Player): number {
+Player.prototype.getMoney = function (this: Player): number {
   const session = PlayerExtension.getSession(this);
-  return session ? session.getCoins() : 0;
+  return session ? session.getMoney() : 0;
 }
-Player.prototype.addCoins = async function (this: Player, amount: number): Promise<OperationResult> {
+Player.prototype.addMoney = async function (this: Player, amount: number): Promise<OperationResult> {
   const session = PlayerExtension.getSession(this);
   if (!session) return PlayerExtension['NO_SESSION_RESULT'];
-  return session.addCoins(amount);
+  return session.addMoney(amount);
 }
-Player.prototype.removeCoins = async function (this: Player, amount: number): Promise<OperationResult> {
+Player.prototype.removeMoney = async function (this: Player, amount: number): Promise<OperationResult> {
   const session = PlayerExtension.getSession(this);
   if (!session) return PlayerExtension['NO_SESSION_RESULT'];
-  return session.removeCoins(amount);
+  return session.removeMoney(amount);
 }
-Player.prototype.setCoins = async function (this: Player, amount: number): Promise<OperationResult> {
+Player.prototype.setMoney = async function (this: Player, amount: number): Promise<OperationResult> {
   const session = PlayerExtension.getSession(this);
   if (!session) return PlayerExtension['NO_SESSION_RESULT'];
-  return session.setCoins(amount);
+  return session.setMoney(amount);
 }
 
 Player.prototype.getXp = function (this: Player): number {

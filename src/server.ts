@@ -2,6 +2,8 @@ import { Serenity, WorldEvent } from "@serenityjs/core";
 import { Logger, LoggerColors } from "@serenityjs/logger";
 import { CommandBuilder, DatabaseService, IslandDatabase, PlayerDatabase } from "./Classes/classes";
 import { PlayerExtension } from "./extensions/player";
+import { DisplaySlotType } from "@serenityjs/protocol";
+import { Scorebar } from "./Scoreboard/scoreboard";
 
 class Server {
     public static readonly logger: Logger = new Logger("Enderquest", LoggerColors.LightPurple);
@@ -19,6 +21,8 @@ class Server {
         this.registerPlayerEvents()
         // Register commands.
         CommandBuilder.registerAll(this.instance.commandPalette);
+        // Start Scorebar runtime.
+        Scorebar.runtime(this.instance)
     }
 
     private static async registerDBService() {
@@ -28,7 +32,11 @@ class Server {
     }
 
     private static async registerPlayerEvents() {
+        /**
+         * @event onJoin
+         */
         this.instance.on(WorldEvent.PlayerJoin, async ({ player }) => {
+            // Load player data.
             const session = await PlayerExtension.loadSession(player);
             if (!session) {
                 await PlayerExtension.createSession(player);
@@ -36,8 +44,14 @@ class Server {
             } else {
                 this.logger.info(`Loaded session for player ${player.username}.`);
             }
+            // Initialize scorebar.
+            Scorebar.initialize(player)
         });
+        /**
+         * @event onLeave
+         */
         this.instance.on(WorldEvent.PlayerLeave, ({ player }) => {
+            // Uncache player data.
             PlayerExtension.removeSession(player);
             this.logger.info(`Removed session for player ${player.username}.`);
         });

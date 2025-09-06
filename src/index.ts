@@ -21,3 +21,9 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
 }
 
 export default new EnderquestPlugin();
+
+/**
+ * @IMPORTS
+ */
+
+import "./Commands/commands"

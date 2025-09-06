@@ -17,7 +17,7 @@ interface PlayerData {
    * Currency balance values for the player.
    */
   balance: {
-    coins: number;
+    money: number;
     xp: number;
     shards: number;
   }

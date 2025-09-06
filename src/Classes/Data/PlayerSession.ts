@@ -47,7 +47,7 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
       username: username,
       permission: PERMISSION_INTEGER.MEMBER,
       balance: {
-        coins: 100, // Starting coins
+        money: 100, // Starting money
         xp: 0,
         shards: 0
       },
@@ -69,7 +69,7 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
   public getXuid(): string { return this.data.xuid; }
   public getUsername(): string { return this.data.username; }
   public getPermission(): PERMISSION_INTEGER { return this.data.permission; }
-  public getCoins(): number { return this.data.balance.coins; }
+  public getMoney(): number { return this.data.balance.money; }
   public getXp(): number { return this.data.balance.xp; }
   public getShards(): number { return this.data.balance.shards; }
   public getRanks(): string[] { return this.data.ranks; }
@@ -115,31 +115,31 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
   }
 
   /**
-   * Adds coins to the player's balance.
-   * @param amount The amount of coins to add.
+   * Adds money to the player's balance.
+   * @param amount The amount of money to add.
    */
-  public async addCoins(amount: number): Promise<OperationResult> {
+  public async addMoney(amount: number): Promise<OperationResult> {
     if (amount <= 0) return { success: false, reason: "Amount must be a positive number." };
-    return this.updateOne({ $inc: { "balance.coins": amount } });
+    return this.updateOne({ $inc: { "balance.money": amount } });
   }
 
   /**
-   * Removes coins from the player's balance.
-   * @param amount The amount of coins to remove.
+   * Removes money from the player's balance.
+   * @param amount The amount of money to remove.
    */
-  public async removeCoins(amount: number): Promise<OperationResult> {
+  public async removeMoney(amount: number): Promise<OperationResult> {
     if (amount <= 0) return { success: false, reason: "Amount must be a positive number." };
-    if (this.getCoins() < amount) return { success: false, reason: "Insufficient funds." };
-    return this.updateOne({ $inc: { "balance.coins": -amount } });
+    if (this.getMoney() < amount) return { success: false, reason: "Insufficient funds." };
+    return this.updateOne({ $inc: { "balance.money": -amount } });
   }
 
   /**
    * Sets the player's coin balance to a specific value.
    * @param amount The new coin balance.
    */
-  public async setCoins(amount: number): Promise<OperationResult> {
+  public async setMoney(amount: number): Promise<OperationResult> {
     if (amount < 0) return { success: false, reason: "Amount must be a non-negative number." };
-    return this.updateOne({ $set: { "balance.coins": amount } });
+    return this.updateOne({ $set: { "balance.money": amount } });
   }
 
   /**

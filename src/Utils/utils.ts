@@ -17,7 +17,7 @@ class Utils {
     [1, "I"],
   ]);
 
-  public static readonly toTimeStamp = (seconds: number) => {
+  public static readonly formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
@@ -26,6 +26,13 @@ class Utils {
       minutes.toString().padStart(2, "0"),
       secs.toString().padStart(2, "0"),
     ].join(":");
+  };
+
+  public static readonly formatDuration = (s: number): string => {
+    const d = Math.floor(s / 86400);
+    const h = Math.floor((s %= 86400) / 3600);
+    const m = Math.floor((s %= 3600) / 60);
+    return `${d}d:${h}h:${m}m`
   };
 
   public static readonly formatString = (str: string) => {
