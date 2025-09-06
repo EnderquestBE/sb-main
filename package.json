@@ -12,11 +12,11 @@
   },
   "keywords": [],
   "peerDependencies": {
-    "@serenityjs/core": "*",
-    "@serenityjs/logger": "*",
-    "@serenityjs/nbt": "*",
-    "@serenityjs/plugins": "*",
-    "@serenityjs/protocol": "*"
+    "@serenityjs/core": "../../../packages/core",
+    "@serenityjs/logger": "../../../packages/logger",
+    "@serenityjs/nbt": "../../../packages/nbt",
+    "@serenityjs/plugins": "../../../packages/plugins",
+    "@serenityjs/protocol": "../../../packages/protocol"
   },
   "devDependencies": {
     "@types/uuid": "^10.0.0",

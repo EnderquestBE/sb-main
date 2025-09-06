@@ -1,51 +1,58 @@
-import { Plugin, PluginEvents, PluginPriority } from "@serenityjs/plugins";
-import { LevelDBProvider, StringEnum, VoidGenerator, WorldEvent } from "@serenityjs/core";
+import { Serenity, WorldEvent } from "@serenityjs/core";
+import { Logger, LoggerColors } from "@serenityjs/logger";
+import { Plugin, PluginEvents } from "@serenityjs/plugins";
+import { CommandBuilder, DatabaseService, IslandDatabase, PlayerDatabase } from "./Classes/classes";
+import { PlayerExtension } from "./extensions/player";
 
-class EnderquestMain extends Plugin implements PluginEvents {
-  public readonly priority: PluginPriority = PluginPriority.Low;
+class Server {
+  public static readonly logger: Logger = new Logger("Enderquest", LoggerColors.LightPurple);
+
+  public static instance: Serenity
+
+  private static database: DatabaseService;
+
+  public static initialize() {
+    this.database = new DatabaseService()
+    // Register database.
+    this.registerDBService()
+    // Register player events.
+    this.registerPlayerEvents()
+  }
+
+  private static async registerDBService() {
+    await this.database.connect();
+    new PlayerDatabase(this.database);
+    new IslandDatabase(this.database)
+  }
+
+  private static async registerPlayerEvents() {
+    this.instance.on(WorldEvent.PlayerJoin, async ({ player }) => {
+      const session = await PlayerExtension.loadSession(player);
+      if (!session) {
+        await PlayerExtension.createSession(player);
+        this.logger.info(`Created new session for player ${player.username}.`);
+      } else {
+        this.logger.info(`Loaded session for player ${player.username}.`);
+      }
+    });
+    this.instance.on(WorldEvent.PlayerLeave, ({ player }) => {
+      PlayerExtension.removeSession(player);
+      this.logger.info(`Removed session for player ${player.username}.`);
+    });
+  }
+
+}
+
+class EnderquestPlugin extends Plugin implements PluginEvents {
 
   public constructor() {
     super("ender-quest", "0.0.1+indev");
   }
 
-  public onInitialize(): void {
-    this.logger.info("§5Ender§dquest§r has been initialized.");
-    this.serenity.on(WorldEvent.WorldInitialize, ({ world }) => {
-      world.commandPalette.register(
-        "create",
-        "Create a new world.",
-        (registry) => {
-          registry.overload(
-            {
-              identifier: StringEnum,
-            },
-            async ({ identifier }) => {
-              // Check if identifier is provided
-              if (!identifier.result) throw new Error("Identifier is required");
-
-              // Create a new world with the specified identifier
-              const world = await this.serenity.createWorld(LevelDBProvider, {
-                identifier: identifier.result,
-                dimensions: [
-                  {
-                    identifier: "overworld",
-                    generator: VoidGenerator.identifier,
-                  }
-                ]
-              });
-              return {
-                message: "World created successfully."
-              }
-            }
-          )
-        },
-        () => {
-          return {
-            message: "World failed to create."
-          }
-        }
-      )
-    })
+  public async onInitialize(): Promise<void> {
+    CommandBuilder.registerAll()
+    Server.instance = this.serenity
+    Server.initialize()
   }
 
   public onStartUp(): void {
@@ -57,6 +64,6 @@ class EnderquestMain extends Plugin implements PluginEvents {
   }
 }
 
-export default new EnderquestMain();
+export default new EnderquestPlugin();
 
-export { EnderquestMain }
+export { Server }

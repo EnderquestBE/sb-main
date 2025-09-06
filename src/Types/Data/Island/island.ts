@@ -5,24 +5,21 @@ import { IslandLimitType } from "./limitType";
 import { IslandLimit } from "./limit";
 import { IslandHome } from "./home";
 import { BankLogEntry } from "./bankLogEntry";
+import { PlayerInfo } from "../types";
 
 interface IslandData extends Document {
-  /**
-   * The unique identifier belonging to this island.
-   */
-  uuid: string;
-  /**
-   * The XUID of the owner of the island.
-   */
-  owner: string;
-  /**
-   * The XUID of the founder of the island.
-   */
-  founder: string;
   /**
    * The name of the island.
    */
   name: string;
+  /**
+   * User information for the owner of the island.
+   */
+  owner: PlayerInfo
+  /**
+   * User information for the founder of the island.
+   */
+  founder: PlayerInfo
   /**
    * The level of the island.
    */
@@ -40,9 +37,9 @@ interface IslandData extends Document {
    */
   spawn: Vector3f
   /**
-   * The dimension the island is located in.
+   * The world the island is located in.
    */
-  dimension: string
+  world: string
   /**
    * List of island members.
    */
@@ -81,6 +78,10 @@ interface IslandData extends Document {
    * The date the island was created.
    */
   createdAt: Date;
+  /**
+   * The date this data instance was cached.
+   */
+  lastUpdated: Date
 }
 
 export { IslandData }

@@ -1,9 +1,8 @@
-import { UpdateResult } from "mongodb";
-import { IslandData } from "../../../Types/Data/Island/island";
-import { IslandRole } from "../../../Types/Data/Island/role";
+import { Logger, LoggerColors } from "@serenityjs/logger";
+import { IslandData, IslandRole } from "../../../Types/types";
 import { CollectionManager } from "../CollectionManager";
 import { DatabaseService } from "../DatabaseService";
-import { Logger, LoggerColors } from "@serenityjs/logger";
+import { UpdateResult } from "mongodb";
 
 /**
  * Manages database for islands.
@@ -11,8 +10,11 @@ import { Logger, LoggerColors } from "@serenityjs/logger";
 class IslandDatabase extends CollectionManager<IslandData> {
   public readonly logger = new Logger("IslandDB", LoggerColors.Green)
 
+  public static instance: IslandDatabase;
+
   constructor(dbs: DatabaseService) {
     super(dbs.islands, 'uuid');
+    IslandDatabase.instance = this;
   }
 
 
@@ -29,6 +31,7 @@ class IslandDatabase extends CollectionManager<IslandData> {
     const options = { arrayFilters: [{ "elem.xuid": xuid }] };
     return this.collection.updateOne(filter, updateDoc, options);
   }
+
 }
 
 export { IslandDatabase }

@@ -5,7 +5,7 @@ import { Collection, Document, Filter, OptionalUnlessRequiredId, UpdateFilter } 
  */
 abstract class CollectionManager<T extends Document> {
   protected collection: Collection<T>;
-  private key: string;
+  public readonly key: string;
 
   constructor(collection: Collection<T>, key: string) {
     this.collection = collection;

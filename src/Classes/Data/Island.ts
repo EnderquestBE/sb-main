@@ -1,8 +1,8 @@
 import { Vector3f } from "@serenityjs/protocol";
-import { IslandDatabase } from "../Database/Collections/Island";
+import { Player } from "@serenityjs/core";
 import { UpdateFilter } from "mongodb";
-import { BankLogEntry, IslandData, IslandHome, IslandLimit, IslandLimitType, IslandMember, IslandRole } from "../../Types/types";
-import { OperationResult } from "../../Types/Data/operationResult";
+import { DataManager, IslandDatabase } from "../classes";
+import { BankLogEntry, IslandData, IslandHome, IslandLimit, IslandLimitType, IslandMember, IslandRole, OperationResult, PlayerInfo } from "../../Types/types";
 
 const ROLE_HIERARCHY = Object.values(IslandRole);
 
@@ -10,13 +10,10 @@ const ROLE_HIERARCHY = Object.values(IslandRole);
  * @name Island
  * Class for manipulating island data.
  */
-class Island {
-  private data: IslandData;
-  private islandDB: IslandDatabase;
+class Island extends DataManager<IslandData, IslandDatabase> {
 
   private constructor(initialData: IslandData, dbManager: IslandDatabase) {
-    this.data = initialData;
-    this.islandDB = dbManager;
+    super(initialData, dbManager);
   }
 
   /**
@@ -24,108 +21,38 @@ class Island {
    */
 
   /**
-   * Updates a single value of the document to database.
-   */
-  private async updateOne(updateDoc: UpdateFilter<IslandData>): Promise<OperationResult> {
-    try {
-      const result = await this.islandDB.updateOne(this.getUUID(), updateDoc);
-      const success = result.modifiedCount > 0;
-      if (success) {
-        // Manually update local version to keep sync without having to load again.
-        if (updateDoc.$inc) {
-          for (const key in updateDoc.$inc) {
-            const keys = key.split('.');
-            let current: any = this.data;
-            for (let i = 0; i < keys.length - 1; i++) {
-              const currentKey = keys[i]!;
-              if (current[currentKey] === undefined) {
-                current[currentKey] = {};
-              }
-              current = current[currentKey];
-            }
-            current[keys[keys.length - 1]!] = (current[keys[keys.length - 1]!] || 0) + updateDoc.$inc[key];
-          }
-        }
-        if (updateDoc.$set) {
-          for (const key in updateDoc.$set) {
-            (this.data as any)[key] = updateDoc.$set[key];
-          }
-        }
-      }
-      return { success };
-    } catch (e) {
-      // Log error
-      this.islandDB.logger.error(`Failed to update island data for UUID: ${this.getUUID()} name: ${this.getName()}.\nError: ${e}`)
-      return { success: false, reason: "A database error occurred." };
-    }
-  }
-
-
-  private async _addToArray<T>(key: keyof IslandData, value: T): Promise<OperationResult> {
-    const updateDoc = { $push: { [key]: value } } as UpdateFilter<IslandData>;
-    const result = await this.updateOne(updateDoc);
-    if (result.success) {
-      (this.data[key] as T[]).push(value);
-    }
-    return result;
-  }
-
-  private async _removeFromArrayByField(key: keyof IslandData, field: string, value: any): Promise<OperationResult> {
-    const updateDoc = { $pull: { [key]: { [field]: value } } } as UpdateFilter<IslandData>;
-    const result = await this.updateOne(updateDoc);
-    if (result.success) {
-      (this.data[key] as any[]) = (this.data[key] as any[]).filter(item => item[field] !== value);
-    }
-    return result;
-  }
-
-  private async _removeFromArrayByValue(key: keyof IslandData, value: any): Promise<OperationResult> {
-    const updateDoc = { $pull: { [key]: value } } as UpdateFilter<IslandData>;
-    const result = await this.updateOne(updateDoc);
-    if (result.success) {
-      (this.data[key] as any[]) = (this.data[key] as any[]).filter(item => item !== value);
-    }
-    return result;
-  }
-
-  /**
    * Loads an island's data from the database.
-   * @param uuid The UUID of the island to load.
+   * @param name The name of the island to load.
    * @param islandDB The island database manager instance.
    */
-  public static async load(uuid: string, islandDB: IslandDatabase): Promise<Island | null> {
-    const islandData = await islandDB.get(uuid);
+  public static async load(name: string): Promise<Island | null> {
+    const islandData = await IslandDatabase.instance.get(name);
     if (!islandData) return null;
-    return new Island(islandData, islandDB);
+    return new Island(islandData, IslandDatabase.instance);
   }
 
   /**
    * Creates default island data for database.
-   * @param uuid The UUID for the new island.
+   * @param name The name for the new island.
    * @param xuid The founder's XUID.
-   * @param islandName The name for the new island.
    * @param spawn The spawn location for the new island.
    * @param dimension The dimension the island is in.
    * @param islandDB The island database manager instance.
    */
   public static async createDefault(
-    uuid: string,
-    xuid: string,
-    islandName: string,
-    spawn: Vector3f,
-    dimension: string,
-    islandDB: IslandDatabase
+    name: string,
+    player: Player,
+    world: string
   ): Promise<Island> {
     const initialData: IslandData = {
-      uuid: uuid,
-      owner: xuid,
-      founder: xuid,
-      name: islandName,
+      owner: { xuid: player.xuid, username: player.username },
+      founder: { xuid: player.xuid, username: player.username },
+      name: name,
       level: 1,
       points: 0,
       size: 16,
-      spawn: spawn,
-      dimension: dimension,
+      spawn: new Vector3f(0.5, 3, 0.5),
+      world: world,
       members: [],
       banned: [],
       bank: 0,
@@ -134,17 +61,17 @@ class Island {
       homes: [],
       status: true,
       preset: 'default',
-      createdAt: new Date()
+      createdAt: new Date(),
+      lastUpdated: new Date()
     };
-    await islandDB.create(initialData);
-    return new Island(initialData, islandDB);
+    await IslandDatabase.instance.create(initialData);
+    return new Island(initialData, IslandDatabase.instance);
   }
 
   /**
    * @tab Property Methods
    */
 
-  public getUUID(): string { return this.data.uuid; }
   public getName(): string { return this.data.name; }
   public getLevel(): number { return this.data.level; }
   public getPoints(): number { return this.data.points; }
@@ -157,8 +84,8 @@ class Island {
   public getHomes(): IslandHome[] { return this.data.homes; }
   public getBanned(): string[] { return this.data.banned; }
   public getStatus(): boolean { return this.data.status; }
-  public getOwner(): string { return this.data.owner; }
-  public getFounder(): string { return this.data.founder; }
+  public getOwner(): PlayerInfo { return this.data.owner; }
+  public getFounder(): PlayerInfo { return this.data.founder; }
 
   /**
    * @tab Boolean Methods
@@ -224,7 +151,7 @@ class Island {
    * @param role The new role to assign.
    */
   public async updateMemberRole(xuid: string, role: IslandRole): Promise<OperationResult> {
-    const result = await this.islandDB.updateMemberRole(this.getUUID(), xuid, role);
+    const result = await this.db.updateMemberRole(this.getName(), xuid, role);
     const success = result.modifiedCount > 0;
     if (success) {
       const member = this.getMember(xuid);
@@ -409,8 +336,8 @@ class Island {
    * Sets a new owner for the island.
    * @param xuid The XUID of the new owner.
    */
-  public async setOwner(xuid: string): Promise<OperationResult> {
-    return this.updateOne({ $set: { owner: xuid } });
+  public async setOwner(xuid: string, username: string): Promise<OperationResult> {
+    return this.updateOne({ $set: { owner: { xuid, username } } });
   }
 
   /**
