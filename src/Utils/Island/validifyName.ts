@@ -1,8 +1,7 @@
-import { Filter } from "../../Classes/classes";
-import { IslandDatabase } from "../../Classes/Database/Collections/Island";
+import { Filter, IslandDatabase } from "../../Classes/classes";
 
-async function validifyIslandName(name: string): Promise<{ success: boolean, message?: string }> {
-  if (await IslandDatabase.instance.get(name)) {
+async function validifyIslandName(name: string, db: IslandDatabase): Promise<{ success: boolean, message?: string }> {
+  if (await db.get(name)) {
     return { success: false, message: "That island name is already taken!" }
   } else if (Filter.contains(name)) {
     return { success: false, message: "Island name contains a banned word." }

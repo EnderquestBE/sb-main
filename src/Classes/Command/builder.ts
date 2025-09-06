@@ -1,8 +1,7 @@
-import { Dimension, Entity } from "@serenityjs/core";
+import { CommandPalette, Dimension, Entity } from "@serenityjs/core";
 import { Logger, LoggerColors } from "@serenityjs/logger";
 import { CommandOverload } from "./overload";
 import { FailureCallback } from "../../Types/types";
-import { Server } from "../..";
 
 /**
  * Used for class oriented command creation.
@@ -88,7 +87,7 @@ class CommandBuilder {
   /**
    * Registers all commands through server command registry.
    */
-  public static registerAll(): void {
+  public static registerAll(commandPalette: CommandPalette): void {
     // Warn when commands aren't registered correctly.
     for (let i = 0; i < this.unregisteredCommands.length; i++) {
       this.logger.warn(
@@ -104,7 +103,7 @@ class CommandBuilder {
       );
       if (!commands) continue;
       for (let command of commands) {
-        Server.instance.commandPalette.register(
+        commandPalette.register(
           command.name!,
           command.description!,
           (registry) => {
