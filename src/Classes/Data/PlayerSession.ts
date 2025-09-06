@@ -1,6 +1,8 @@
 import { PERMISSION_INTEGER } from "../../Configuration/config";
 import { OperationResult, PlayerData } from "../../Types/types";
-import { DataManager, Island, PlayerDatabase } from "../classes";
+import { DataManager } from "./Manager";
+import { Island } from "./Island";
+import { PlayerDatabase } from "../Database/Collections/Player";
 
 
 /**

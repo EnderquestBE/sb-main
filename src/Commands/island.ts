@@ -1,8 +1,8 @@
 import { Entity, LevelDBProvider, ModalForm, StringEnum, VoidGenerator } from "@serenityjs/core";
-import { Main } from "..";
 import { CommandBuilder, CommandOverload, Island, IslandDatabase } from "../Classes/classes";
 import { validifyIslandName } from "../Utils/utils";
 import { Gamemode, Vector3f } from "@serenityjs/protocol";
+import { Server } from "../server";
 
 new CommandBuilder("iscreate", "Create an island.").addOverload(
   new CommandOverload({
@@ -15,7 +15,7 @@ new CommandBuilder("iscreate", "Create an island.").addOverload(
         if (island) return player.error(`You already own the §e${island.getName()}§c island.\nUse §6/is go§c to teleport there.`)
 
         async function createIsland(name: string) {
-          validifyIslandName(name).then((result) => {
+          validifyIslandName(name, IslandDatabase.instance).then((result) => {
             if (!result.success) return player.error(result.message!)
           })
           const worldKey = `sb_${name}`
@@ -27,7 +27,7 @@ new CommandBuilder("iscreate", "Create an island.").addOverload(
             }]
           })
           if (!world) {
-            Main.logger.error("Failed to create world for " + player.username + " during island creation.")
+            Server.logger.error("Failed to create world for " + player.username + " during island creation.")
             return
           }
           Island.createDefault(name, player, worldKey)
@@ -46,7 +46,7 @@ new CommandBuilder("iscreate", "Create an island.").addOverload(
           form.input("Enter island name:")
           form.show(player).then(async (result) => {
             if (result instanceof Error) {
-              return Main.logger.error(result)
+              return Server.logger.error(result)
             }
             if (typeof result[0] !== "string") return
             const name = result[0].replace(/\s/g, "");
@@ -55,7 +55,7 @@ new CommandBuilder("iscreate", "Create an island.").addOverload(
         }
       })
     } catch (e) {
-      Main.logger.warn("Error during island creation for " + player.username + ": " + e)
+      Server.logger.warn("Error during island creation for " + player.username + ": " + e)
     }
   })
 ).register()
@@ -72,7 +72,7 @@ new CommandBuilder("isdelete", "Deletes an island.").addOverload(
         if (island) return player.error(`You already own the §e${island.getName()}§c island.\nUse §6/is go§c to teleport there.`)
 
         async function createIsland(name: string) {
-          validifyIslandName(name).then((result) => {
+          validifyIslandName(name, IslandDatabase.instance).then((result) => {
             if (!result.success) return player.error(result.message!)
           })
           const worldKey = `sb_${name}`
@@ -84,7 +84,7 @@ new CommandBuilder("isdelete", "Deletes an island.").addOverload(
             }]
           })
           if (!world) {
-            Main.logger.error("Failed to create world for " + player.username + " during island creation.")
+            Server.logger.error("Failed to create world for " + player.username + " during island creation.")
             return
           }
           Island.createDefault(name, player, worldKey)
@@ -103,7 +103,7 @@ new CommandBuilder("isdelete", "Deletes an island.").addOverload(
           form.input("Enter island name:")
           form.show(player).then(async (result) => {
             if (result instanceof Error) {
-              return Main.logger.error(result)
+              return Server.logger.error(result)
             }
             if (typeof result[0] !== "string") return
             const name = result[0].replace(/\s/g, "");
@@ -112,7 +112,7 @@ new CommandBuilder("isdelete", "Deletes an island.").addOverload(
         }
       })
     } catch (e) {
-      Main.logger.warn("Error during island creation for " + player.username + ": " + e)
+      Server.logger.warn("Error during island creation for " + player.username + ": " + e)
     }
   })
 ).register()

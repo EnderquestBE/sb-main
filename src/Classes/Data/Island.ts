@@ -1,7 +1,8 @@
 import { Vector3f } from "@serenityjs/protocol";
 import { Player } from "@serenityjs/core";
 import { UpdateFilter } from "mongodb";
-import { DataManager, IslandDatabase } from "../classes";
+import { DataManager } from "./Manager";
+import { IslandDatabase } from "../Database/Collections/Island";
 import { BankLogEntry, IslandData, IslandHome, IslandLimit, IslandLimitType, IslandMember, IslandRole, OperationResult, PlayerInfo } from "../../Types/types";
 
 const ROLE_HIERARCHY = Object.values(IslandRole);
