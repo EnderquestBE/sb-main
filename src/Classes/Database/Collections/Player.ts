@@ -1,7 +1,7 @@
 import { Logger, LoggerColors } from "@serenityjs/logger";
-import { PlayerData } from "../../../Types/Database/Collections/player";
 import { CollectionManager } from "../CollectionManager";
 import { DatabaseService } from "../DatabaseService";
+import { PlayerData } from "../../../Types/types";
 
 /**
  * Manages database for players.
@@ -9,9 +9,14 @@ import { DatabaseService } from "../DatabaseService";
 class PlayerDatabase extends CollectionManager<PlayerData> {
     public readonly logger = new Logger("PlayerDB", LoggerColors.Green)
 
+    public static instance: PlayerDatabase;
+
     constructor(dbs: DatabaseService) {
         super(dbs.players, 'xuid');
+        PlayerDatabase.instance = this;
     }
+
+
 }
 
 

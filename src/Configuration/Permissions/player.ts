@@ -1,0 +1,11 @@
+
+enum PERMISSION_INTEGER {
+  MEMBER = 0,
+  TRAINEE = 1,
+  HELPER = 2,
+  MODERATOR = 3,
+  ADMIN = 4,
+  OWNER = 5,
+}
+
+export { PERMISSION_INTEGER };

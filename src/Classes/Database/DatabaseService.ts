@@ -1,8 +1,7 @@
 import { MongoClient, Db, Collection } from 'mongodb';
-import { PlayerData } from '../../Types/Database/Collections/player';
 import { Logger, LoggerColors } from '@serenityjs/logger';
 import { CONNECTION_STRING, DATABASE_NAME } from '../../Configuration/Database/database';
-import { IslandData } from '../../Types/Data/Island/island';
+import { IslandData, PlayerData } from '../../Types/types';
 
 class DatabaseService {
   private logger = new Logger("Database Service", LoggerColors.Yellow)

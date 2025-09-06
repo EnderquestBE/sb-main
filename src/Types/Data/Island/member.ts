@@ -1,8 +1,7 @@
+import { PlayerInfo } from "../types";
 import { IslandRole } from "./role";
 
-interface IslandMember {
-  xuid: string;
-  username: string;
+interface IslandMember extends PlayerInfo {
   role: IslandRole
 }
 
