@@ -42,6 +42,10 @@ interface PlayerData {
    */
   settings: { [key: string]: string | boolean };
   /**
+   * The amount of time in seconds the user has spent on the server.
+   */
+  timePlayed: number
+  /**
    * The date the player was last seen online.
    */
   lastSeen: Date;

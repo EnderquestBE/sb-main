@@ -37,7 +37,7 @@ class Island extends DataManager<IslandData, IslandDatabase> {
    * @param name The name for the new island.
    * @param xuid The founder's XUID.
    * @param spawn The spawn location for the new island.
-   * @param dimension The dimension the island is in.
+   * @param world The world the island is in.
    * @param islandDB The island database manager instance.
    */
   public static async createDefault(
@@ -46,9 +46,9 @@ class Island extends DataManager<IslandData, IslandDatabase> {
     world: string
   ): Promise<Island> {
     const initialData: IslandData = {
+      name: name,
       owner: { xuid: player.xuid, username: player.username },
       founder: { xuid: player.xuid, username: player.username },
-      name: name,
       level: 1,
       points: 0,
       size: 16,
@@ -78,7 +78,7 @@ class Island extends DataManager<IslandData, IslandDatabase> {
   public getPoints(): number { return this.data.points; }
   public getSize(): number { return this.data.size; }
   public getSpawn(): Vector3f { return this.data.spawn; }
-  public getDimension(): string { return this.data.dimension; }
+  public getWorld(): string { return this.data.world; }
   public getMembers(): IslandMember[] { return this.data.members; }
   public getBankBalance(): number { return this.data.bank; }
   public getBankLogs(): BankLogEntry[] { return this.data.bankLogs; }
@@ -87,6 +87,16 @@ class Island extends DataManager<IslandData, IslandDatabase> {
   public getStatus(): boolean { return this.data.status; }
   public getOwner(): PlayerInfo { return this.data.owner; }
   public getFounder(): PlayerInfo { return this.data.founder; }
+
+  // Data
+  public getData(): IslandData {
+    return this.data
+  }
+
+  public getDataString(): string {
+    return JSON.stringify(this.data);
+  }
+
 
   /**
    * @tab Boolean Methods

@@ -4,13 +4,14 @@ import { CONNECTION_STRING, DATABASE_NAME } from '../../Configuration/Database/d
 import { IslandData, PlayerData } from '../../Types/types';
 
 class DatabaseService {
-  private logger = new Logger("Database Service", LoggerColors.Yellow)
 
   private client: MongoClient;
   private db!: Db;
 
   private _players!: Collection<PlayerData>;
   private _islands!: Collection<IslandData>;
+
+  public logger = new Logger("Database Service", LoggerColors.Yellow)
 
   constructor() {
     this.client = new MongoClient(CONNECTION_STRING);
@@ -28,7 +29,7 @@ class DatabaseService {
       this._players = this.db.collection<PlayerData>('players');
       this._islands = this.db.collection<IslandData>('islands');
 
-      this.logger.success("Successfully connected to database.")
+      this.logger.success("Database connection has been established.")
     } catch (error) {
       this.logger.error("Failed to connect to database.")
       throw error;
@@ -40,7 +41,7 @@ class DatabaseService {
    */
   public async disconnect(): Promise<void> {
     await this.client.close();
-    this.logger.info("Database connection has been closed.")
+    this.logger.info("Database connection has been severed.")
   }
 
   public get players(): Collection<PlayerData> {

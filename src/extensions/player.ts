@@ -2,7 +2,7 @@
 import { Player } from "@serenityjs/core";
 import { PlayerSession } from "../Classes/Data/PlayerSession";
 import { PlayerDatabase } from "../Classes/Database/Collections/Player";
-import { OperationResult } from "../Types/types";
+import { OperationResult, PlayerData } from "../Types/types";
 import { ChatSource, PERMISSION_INTEGER } from "../Configuration/config";
 import { Island } from "../Classes/Data/Island";
 
@@ -12,6 +12,13 @@ declare module "@serenityjs/core" {
   interface Player {
     [sessionSymbol]?: PlayerSession;
     session(): PlayerSession | null;
+
+    getTimePlayed(): number
+    setTimePlayed(value: number): Promise<OperationResult>
+
+    // Data
+    getDataString(): string
+    getDataProperty(key: keyof PlayerData): any;
 
     // Chat
     info(message: string, source?: ChatSource): void
@@ -48,8 +55,8 @@ declare module "@serenityjs/core" {
 
     // Island
     getIsland(): Promise<Island | null>
-    getIslandUUID(): string;
-    setIslandUUID(islandUuid: string): Promise<OperationResult>;
+    getIslandName(): string;
+    setIslandName(islandName: string): Promise<OperationResult>;
 
     // Settings
     getSettings(): { [key: string]: string | boolean };
@@ -95,6 +102,30 @@ class PlayerExtension {
 Player.prototype.session = function (this: Player): PlayerSession | null {
   return PlayerExtension.getSession(this);
 };
+
+Player.prototype.getTimePlayed = function (this: Player): number {
+  const session = PlayerExtension.getSession(this);
+  return session ? session.getTimePlayed() : 0;
+};
+
+Player.prototype.setTimePlayed = function (this: Player, value: number): Promise<OperationResult> {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return PlayerExtension["NO_SESSION_RESULT"]
+  return session.setTimePlayed(value);
+}
+
+// Data
+Player.prototype.getDataString = function (this: Player): string {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return "";
+  return session.getDataString();
+}
+
+Player.prototype.getDataProperty = function (this: Player, key: keyof PlayerData): any {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return;
+  return session.getDataProperty(key);
+}
 
 // Chat
 Player.prototype.info = function (this: Player, message: string, source: ChatSource = ChatSource.server): void {
@@ -148,11 +179,16 @@ Player.prototype.getXp = function (this: Player): number {
 Player.prototype.addXp = async function (this: Player, amount: number): Promise<OperationResult> {
   const session = PlayerExtension.getSession(this);
   if (!session) return PlayerExtension['NO_SESSION_RESULT'];
+  if (amount <= 0) return { success: false, reason: "Amount must be a positive number." };
+  this.addExperience(amount)
   return session.addXp(amount);
 }
 Player.prototype.removeXp = async function (this: Player, amount: number): Promise<OperationResult> {
   const session = PlayerExtension.getSession(this);
   if (!session) return PlayerExtension['NO_SESSION_RESULT'];
+  if (amount <= 0) return { success: false, reason: "Amount must be a positive number." };
+  if (this.getXp() < amount) return { success: false, reason: "Insufficient XP." };
+  this.setExperience(this.getExperience() - amount)
   return session.removeXp(amount);
 }
 Player.prototype.setXp = async function (this: Player, amount: number): Promise<OperationResult> {
@@ -224,14 +260,14 @@ Player.prototype.getIsland = async function (this: Player): Promise<Island | nul
   const session = PlayerExtension.getSession(this)
   return session ? await session.getIsland() : null
 }
-Player.prototype.getIslandUUID = function (this: Player): string {
+Player.prototype.getIslandName = function (this: Player): string {
   const session = PlayerExtension.getSession(this);
-  return session ? session.getIslandUUID() : "";
+  return session ? session.getIslandName() : "";
 }
-Player.prototype.setIslandUUID = async function (this: Player, islandUuid: string): Promise<OperationResult> {
+Player.prototype.setIslandName = async function (this: Player, islandName: string): Promise<OperationResult> {
   const session = PlayerExtension.getSession(this);
   if (!session) return PlayerExtension['NO_SESSION_RESULT'];
-  return session.setIslandUUID(islandUuid);
+  return session.setIslandName(islandName);
 }
 
 // Settings

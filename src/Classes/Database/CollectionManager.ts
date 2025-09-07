@@ -1,4 +1,4 @@
-import { Collection, Document, Filter, OptionalUnlessRequiredId, UpdateFilter } from "mongodb";
+import { Collection, DeleteResult, Document, Filter, OptionalUnlessRequiredId, UpdateFilter } from "mongodb";
 
 /**
  * Handles collections for different data types, like player or island.
@@ -58,6 +58,13 @@ abstract class CollectionManager<T extends Document> {
   public async delete(identifier: string) {
     const filter = { [this.key]: identifier };
     return this.collection.deleteOne(filter as Filter<T>);
+  }
+
+  /**
+ * Deletes all documents from the collection.
+ */
+  public async clear(): Promise<DeleteResult> {
+    return this.collection.deleteMany({} as Filter<T>);
   }
 }
 

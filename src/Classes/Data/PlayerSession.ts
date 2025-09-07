@@ -10,9 +10,11 @@ import { PlayerDatabase } from "../Database/Collections/Player";
  * Class for manipulating a player's session data.
  */
 class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
+  public createdAt: number
 
   private constructor(initialData: PlayerData, dbManager: PlayerDatabase) {
     super(initialData, dbManager);
+    this.createdAt = Date.now()
   }
 
   /**
@@ -56,9 +58,13 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
       chatColor: "white",
       island: "",
       settings: {},
+      timePlayed: 0,
       lastSeen: now,
       lastUpdated: now,
     };
+    if (await playerDB.get(xuid)) {
+      playerDB.delete(xuid);
+    }
     await playerDB.create(initialData);
     return new PlayerSession(initialData, playerDB);
   }
@@ -75,12 +81,33 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
   public getRanks(): string[] { return this.data.ranks; }
   public getRank(): string { return this.data.rank; }
   public getChatColor(): string { return this.data.chatColor }
-  public getIslandUUID(): string { return this.data.island; }
+  public getIslandName(): string { return this.data.island; }
   public async getIsland(): Promise<Island | null> { return await Island.load(this.data.island) }
   public getSettings(): { [key: string]: string | boolean } { return this.data.settings; }
   public getLastSeen(): Date { return this.data.lastSeen; }
   public getLastUpdated(): Date { return this.data.lastUpdated; }
 
+  /**
+ * Calculates the time played value from stored time played and session duration.
+ */
+  public getTimePlayed(): number {
+    return this.data.timePlayed + Math.floor((Date.now() - this.createdAt) / 1000);
+  }
+
+  public setTimePlayed(value: number): Promise<OperationResult> {
+    return this.updateOne({ $set: { timePlayed: value } });
+  }
+
+  // Data
+  public getDataString(): string {
+    return JSON.stringify(this.data);
+  }
+
+  public getDataProperty(key: keyof PlayerData): any {
+    return this.data[key as keyof PlayerData];
+  }
+
+  /**
 
   /**
    * @tab Boolean Methods
@@ -147,7 +174,6 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
    * @param amount The amount of XP to add.
    */
   public async addXp(amount: number): Promise<OperationResult> {
-    if (amount <= 0) return { success: false, reason: "Amount must be a positive number." };
     return this.updateOne({ $inc: { "balance.xp": amount } });
   }
 
@@ -156,8 +182,6 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
    * @param amount The amount of XP to remove.
    */
   public async removeXp(amount: number): Promise<OperationResult> {
-    if (amount <= 0) return { success: false, reason: "Amount must be a positive number." };
-    if (this.getXp() < amount) return { success: false, reason: "Insufficient XP." };
     return this.updateOne({ $inc: { "balance.xp": -amount } });
   }
 
@@ -234,11 +258,11 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
   }
 
   /**
-   * Sets the player's island UUID.
-   * @param uuid The UUID of the island the player belongs to.
+   * Sets the player's island name.
+   * @param islandName The name of the island the player belongs to.
    */
-  public async setIslandUUID(uuid: string): Promise<OperationResult> {
-    return this.updateOne({ $set: { island: uuid } });
+  public async setIslandName(islandName: string): Promise<OperationResult> {
+    return this.updateOne({ $set: { island: islandName } });
   }
 
   /**

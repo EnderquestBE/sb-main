@@ -1,4 +1,8 @@
 import { Plugin, PluginEvents } from "@serenityjs/plugins";
+import { EntityDimensionChangeSignal, PlayerJoinSignal, PlayerLeaveSignal } from "@serenityjs/core";
+import { DisplaySlotType, ObjectiveSortOrder } from "@serenityjs/protocol";
+import { IslandGenerator } from "./Classes/Island/generator";
+import { Scorebar } from "./Scorebar/scorebar";
 import { Server } from "./server";
 
 class EnderquestPlugin extends Plugin implements PluginEvents {
@@ -12,11 +16,34 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
   }
 
   public onStartUp(): void {
+    Server.onStartUp()
+    // Register island world generator.
+    this.serenity.registerGenerator(IslandGenerator)
+    IslandGenerator.registerStructure(this.serenity.getWorld())
     this.logger.info("§5Ender§dquest§r has started.");
   }
 
   public onShutDown(): void {
+    Server.onShutDown()
     this.logger.info("§5Ender§dquest§r has stopped safely.");
+  }
+
+  public onPlayerJoin({ player }: PlayerJoinSignal): void {
+    Server.onPlayerJoin(player)
+  }
+
+  public onPlayerLeave({ player }: PlayerLeaveSignal): void {
+    Server.onPlayerLeave(player)
+  }
+
+  public onEntityDimensionChange?({ entity, fromDimension, toDimension }: EntityDimensionChangeSignal): void {
+    if (!entity.isPlayer()) return
+    const objective = fromDimension.world.scoreboard.getObjective(`sbs_${entity.xuid}`)
+    if (objective) {
+      fromDimension.world.scoreboard.removeObjective(objective)
+      fromDimension.world.scoreboard.clearObjectiveAtDisplaySlot(DisplaySlotType.Sidebar, { player: entity, objective: objective, sortOrder: ObjectiveSortOrder.Ascending })
+    }
+    Scorebar.initialize(entity, toDimension.world)
   }
 }
 
