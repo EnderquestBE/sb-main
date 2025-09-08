@@ -1,8 +1,9 @@
 import { Plugin, PluginEvents } from "@serenityjs/plugins";
-import { EntityDimensionChangeSignal, PlayerJoinSignal, PlayerLeaveSignal } from "@serenityjs/core";
+import { EntityDimensionChangeSignal, PlayerChatSignal, PlayerJoinSignal, PlayerLeaveSignal } from "@serenityjs/core";
 import { DisplaySlotType, ObjectiveSortOrder } from "@serenityjs/protocol";
 import { IslandGenerator } from "./Classes/Island/generator";
 import { Scorebar } from "./Scorebar/scorebar";
+import { ChatHandler } from "./Classes/Chat/handler";
 import { Server } from "./server";
 
 class EnderquestPlugin extends Plugin implements PluginEvents {
@@ -44,6 +45,10 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
       fromDimension.world.scoreboard.clearObjectiveAtDisplaySlot(DisplaySlotType.Sidebar, { player: entity, objective: objective, sortOrder: ObjectiveSortOrder.Ascending })
     }
     Scorebar.initialize(entity, toDimension.world)
+  }
+
+  public beforePlayerChat(event: PlayerChatSignal): boolean {
+    return ChatHandler.onChat(event)
   }
 }
 

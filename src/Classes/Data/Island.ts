@@ -1,9 +1,11 @@
 import { Vector3f } from "@serenityjs/protocol";
-import { Player } from "@serenityjs/core";
+import { Player, World } from "@serenityjs/core";
 import { UpdateFilter } from "mongodb";
 import { DataManager } from "./Manager";
 import { IslandDatabase } from "../Database/Collections/Island";
 import { BankLogEntry, IslandData, IslandHome, IslandLimit, IslandLimitType, IslandMember, IslandRole, OperationResult, PlayerInfo } from "../../Types/types";
+import { Server } from "../../server";
+import { Logger, LoggerColors } from "@serenityjs/logger";
 
 const ROLE_HIERARCHY = Object.values(IslandRole);
 
@@ -12,6 +14,8 @@ const ROLE_HIERARCHY = Object.values(IslandRole);
  * Class for manipulating island data.
  */
 class Island extends DataManager<IslandData, IslandDatabase> {
+
+  public static readonly logger = new Logger("Island", LoggerColors.MaterialEmerald)
 
   private constructor(initialData: IslandData, dbManager: IslandDatabase) {
     super(initialData, dbManager);
@@ -78,7 +82,8 @@ class Island extends DataManager<IslandData, IslandDatabase> {
   public getPoints(): number { return this.data.points; }
   public getSize(): number { return this.data.size; }
   public getSpawn(): Vector3f { return this.data.spawn; }
-  public getWorld(): string { return this.data.world; }
+  public getWorldId(): string { return this.data.world; }
+  public getWorld(): World | null { return Server.instance.getWorld(this.getWorldId()); }
   public getMembers(): IslandMember[] { return this.data.members; }
   public getBankBalance(): number { return this.data.bank; }
   public getBankLogs(): BankLogEntry[] { return this.data.bankLogs; }

@@ -17,6 +17,7 @@ class CommandBuilder {
   } = {};
 
   private name: string;
+  private aliases: string[] = [];
   private description: string;
   private overloads: CommandOverload<any>[] = [];
   private permissions: string[] = [];
@@ -41,6 +42,14 @@ class CommandBuilder {
    */
   public addOverload(overload: CommandOverload<any>) {
     this.overloads.push(overload);
+    return this;
+  }
+
+  /**
+   * Adds a list of aliases that can be used in lieu of the command name.
+   */
+  public setAliases(aliases: string[]) {
+    this.aliases = aliases;
     return this;
   }
 
@@ -108,6 +117,8 @@ class CommandBuilder {
           command.description!,
           (registry) => {
             registry.permissions = command.permissions;
+            //@ts-ignore
+            registry.aliases = command.aliases;
             registry.debug = command.debug;
 
             for (const overload of command.overloads) {

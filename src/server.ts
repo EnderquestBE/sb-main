@@ -1,8 +1,9 @@
-import { Player, Serenity, WorldEvent } from "@serenityjs/core";
+import { Player, Serenity } from "@serenityjs/core";
 import { Logger, LoggerColors } from "@serenityjs/logger";
 import { CommandBuilder, DatabaseService, IslandDatabase, PlayerDatabase } from "./Classes/classes";
 import { PlayerExtension } from "./extensions/player";
 import { Scorebar } from "./Scorebar/scorebar";
+import { Warp } from "./Classes/Warp/warp";
 
 class Server {
     public static readonly logger: Logger = new Logger("Enderquest", LoggerColors.LightPurple);
@@ -16,6 +17,8 @@ class Server {
         this.database = new DatabaseService()
         // Register database.
         this.registerDBService()
+        // Register warp locations and commands.
+        Warp.registerAll()
         // Register commands.
         CommandBuilder.registerAll(this.instance.commandPalette);
         // Start Scorebar runtime.
