@@ -3,6 +3,7 @@ import { OperationResult, PlayerData } from "../../Types/types";
 import { DataManager } from "./Manager";
 import { Island } from "./Island";
 import { PlayerDatabase } from "../Database/Collections/Player";
+import { Setting } from "../../Configuration/Settings/settings";
 
 
 /**
@@ -70,7 +71,7 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
   public getChatColor(): string { return this.data.chatColor }
   public getIslandName(): string { return this.data.island; }
   public async getIsland(): Promise<Island | null> { return await Island.load(this.data.island) }
-  public getSettings(): { [key: string]: string | boolean } { return this.data.settings; }
+  public getSettings(): { [key in Setting]: string | boolean } { return this.data.settings; }
   public getLastSeen(): Date { return this.data.lastSeen; }
   public getLastUpdated(): Date { return this.data.lastUpdated; }
 
@@ -239,15 +240,6 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
    */
   public async setSetting(key: string, value: string | boolean): Promise<OperationResult> {
     return this.updateOne({ $set: { [`settings.${key}`]: value } });
-  }
-
-  /**
-   * Removes a setting from the player's data.
-   * @param key The key of the setting to remove.
-   */
-  public async removeSetting(key: string): Promise<OperationResult> {
-    if (!this.hasSetting(key)) return { success: true };
-    return this.updateOne({ $unset: { [`settings.${key}`]: "" } });
   }
 
   /**

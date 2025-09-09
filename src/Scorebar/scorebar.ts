@@ -5,11 +5,18 @@ import { Utils } from "../Utils/utils";
 import { Island } from "../Classes/classes";
 
 class Scorebar {
+    private static barTitle = "§l§dEnder§eQuest §bSB"
+
     public static runtime(serenity: Serenity) {
         serenity.on(WorldEvent.WorldTick, async ({ currentTick, world }) => {
             if (Number(currentTick) % 20 !== 0) return
             for (let player of world.getPlayers()) {
-                this.update(player, world, player.isWorldIsland() ? await player.getWorldIsland() : await player.getIsland())
+                const hudMode = player.getSetting("hudMode")
+                if (hudMode === "scoreboard")
+                    this.updateScoreboard(player, world, player.isWorldIsland() ? await player.getWorldIsland() : await player.getIsland())
+                else if (hudMode === "tooltip")
+                    this.updateTooltip(player, world, player.isWorldIsland() ? await player.getWorldIsland() : await player.getIsland())
+                else continue
             }
         })
     }
@@ -17,11 +24,24 @@ class Scorebar {
     public static initialize(player: Player, world: World) {
         const scoreboard = world.scoreboard
         let objective = scoreboard.getObjective(`sbs_${player.xuid}`)
-        objective ??= scoreboard.addObjective(`sbs_${player.xuid}`, "§l§dEnder§eQuest §bSB")
+        objective ??= scoreboard.addObjective(`sbs_${player.xuid}`, this.barTitle)
         scoreboard.setObjectiveAtDisplaySlot(DisplaySlotType.Sidebar, { objective: objective, player: player, sortOrder: ObjectiveSortOrder.Ascending })
     }
 
-    private static update(player: Player, world: World, island: Island | null) {
+    public static removeScoreboard(player: Player, world: World) {
+        const scoreboard = world.scoreboard
+        const objective = scoreboard.getObjective(`sbs_${player.xuid}`)
+        if (objective) {
+            scoreboard.clearObjectiveAtDisplaySlot(DisplaySlotType.Sidebar, { objective: objective, player: player, sortOrder: ObjectiveSortOrder.Ascending })
+            scoreboard.removeObjective(`sbs_${player.xuid}`)
+        }
+    }
+
+    public static removeTooltip(player: Player) {
+        player.onScreenDisplay.setToolTip("")
+    }
+
+    private static updateScoreboard(player: Player, world: World, island: Island | null) {
         const scoreboard = world.scoreboard
         const objective = scoreboard.getObjective(`sbs_${player.xuid}`)
         if (!objective) {
@@ -33,10 +53,10 @@ class Scorebar {
         function addScore(str: string) {
             objective!.setScore(str, i++)
         }
-        addScore(`§d➲ §aGT: §f${player.username}`);
-        addScore(`§d➲ §ePlayers: §f${world.getPlayers().length}§7/§f${20}`);
-        addScore(`§d➲ §3Ping: §f10ms`);
-        addScore(`§d➲ §6Money: §f$${Utils.formatInt(player.getMoney())}`);
+        addScore(` §d➲ §aGT: §f${player.username}`);
+        addScore(` §d➲ §ePlayers: §f${world.getPlayers().length}§7/§f${20}`);
+        addScore(` §d➲ §3Ping: §f10ms`);
+        addScore(` §d➲ §6Money: §f$${Utils.formatInt(player.getMoney())}`);
         if (player.isWorldIsland() && island) {
             addScore(`§b❖ Island Stats ❖`);
             addScore(` §b匚 §eIsland: §f${island.getName()}`);
@@ -46,7 +66,6 @@ class Scorebar {
             addScore(` §b匚 §2Points: §f${0}§7/§f${150}`);
             addScore(` §b匚 §dSize: §f${island.getSize()} Blocks`);
             addScore(`§d➤ §7Try using §6/is help§7.`);
-            scoreboard.setObjectiveAtDisplaySlot(DisplaySlotType.Sidebar, { objective: objective, player: player, sortOrder: ObjectiveSortOrder.Ascending })
         } else {
             addScore(`§b❖ Your Stats ❖`);
             addScore(` §b匚 §aRank: §f${"Guest"}`);
@@ -60,8 +79,65 @@ class Scorebar {
             addScore(` §b匚 §6Time: §f${Utils.formatDuration(player.getTimePlayed())}`);
             addScore(` §b匚 §cK: §f0 §9D: §f0 §5R: §f0`);
             addScore(`§d➤ §7Use §6/hud §7to disable.`);
-            scoreboard.setObjectiveAtDisplaySlot(DisplaySlotType.Sidebar, { objective: objective, player: player, sortOrder: ObjectiveSortOrder.Ascending })
         }
+        scoreboard.setObjectiveAtDisplaySlot(DisplaySlotType.Sidebar, { objective: objective, player: player, sortOrder: ObjectiveSortOrder.Ascending })
+    }
+
+
+    private static readonly tooltipTargetWidth = 60;
+    private static readonly textPaddingCache = new Map<string, string>();
+
+    private static centerTooltipText(text: string): string {
+        const cacheKey = `${this.tooltipTargetWidth}|${text}`;
+
+        if (this.textPaddingCache.has(cacheKey)) {
+            return this.textPaddingCache.get(cacheKey)!;
+        }
+        const visibleLength = Utils.stripColorCodes(text).length;
+        if (visibleLength >= this.tooltipTargetWidth) {
+            return text;
+        }
+
+        const leftPadding = Math.floor((this.tooltipTargetWidth - visibleLength) / 2);
+        const targetLength = text.length + leftPadding;
+        const result = text.padStart(targetLength, ' ');
+
+        this.textPaddingCache.set(cacheKey, result);
+        return result;
+    }
+
+    private static updateTooltip(player: Player, world: World, island: Island | null) {
+        const elements: string[] = [];
+        if (player.isWorldIsland() && island) {
+            elements.push(`§e[Island: §f${island.getName()}§e]`);
+            elements.push(`§6[Owner: §f${island.getOwner().username}§6]`);
+            elements.push(`§c[Bank: §f$${Utils.formatInt(island.getBankBalance())}§c]`);
+            elements.push(`§a[Level: §f${island.getLevel()}§a]`);
+            elements.push(`§2[Points: §f${0}§7/§f${150}§2]`);
+            elements.push(`§d[Size: §f${island.getSize()} Blocks§d]`);
+        } else {
+            elements.push(`§a[GT: §f${player.username}§a]`);
+            elements.push(`§e[Players: §f${world.getPlayers().length}§7/§f${20}§e]`);
+            elements.push(`§6[Money: §f$${Utils.formatInt(player.getMoney())}§6]`);
+            elements.push(`§b[Rank: §f${"Guest"}§b]`);
+            if (island) {
+                elements.push(`§2[Island: §f${island.getName()}§2]`);
+                elements.push(`§e[Level: §f${island.getLevel()}§e]`);
+            } else {
+                elements.push("§2[Island: §f/is create§2]");
+                elements.push("§e[Level: §f--§e]");
+            }
+            elements.push(`§6[Time: §f${Utils.formatDuration(player.getTimePlayed())}§6]`);
+            elements.push(`§c[K: §f0 §9D: §f0 §5R: §f0§c]`);
+        }
+
+        const finalLines: string[] = [this.centerTooltipText(`§c§l<<- ${this.barTitle} §c->>§r`)];
+        for (let i = 0; i < elements.length; i += 3) {
+            const lineElements = elements.slice(i, i + 3);
+            const lineText = lineElements.join(' ');
+            finalLines.push(this.centerTooltipText(lineText));
+        }
+        player.onScreenDisplay.setToolTip(finalLines.join('\n'));
     }
 }
 

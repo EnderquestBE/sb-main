@@ -40,7 +40,7 @@ interface PlayerData {
   /**
    * User setting values to remember for the player.
    */
-  settings: { [K in Setting]?: string | boolean };
+  settings: { [key in Setting]: string | boolean };
   /**
    * The amount of time in seconds the user has spent on the server.
    */

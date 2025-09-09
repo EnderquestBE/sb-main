@@ -105,6 +105,10 @@ class Utils {
     }
     return result;
   }
+
+  public static stripColorCodes(text: string): string {
+    return text.replace(/§./g, '');
+  }
 }
 
 export { Utils }

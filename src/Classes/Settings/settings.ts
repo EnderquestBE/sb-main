@@ -1,5 +1,5 @@
 import { ModalForm, Player } from "@serenityjs/core";
-import { USERSETTINGS } from "../../Configuration/Settings/settings";
+import { Setting, USERSETTINGS } from "../../Configuration/Settings/settings";
 import { Logger, LoggerColors } from "@serenityjs/logger";
 
 class Settings {
@@ -7,7 +7,7 @@ class Settings {
 
     public static show(player: Player) {
         const form = new ModalForm("Settings")
-        for (const setting of Object.entries(player.getSettings())) {
+        for (const setting of Object.entries(player.getSettings()) as [keyof typeof Setting, string | boolean][]) {
             const info = USERSETTINGS.get(setting[0])
             if (!info) continue
             if (info.options) {
@@ -23,10 +23,15 @@ class Settings {
                     return
                 }
                 for (const option of (result as (number | boolean)[])) {
+                    let value: string | boolean
                     if (typeof option === "number") {
-                        player.setSetting(setting[0], info.options![option]!)
+                        value = info.options![option]!
                     } else {
-                        player.setSetting(setting[0], option)
+                        value = option
+                    }
+                    player.setSetting(setting[0], value)
+                    if (info.function) {
+                        info.function(player, value)
                     }
                 }
                 player.info("§aYour settings have been changed.")

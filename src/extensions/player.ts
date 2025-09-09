@@ -3,7 +3,7 @@ import { Player } from "@serenityjs/core";
 import { PlayerSession } from "../Classes/Data/PlayerSession";
 import { PlayerDatabase } from "../Classes/Database/Collections/Player";
 import { OperationResult, PlayerData } from "../Types/types";
-import { ChatSource, PERMISSION_INTEGER } from "../Configuration/config";
+import { ChatSource, DEFAULT_PLAYER_DATA, PERMISSION_INTEGER } from "../Configuration/config";
 import { Island } from "../Classes/Data/Island";
 import { Setting } from "../Configuration/Settings/settings";
 
@@ -58,10 +58,9 @@ declare module "@serenityjs/core" {
     getWorldIsland(): Promise<Island | null>
 
     // Settings
-    getSettings(): { [key: string]: string | boolean };
-    getSetting(key: string): string | boolean | undefined
-    setSetting(key: string, value: string | boolean): Promise<OperationResult>;
-    removeSetting(key: string): Promise<OperationResult>;
+    getSettings(): { [key in Setting]: string | boolean };
+    getSetting(key: keyof typeof Setting): string | boolean | undefined
+    setSetting(key: keyof typeof Setting, value: string | boolean): Promise<OperationResult>;
     hasSetting(key: string): boolean;
   }
 }
@@ -256,9 +255,9 @@ Player.prototype.getWorldIsland = function (this: Player): Promise<Island | null
 }
 
 // Settings
-Player.prototype.getSettings = function (this: Player): { [key: string]: string | boolean } {
+Player.prototype.getSettings = function (this: Player): { [key in Setting]: string | boolean } {
   const session = PlayerExtension.getSession(this);
-  return session ? session.getSettings() : {};
+  return session ? session.getSettings() : DEFAULT_PLAYER_DATA.settings;
 }
 Player.prototype.getSetting = function (this: Player, key: keyof typeof Setting): string | boolean | undefined {
   const session = PlayerExtension.getSession(this);
@@ -268,11 +267,6 @@ Player.prototype.setSetting = async function (this: Player, key: string, value: 
   const session = PlayerExtension.getSession(this);
   if (!session) return PlayerExtension['NO_SESSION_RESULT'];
   return session.setSetting(key, value);
-}
-Player.prototype.removeSetting = async function (this: Player, key: string): Promise<OperationResult> {
-  const session = PlayerExtension.getSession(this);
-  if (!session) return PlayerExtension['NO_SESSION_RESULT'];
-  return session.removeSetting(key);
 }
 Player.prototype.hasSetting = function (this: Player, key: string): boolean {
   const session = PlayerExtension.getSession(this);
