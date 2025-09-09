@@ -1,5 +1,7 @@
 import { PlayerData } from "../../Types/types";
-import { PERMISSION_INTEGER } from "../config";
+import { PERMISSION_INTEGER } from "../Permissions/player";
+import { PlayerRank } from "../Ranks/ranks";
+
 
 const DEFAULT_PLAYER_DATA: PlayerData = {
     xuid: "",
@@ -9,12 +11,12 @@ const DEFAULT_PLAYER_DATA: PlayerData = {
         money: 100, // Starting money
         xp: 0
     },
-    ranks: [],
-    rank: "guest",
+    ranks: [PlayerRank.GUEST],
+    rank: PlayerRank.GUEST,
     chatColor: "white",
     island: "",
     settings: {
-        hudMode: "sidebar"
+        hudMode: "scoreboard"
     },
     timePlayed: 0,
     lastSeen: new Date(),

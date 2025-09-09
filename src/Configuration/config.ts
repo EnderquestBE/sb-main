@@ -7,3 +7,6 @@ export * from "./Chat/source"
 
 /* Data */
 export * from "./Data/player"
+
+/* Ranks */
+export * from "./Ranks/ranks"

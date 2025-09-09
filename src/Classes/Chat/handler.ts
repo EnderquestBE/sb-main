@@ -16,7 +16,7 @@ class ChatHandler {
     }
 
     private static format(player: Player, island: Island | null, message: string) {
-        return island ? `§f➙ §7~§f${island.getLevel()}§7~ §f** §5${island.getName()} §7[§fGuest§7] §a${player.username} §7» §f${message}` : ""
+        return `§f➙ ${island ? `§7~§f${island.getLevel()}§7~ §f** §5${island.getName()} ` : ""}§7[${player.getRank().displayName}§7] §a${player.username} §7» §f${message}`
     }
 }
 

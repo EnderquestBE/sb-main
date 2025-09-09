@@ -2,8 +2,9 @@
 import { Player } from "@serenityjs/core";
 import { PlayerSession } from "../Classes/Data/PlayerSession";
 import { PlayerDatabase } from "../Classes/Database/Collections/Player";
-import { OperationResult, PlayerData } from "../Types/types";
+import { OperationResult, PlayerData, RankInfo } from "../Types/types";
 import { ChatSource, DEFAULT_PLAYER_DATA, PERMISSION_INTEGER } from "../Configuration/config";
+import { PlayerRank, RANKS } from "../Configuration/Ranks/ranks";
 import { Island } from "../Classes/Data/Island";
 import { Setting } from "../Configuration/Settings/settings";
 
@@ -41,11 +42,11 @@ declare module "@serenityjs/core" {
     setXp(amount: number): Promise<OperationResult>;
 
     // Ranks & Customization
-    getRanks(): string[];
+    getRankIds(): string[];
     hasRank(rankId: string): boolean;
     addRank(rankId: string): Promise<OperationResult>;
     removeRank(rankId: string): Promise<OperationResult>;
-    getRank(): string;
+    getRank(): RankInfo;
     setRank(rankId: string): Promise<OperationResult>;
     getChatColor(): string;
     setChatColor(color: string): Promise<OperationResult>;
@@ -196,27 +197,27 @@ Player.prototype.setXp = async function (this: Player, amount: number): Promise<
 }
 
 // Ranks & Customization
-Player.prototype.getRanks = function (this: Player): string[] {
+Player.prototype.getRankIds = function (this: Player): string[] {
   const session = PlayerExtension.getSession(this);
-  return session ? session.getRanks() : [];
+  return session ? session.getRankIds() : [];
 }
-Player.prototype.hasRank = function (this: Player, rankId: string): boolean {
+Player.prototype.hasRank = function (this: Player, rankId: keyof typeof PlayerRank): boolean {
   const session = PlayerExtension.getSession(this);
   return session ? session.hasRank(rankId) : false;
 }
-Player.prototype.addRank = async function (this: Player, rankId: string): Promise<OperationResult> {
+Player.prototype.addRank = async function (this: Player, rankId: keyof typeof PlayerRank): Promise<OperationResult> {
   const session = PlayerExtension.getSession(this);
   if (!session) return PlayerExtension['NO_SESSION_RESULT'];
   return session.addRank(rankId);
 }
-Player.prototype.removeRank = async function (this: Player, rankId: string): Promise<OperationResult> {
+Player.prototype.removeRank = async function (this: Player, rankId: keyof typeof PlayerRank): Promise<OperationResult> {
   const session = PlayerExtension.getSession(this);
   if (!session) return PlayerExtension['NO_SESSION_RESULT'];
   return session.removeRank(rankId);
 }
-Player.prototype.getRank = function (this: Player): string {
+Player.prototype.getRank = function (this: Player): RankInfo {
   const session = PlayerExtension.getSession(this);
-  return session ? session.getRank() : "default";
+  return session ? session.getRank() : RANKS.get("GUEST")!;
 }
 Player.prototype.setRank = async function (this: Player, rankId: string): Promise<OperationResult> {
   const session = PlayerExtension.getSession(this);

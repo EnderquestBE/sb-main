@@ -1,5 +1,5 @@
-import { PERMISSION_INTEGER } from "../../../Configuration/config";
-import { Setting, USERSETTINGS } from "../../../Configuration/Settings/settings";
+import { PERMISSION_INTEGER, PlayerRank } from "../../../Configuration/config";
+import { Setting } from "../../../Configuration/Settings/settings";
 
 interface PlayerData {
   /**
@@ -24,11 +24,11 @@ interface PlayerData {
   /**
    * List of rank IDs that a player owns.
    */
-  ranks: string[]
+  ranks: (keyof typeof PlayerRank)[]
   /**
    * The rank the player is currently using.
    */
-  rank: string
+  rank: keyof typeof PlayerRank
   /**
    * The chat color the player is currently using.
    */

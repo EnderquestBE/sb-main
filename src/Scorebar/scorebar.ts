@@ -3,6 +3,7 @@ import { DisplaySlotType, ObjectiveSortOrder } from "@serenityjs/protocol";
 import { Server } from "../server";
 import { Utils } from "../Utils/utils";
 import { Island } from "../Classes/classes";
+import { PlayerExtension } from "../extensions/player";
 
 class Scorebar {
     private static barTitle = "§l§dEnder§eQuest §bSB"
@@ -68,7 +69,7 @@ class Scorebar {
             addScore(`§d➤ §7Try using §6/is help§7.`);
         } else {
             addScore(`§b❖ Your Stats ❖`);
-            addScore(` §b匚 §aRank: §f${"Guest"}`);
+            addScore(` §b匚 §aRank: ${player.getRank().displayName}`);
             if (island) {
                 addScore(` §b匚 §2Island: §f${island.getName()}`);
                 addScore(` §b匚 §eLevel: §f${island.getLevel()}`);
@@ -119,7 +120,7 @@ class Scorebar {
             elements.push(`§a[GT: §f${player.username}§a]`);
             elements.push(`§e[Players: §f${world.getPlayers().length}§7/§f${20}§e]`);
             elements.push(`§6[Money: §f$${Utils.formatInt(player.getMoney())}§6]`);
-            elements.push(`§b[Rank: §f${"Guest"}§b]`);
+            elements.push(`§b[Rank: ${player.getRank().displayName}§b]`);
             if (island) {
                 elements.push(`§2[Island: §f${island.getName()}§2]`);
                 elements.push(`§e[Level: §f${island.getLevel()}§e]`);

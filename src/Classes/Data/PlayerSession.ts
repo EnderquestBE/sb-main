@@ -1,5 +1,5 @@
-import { DEFAULT_PLAYER_DATA, PERMISSION_INTEGER } from "../../Configuration/config";
-import { OperationResult, PlayerData } from "../../Types/types";
+import { DEFAULT_PLAYER_DATA, PERMISSION_INTEGER, PlayerRank, RANKS } from "../../Configuration/config";
+import { OperationResult, PlayerData, RankInfo } from "../../Types/types";
 import { DataManager } from "./Manager";
 import { Island } from "./Island";
 import { PlayerDatabase } from "../Database/Collections/Player";
@@ -66,8 +66,8 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
   public getPermission(): PERMISSION_INTEGER { return this.data.permission; }
   public getMoney(): number { return this.data.balance.money; }
   public getXp(): number { return this.data.balance.xp; }
-  public getRanks(): string[] { return this.data.ranks; }
-  public getRank(): string { return this.data.rank; }
+  public getRankIds(): string[] { return this.data.ranks; }
+  public getRank(): RankInfo { return RANKS.get(this.data.rank as PlayerRank)!; }
   public getChatColor(): string { return this.data.chatColor }
   public getIslandName(): string { return this.data.island; }
   public async getIsland(): Promise<Island | null> { return await Island.load(this.data.island) }
