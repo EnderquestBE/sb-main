@@ -1,0 +1,27 @@
+import { Scorebar } from "../../Scorebar/scorebar"
+import { UserSetting } from "../../Types/types"
+
+enum Setting {
+    hudMode = "hudMode"
+}
+
+
+const USERSETTINGS = new Map<keyof typeof Setting, UserSetting>([
+    [
+        Setting.hudMode,
+        {
+            name: "Hud",
+            options: ["scoreboard", "tooltip", "off"],
+            function(player, newValue) {
+                if (newValue !== "scoreboard") {
+                    Scorebar.removeScoreboard(player, player.world)
+                }
+                if (newValue !== "tooltip") {
+                    Scorebar.removeTooltip(player)
+                }
+            }
+        }
+    ]
+])
+
+export { USERSETTINGS, Setting }

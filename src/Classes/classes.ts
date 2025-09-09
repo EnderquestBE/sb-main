@@ -15,3 +15,6 @@ export * from "./Database/CollectionManager"
 
 /* Chat */
 export * from "./Chat/filter"
+
+/* Settings */
+export * from "./Settings/settings"

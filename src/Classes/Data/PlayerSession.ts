@@ -1,8 +1,9 @@
-import { PERMISSION_INTEGER } from "../../Configuration/config";
+import { DEFAULT_PLAYER_DATA, PERMISSION_INTEGER } from "../../Configuration/config";
 import { OperationResult, PlayerData } from "../../Types/types";
 import { DataManager } from "./Manager";
 import { Island } from "./Island";
 import { PlayerDatabase } from "../Database/Collections/Player";
+import { Setting } from "../../Configuration/Settings/settings";
 
 
 /**
@@ -10,9 +11,11 @@ import { PlayerDatabase } from "../Database/Collections/Player";
  * Class for manipulating a player's session data.
  */
 class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
+  public createdAt: number
 
   private constructor(initialData: PlayerData, dbManager: PlayerDatabase) {
     super(initialData, dbManager);
+    this.createdAt = Date.now()
   }
 
   /**
@@ -27,6 +30,7 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
   public static async load(xuid: string, playerDB: PlayerDatabase): Promise<PlayerSession | null> {
     const playerData = await playerDB.get(xuid);
     if (!playerData) return null;
+    playerData.settings = { ...DEFAULT_PLAYER_DATA.settings, ...playerData.settings }
     return new PlayerSession(playerData, playerDB);
   }
 
@@ -42,23 +46,14 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
     playerDB: PlayerDatabase
   ): Promise<PlayerSession> {
     const now = new Date();
-    const initialData: PlayerData = {
-      xuid: xuid,
-      username: username,
-      permission: PERMISSION_INTEGER.MEMBER,
-      balance: {
-        coins: 100, // Starting coins
-        xp: 0,
-        shards: 0
-      },
-      ranks: [],
-      rank: "default",
-      chatColor: "white",
-      island: "",
-      settings: {},
-      lastSeen: now,
-      lastUpdated: now,
-    };
+    const initialData: PlayerData = structuredClone(DEFAULT_PLAYER_DATA)
+    initialData.xuid = xuid;
+    initialData.username = username;
+    initialData.lastUpdated = now;
+    initialData.lastSeen = now;
+    if (await playerDB.get(xuid)) {
+      playerDB.delete(xuid);
+    }
     await playerDB.create(initialData);
     return new PlayerSession(initialData, playerDB);
   }
@@ -69,18 +64,38 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
   public getXuid(): string { return this.data.xuid; }
   public getUsername(): string { return this.data.username; }
   public getPermission(): PERMISSION_INTEGER { return this.data.permission; }
-  public getCoins(): number { return this.data.balance.coins; }
+  public getMoney(): number { return this.data.balance.money; }
   public getXp(): number { return this.data.balance.xp; }
-  public getShards(): number { return this.data.balance.shards; }
   public getRanks(): string[] { return this.data.ranks; }
   public getRank(): string { return this.data.rank; }
   public getChatColor(): string { return this.data.chatColor }
-  public getIslandUUID(): string { return this.data.island; }
+  public getIslandName(): string { return this.data.island; }
   public async getIsland(): Promise<Island | null> { return await Island.load(this.data.island) }
-  public getSettings(): { [key: string]: string | boolean } { return this.data.settings; }
+  public getSettings(): { [key in Setting]: string | boolean } { return this.data.settings; }
   public getLastSeen(): Date { return this.data.lastSeen; }
   public getLastUpdated(): Date { return this.data.lastUpdated; }
 
+  /**
+ * Calculates the time played value from stored time played and session duration.
+ */
+  public getTimePlayed(): number {
+    return this.data.timePlayed + Math.floor((Date.now() - this.createdAt) / 1000);
+  }
+
+  public setTimePlayed(value: number): Promise<OperationResult> {
+    return this.updateOne({ $set: { timePlayed: value } });
+  }
+
+  // Data
+  public getDataString(): string {
+    return JSON.stringify(this.data);
+  }
+
+  public getDataProperty(key: keyof PlayerData): any {
+    return this.data[key as keyof PlayerData];
+  }
+
+  /**
 
   /**
    * @tab Boolean Methods
@@ -115,31 +130,31 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
   }
 
   /**
-   * Adds coins to the player's balance.
-   * @param amount The amount of coins to add.
+   * Adds money to the player's balance.
+   * @param amount The amount of money to add.
    */
-  public async addCoins(amount: number): Promise<OperationResult> {
+  public async addMoney(amount: number): Promise<OperationResult> {
     if (amount <= 0) return { success: false, reason: "Amount must be a positive number." };
-    return this.updateOne({ $inc: { "balance.coins": amount } });
+    return this.updateOne({ $inc: { "balance.money": amount } });
   }
 
   /**
-   * Removes coins from the player's balance.
-   * @param amount The amount of coins to remove.
+   * Removes money from the player's balance.
+   * @param amount The amount of money to remove.
    */
-  public async removeCoins(amount: number): Promise<OperationResult> {
+  public async removeMoney(amount: number): Promise<OperationResult> {
     if (amount <= 0) return { success: false, reason: "Amount must be a positive number." };
-    if (this.getCoins() < amount) return { success: false, reason: "Insufficient funds." };
-    return this.updateOne({ $inc: { "balance.coins": -amount } });
+    if (this.getMoney() < amount) return { success: false, reason: "Insufficient funds." };
+    return this.updateOne({ $inc: { "balance.money": -amount } });
   }
 
   /**
    * Sets the player's coin balance to a specific value.
    * @param amount The new coin balance.
    */
-  public async setCoins(amount: number): Promise<OperationResult> {
+  public async setMoney(amount: number): Promise<OperationResult> {
     if (amount < 0) return { success: false, reason: "Amount must be a non-negative number." };
-    return this.updateOne({ $set: { "balance.coins": amount } });
+    return this.updateOne({ $set: { "balance.money": amount } });
   }
 
   /**
@@ -147,7 +162,6 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
    * @param amount The amount of XP to add.
    */
   public async addXp(amount: number): Promise<OperationResult> {
-    if (amount <= 0) return { success: false, reason: "Amount must be a positive number." };
     return this.updateOne({ $inc: { "balance.xp": amount } });
   }
 
@@ -156,8 +170,6 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
    * @param amount The amount of XP to remove.
    */
   public async removeXp(amount: number): Promise<OperationResult> {
-    if (amount <= 0) return { success: false, reason: "Amount must be a positive number." };
-    if (this.getXp() < amount) return { success: false, reason: "Insufficient XP." };
     return this.updateOne({ $inc: { "balance.xp": -amount } });
   }
 
@@ -168,34 +180,6 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
   public async setXp(amount: number): Promise<OperationResult> {
     if (amount < 0) return { success: false, reason: "Amount must be a non-negative number." };
     return this.updateOne({ $set: { "balance.xp": amount } });
-  }
-
-  /**
-   * Adds shards to the player's balance.
-   * @param amount The amount of shards to add.
-   */
-  public async addShards(amount: number): Promise<OperationResult> {
-    if (amount <= 0) return { success: false, reason: "Amount must be a positive number." };
-    return this.updateOne({ $inc: { "balance.shards": amount } });
-  }
-
-  /**
-   * Removes shards from the player's balance.
-   * @param amount The amount of shards to remove.
-   */
-  public async removeShards(amount: number): Promise<OperationResult> {
-    if (amount <= 0) return { success: false, reason: "Amount must be a positive number." };
-    if (this.getShards() < amount) return { success: false, reason: "Insufficient shards." };
-    return this.updateOne({ $inc: { "balance.shards": -amount } });
-  }
-
-  /**
-   * Sets the player's shard balance to a specific value.
-   * @param amount The new shard balance.
-   */
-  public async setShards(amount: number): Promise<OperationResult> {
-    if (amount < 0) return { success: false, reason: "Amount must be a non-negative number." };
-    return this.updateOne({ $set: { "balance.shards": amount } });
   }
 
   /**
@@ -234,18 +218,18 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
   }
 
   /**
-   * Sets the player's island UUID.
-   * @param uuid The UUID of the island the player belongs to.
+   * Sets the player's island name.
+   * @param islandName The name of the island the player belongs to.
    */
-  public async setIslandUUID(uuid: string): Promise<OperationResult> {
-    return this.updateOne({ $set: { island: uuid } });
+  public async setIslandName(islandName: string): Promise<OperationResult> {
+    return this.updateOne({ $set: { island: islandName } });
   }
 
   /**
    * Gets a specific setting for the player.
    * @param key The key of the setting to retrieve.
    */
-  public getSetting(key: string): string | boolean | undefined {
+  public getSetting(key: keyof PlayerData["settings"]): string | boolean | undefined {
     return this.data.settings[key];
   }
 
@@ -256,15 +240,6 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
    */
   public async setSetting(key: string, value: string | boolean): Promise<OperationResult> {
     return this.updateOne({ $set: { [`settings.${key}`]: value } });
-  }
-
-  /**
-   * Removes a setting from the player's data.
-   * @param key The key of the setting to remove.
-   */
-  public async removeSetting(key: string): Promise<OperationResult> {
-    if (!this.hasSetting(key)) return { success: true };
-    return this.updateOne({ $unset: { [`settings.${key}`]: "" } });
   }
 
   /**

@@ -15,8 +15,6 @@ class PlayerDatabase extends CollectionManager<PlayerData> {
         super(dbs.players, 'xuid');
         PlayerDatabase.instance = this;
     }
-
-
 }
 
 
