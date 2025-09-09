@@ -5,6 +5,7 @@ import { PlayerDatabase } from "../Classes/Database/Collections/Player";
 import { OperationResult, PlayerData } from "../Types/types";
 import { ChatSource, PERMISSION_INTEGER } from "../Configuration/config";
 import { Island } from "../Classes/Data/Island";
+import { Setting } from "../Configuration/Settings/settings";
 
 const sessionSymbol = Symbol("player-session");
 
@@ -251,9 +252,9 @@ Player.prototype.getSettings = function (this: Player): { [key: string]: string 
   const session = PlayerExtension.getSession(this);
   return session ? session.getSettings() : {};
 }
-Player.prototype.getSetting = function (this: Player, key: string): string | boolean | undefined {
+Player.prototype.getSetting = function (this: Player, key: keyof typeof Setting): string | boolean | undefined {
   const session = PlayerExtension.getSession(this);
-  return session ? session.getSetting(key) : undefined;
+  return session ? session.getSetting(key as Setting) : undefined;
 }
 Player.prototype.setSetting = async function (this: Player, key: string, value: string | boolean): Promise<OperationResult> {
   const session = PlayerExtension.getSession(this);

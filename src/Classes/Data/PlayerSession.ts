@@ -1,4 +1,4 @@
-import { PERMISSION_INTEGER } from "../../Configuration/config";
+import { DEFAULT_PLAYER_DATA, PERMISSION_INTEGER } from "../../Configuration/config";
 import { OperationResult, PlayerData } from "../../Types/types";
 import { DataManager } from "./Manager";
 import { Island } from "./Island";
@@ -29,6 +29,7 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
   public static async load(xuid: string, playerDB: PlayerDatabase): Promise<PlayerSession | null> {
     const playerData = await playerDB.get(xuid);
     if (!playerData) return null;
+    playerData.settings = { ...DEFAULT_PLAYER_DATA.settings, ...playerData.settings }
     return new PlayerSession(playerData, playerDB);
   }
 
@@ -44,23 +45,11 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
     playerDB: PlayerDatabase
   ): Promise<PlayerSession> {
     const now = new Date();
-    const initialData: PlayerData = {
-      xuid: xuid,
-      username: username,
-      permission: PERMISSION_INTEGER.MEMBER,
-      balance: {
-        money: 100, // Starting money
-        xp: 0
-      },
-      ranks: [],
-      rank: "default",
-      chatColor: "white",
-      island: "",
-      settings: {},
-      timePlayed: 0,
-      lastSeen: now,
-      lastUpdated: now,
-    };
+    const initialData: PlayerData = structuredClone(DEFAULT_PLAYER_DATA)
+    initialData.xuid = xuid;
+    initialData.username = username;
+    initialData.lastUpdated = now;
+    initialData.lastSeen = now;
     if (await playerDB.get(xuid)) {
       playerDB.delete(xuid);
     }
@@ -239,7 +228,7 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
    * Gets a specific setting for the player.
    * @param key The key of the setting to retrieve.
    */
-  public getSetting(key: string): string | boolean | undefined {
+  public getSetting(key: keyof PlayerData["settings"]): string | boolean | undefined {
     return this.data.settings[key];
   }
 

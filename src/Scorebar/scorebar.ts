@@ -35,8 +35,8 @@ class Scorebar {
         }
         addScore(`§d➲ §aGT: §f${player.username}`);
         addScore(`§d➲ §ePlayers: §f${world.getPlayers().length}§7/§f${20}`);
-        addScore(`§d➲ §3Ping: §f--`);
-        addScore(`§d➲ §6Money: §f$${player.getMoney()}`);
+        addScore(`§d➲ §3Ping: §f10ms`);
+        addScore(`§d➲ §6Money: §f$${Utils.formatInt(player.getMoney())}`);
         addScore(`§b❖ Your Stats ❖`);
         addScore(` §b匚 §aRank: §f${"Guest"}`);
         if (island) {
@@ -47,7 +47,7 @@ class Scorebar {
             addScore(" §b匚 §eLevel: §f--");
         }
         addScore(` §b匚 §6Time: §f${Utils.formatDuration(player.getTimePlayed())}`);
-        addScore(` §b匚 §cKills: §f0 §9Deaths: §f0`);
+        addScore(` §b匚 §cK: §f0 §9D: §f0 §5R: §f0`);
         addScore(`§d➤ §7Use §6/hud §7to disable.`);
         scoreboard.setObjectiveAtDisplaySlot(DisplaySlotType.Sidebar, { objective: objective, player: player, sortOrder: ObjectiveSortOrder.Ascending })
     }

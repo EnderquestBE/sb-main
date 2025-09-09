@@ -1,4 +1,4 @@
-import { Player, TargetEnum } from "@serenityjs/core"
+import { Player } from "@serenityjs/core"
 import { CommandBuilder, CommandOverload } from "../../Classes/classes"
 import { PlayerExtension } from "../../extensions/player"
 

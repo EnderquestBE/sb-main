@@ -1,4 +1,5 @@
 import { PERMISSION_INTEGER } from "../../../Configuration/config";
+import { Setting, USERSETTINGS } from "../../../Configuration/Settings/settings";
 
 interface PlayerData {
   /**
@@ -39,7 +40,7 @@ interface PlayerData {
   /**
    * User setting values to remember for the player.
    */
-  settings: { [key: string]: string | boolean };
+  settings: { [K in Setting]?: string | boolean };
   /**
    * The amount of time in seconds the user has spent on the server.
    */

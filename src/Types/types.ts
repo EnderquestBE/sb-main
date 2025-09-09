@@ -4,3 +4,5 @@ export * from "./Data/types"
 export * from "./Command/types"
 /* Warp */
 export * from "./Warp/warp"
+/* Settings */
+export * from "./Settings/settings"
