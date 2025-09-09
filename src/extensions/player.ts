@@ -54,6 +54,8 @@ declare module "@serenityjs/core" {
     getIsland(): Promise<Island | null>
     getIslandName(): string;
     setIslandName(islandName: string): Promise<OperationResult>;
+    isWorldIsland(): boolean;
+    getWorldIsland(): Promise<Island | null>
 
     // Settings
     getSettings(): { [key: string]: string | boolean };
@@ -245,6 +247,12 @@ Player.prototype.setIslandName = async function (this: Player, islandName: strin
   const session = PlayerExtension.getSession(this);
   if (!session) return PlayerExtension['NO_SESSION_RESULT'];
   return session.setIslandName(islandName);
+}
+Player.prototype.isWorldIsland = function (this: Player): boolean {
+  return this.world.identifier.startsWith("sb_")
+}
+Player.prototype.getWorldIsland = function (this: Player): Promise<Island | null> {
+  return Island.load(this.world.identifier.substring(3))
 }
 
 // Settings
