@@ -19,7 +19,6 @@ interface PlayerData {
   balance: {
     money: number;
     xp: number;
-    shards: number;
   }
   /**
    * List of rank IDs that a player owns.

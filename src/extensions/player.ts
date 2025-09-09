@@ -38,10 +38,6 @@ declare module "@serenityjs/core" {
     addXp(amount: number): Promise<OperationResult>;
     removeXp(amount: number): Promise<OperationResult>;
     setXp(amount: number): Promise<OperationResult>;
-    getShards(): number;
-    addShards(amount: number): Promise<OperationResult>;
-    removeShards(amount: number): Promise<OperationResult>;
-    setShards(amount: number): Promise<OperationResult>;
 
     // Ranks & Customization
     getRanks(): string[];
@@ -195,26 +191,6 @@ Player.prototype.setXp = async function (this: Player, amount: number): Promise<
   const session = PlayerExtension.getSession(this);
   if (!session) return PlayerExtension['NO_SESSION_RESULT'];
   return session.setXp(amount);
-}
-
-Player.prototype.getShards = function (this: Player): number {
-  const session = PlayerExtension.getSession(this);
-  return session ? session.getShards() : 0;
-}
-Player.prototype.addShards = async function (this: Player, amount: number): Promise<OperationResult> {
-  const session = PlayerExtension.getSession(this);
-  if (!session) return PlayerExtension['NO_SESSION_RESULT'];
-  return session.addShards(amount);
-}
-Player.prototype.removeShards = async function (this: Player, amount: number): Promise<OperationResult> {
-  const session = PlayerExtension.getSession(this);
-  if (!session) return PlayerExtension['NO_SESSION_RESULT'];
-  return session.removeShards(amount);
-}
-Player.prototype.setShards = async function (this: Player, amount: number): Promise<OperationResult> {
-  const session = PlayerExtension.getSession(this);
-  if (!session) return PlayerExtension['NO_SESSION_RESULT'];
-  return session.setShards(amount);
 }
 
 // Ranks & Customization

@@ -17,7 +17,7 @@ class Scorebar {
     public static initialize(player: Player, world: World) {
         const scoreboard = world.scoreboard
         let objective = scoreboard.getObjective(`sbs_${player.xuid}`)
-        objective ??= scoreboard.addObjective(`sbs_${player.xuid}`, "§l§dEnder§eQuest")
+        objective ??= scoreboard.addObjective(`sbs_${player.xuid}`, "§l§dEnder§eQuest §bSB")
         scoreboard.setObjectiveAtDisplaySlot(DisplaySlotType.Sidebar, { objective: objective, player: player, sortOrder: ObjectiveSortOrder.Ascending })
     }
 
@@ -33,11 +33,10 @@ class Scorebar {
         function addScore(str: string) {
             objective!.setScore(str, i++)
         }
-        addScore(`§d➲ §aUser: §f${player.username}`);
+        addScore(`§d➲ §aGT: §f${player.username}`);
         addScore(`§d➲ §ePlayers: §f${world.getPlayers().length}§7/§f${20}`);
         addScore(`§d➲ §3Ping: §f--`);
         addScore(`§d➲ §6Money: §f$${player.getMoney()}`);
-        addScore(`§d➲ §dShards: §f${player.getShards() + Math.floor(Math.random() * 10)}`);
         addScore(`§b❖ Your Stats ❖`);
         addScore(` §b匚 §aRank: §f${"Guest"}`);
         if (island) {

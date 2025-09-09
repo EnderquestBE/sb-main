@@ -50,8 +50,7 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
       permission: PERMISSION_INTEGER.MEMBER,
       balance: {
         money: 100, // Starting money
-        xp: 0,
-        shards: 0
+        xp: 0
       },
       ranks: [],
       rank: "default",
@@ -77,7 +76,6 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
   public getPermission(): PERMISSION_INTEGER { return this.data.permission; }
   public getMoney(): number { return this.data.balance.money; }
   public getXp(): number { return this.data.balance.xp; }
-  public getShards(): number { return this.data.balance.shards; }
   public getRanks(): string[] { return this.data.ranks; }
   public getRank(): string { return this.data.rank; }
   public getChatColor(): string { return this.data.chatColor }
@@ -192,34 +190,6 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
   public async setXp(amount: number): Promise<OperationResult> {
     if (amount < 0) return { success: false, reason: "Amount must be a non-negative number." };
     return this.updateOne({ $set: { "balance.xp": amount } });
-  }
-
-  /**
-   * Adds shards to the player's balance.
-   * @param amount The amount of shards to add.
-   */
-  public async addShards(amount: number): Promise<OperationResult> {
-    if (amount <= 0) return { success: false, reason: "Amount must be a positive number." };
-    return this.updateOne({ $inc: { "balance.shards": amount } });
-  }
-
-  /**
-   * Removes shards from the player's balance.
-   * @param amount The amount of shards to remove.
-   */
-  public async removeShards(amount: number): Promise<OperationResult> {
-    if (amount <= 0) return { success: false, reason: "Amount must be a positive number." };
-    if (this.getShards() < amount) return { success: false, reason: "Insufficient shards." };
-    return this.updateOne({ $inc: { "balance.shards": -amount } });
-  }
-
-  /**
-   * Sets the player's shard balance to a specific value.
-   * @param amount The new shard balance.
-   */
-  public async setShards(amount: number): Promise<OperationResult> {
-    if (amount < 0) return { success: false, reason: "Amount must be a non-negative number." };
-    return this.updateOne({ $set: { "balance.shards": amount } });
   }
 
   /**
