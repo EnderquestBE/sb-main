@@ -23,26 +23,25 @@ const IslandRandomVisitCommand = new CommandOverload({
         }
         function chooseRandomIsland() {
             const name = islandNames[Math.floor(Math.random() * islandNames.length)]!
-            Island.load(name).then((island) => {
-                if (!island || (island.getStatus() === false && !island.hasRole(player.xuid))) return chooseRandomIsland()
-                const islandWorld = island.getWorld();
-                if (!islandWorld) {
-                    Island.logger.error(
-                        "Unable to get island world to warp for " + player.username + "."
-                    );
-                    return;
-                }
-                player.teleport(new Vector3f(0.5, 2, 0.5), islandWorld.getDimension());
-                player.info(
-                    `§eYou have been teleported to island §a${island.getName()}§e's spawn!`
+            const island = Island.loadSync(name)
+            if (!island || (island.getStatus() === false && !island.hasRole(player.xuid))) return chooseRandomIsland()
+            const islandWorld = island.getWorld();
+            if (!islandWorld) {
+                Island.logger.error(
+                    "Unable to get island world to warp for " + player.username + "."
                 );
-                const owners = island.getOnlineOwners()
-                for (let owner of owners) {
-                    owner.info(
-                        `§a${player.username} §ejust teleported to your island with §d/is rvisit§e! To prevent visitors, lock your island with §9/is lock§e.`
-                    )
-                }
-            })
+                return;
+            }
+            player.teleport(new Vector3f(0.5, 2, 0.5), islandWorld.getDimension());
+            player.info(
+                `§eYou have been teleported to island §a${island.getName()}§e's spawn!`
+            );
+            const owners = island.getOnlineOwners()
+            for (let owner of owners) {
+                owner.info(
+                    `§a${player.username} §ejust teleported to your island with §d/is randomvisit§e! To prevent visitors, lock your island with §9/is lock§e.`
+                )
+            }
         }
         chooseRandomIsland()
     } catch (e) {

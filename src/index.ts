@@ -1,9 +1,10 @@
 import { Plugin, PluginEvents } from "@serenityjs/plugins";
-import { EntityDimensionChangeSignal, PlayerChatSignal, PlayerJoinSignal, PlayerLeaveSignal } from "@serenityjs/core";
+import { EntityDimensionChangeSignal, EntityHitSignal, PlayerBreakBlockSignal, PlayerChatSignal, PlayerContainerInteractionSignal, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerPlaceBlockSignal } from "@serenityjs/core";
 import { DisplaySlotType, ObjectiveSortOrder } from "@serenityjs/protocol";
 import { IslandGenerator } from "./Classes/Island/generator";
-import { Scorebar } from "./Scorebar/scorebar";
-import { ChatHandler } from "./Classes/Chat/handler";
+import { Scorebar } from "./Handlers/Scorebar/scorebar";
+import { ChatHandler } from "./Handlers/Chat/handler";
+import { PermissionsHandler } from "./Handlers/Permissions/handler";
 import { Server } from "./server";
 
 class EnderquestPlugin extends Plugin implements PluginEvents {
@@ -31,10 +32,12 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
 
   public onPlayerJoin({ player }: PlayerJoinSignal): void {
     Server.onPlayerJoin(player)
+    ChatHandler.onJoin(player, this.serenity)
   }
 
   public onPlayerLeave({ player }: PlayerLeaveSignal): void {
     Server.onPlayerLeave(player)
+    ChatHandler.onLeave(player, this.serenity)
   }
 
   public onEntityDimensionChange?({ entity, fromDimension, toDimension }: EntityDimensionChangeSignal): void {
@@ -50,7 +53,29 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
   }
 
   public beforePlayerChat(event: PlayerChatSignal): boolean {
-    return ChatHandler.onChat(event)
+    return ChatHandler.onChat(event, this.serenity)
+  }
+
+  // World permissions events.
+
+  public beforePlayerBreakBlock(event: PlayerBreakBlockSignal): boolean {
+    return PermissionsHandler.onBreak(event)
+  }
+
+  public beforePlayerPlaceBlock(event: PlayerPlaceBlockSignal): boolean {
+    return PermissionsHandler.onPlace(event)
+  }
+
+  public beforePlayerInteractWithBlock(event: PlayerInteractWithBlockSignal): boolean {
+    return PermissionsHandler.onInteract(event)
+  }
+
+  public beforePlayerContainerInteraction(event: PlayerContainerInteractionSignal): boolean {
+    return PermissionsHandler.onUseContainer(event)
+  }
+
+  public beforeEntityHit(event: EntityHitSignal): boolean {
+    return PermissionsHandler.onEntityHit(event)
   }
 }
 

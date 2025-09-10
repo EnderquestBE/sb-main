@@ -18,7 +18,7 @@ const IslandCreateCommand = new CommandOverload(
     if (!(origin instanceof Entity) || !origin.isPlayer()) return
     const player = origin
     try {
-        player.getIsland().then(async (island) => {
+        player.getIslandAsync().then(async (island) => {
             if (island) return player.error(`You already own the §e${island.getName()}§c island. Use §6/is go§c to teleport there.`)
             async function createIsland(name: string) {
                 validifyIslandName(name, IslandDatabase.instance).then(async (result) => {

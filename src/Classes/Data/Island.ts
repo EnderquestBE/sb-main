@@ -3,7 +3,7 @@ import { Player, World } from "@serenityjs/core";
 import { UpdateFilter } from "mongodb";
 import { DataManager } from "./Manager";
 import { IslandDatabase } from "../Database/Collections/Island";
-import { BankLogEntry, IslandData, IslandHome, IslandLimit, IslandLimitType, IslandRole, OperationResult, PlayerInfo } from "../../Types/types";
+import { BankLogEntry, IslandData, IslandHome, IslandLimit, IslandLimitType, IslandRole, IslandRoleHierarchy, OperationResult, PlayerInfo } from "../../Types/types";
 import { Server } from "../../server";
 import { Logger, LoggerColors } from "@serenityjs/logger";
 
@@ -15,6 +15,8 @@ class Island extends DataManager<IslandData, IslandDatabase> {
 
   public static readonly logger = new Logger("Island", LoggerColors.MaterialEmerald)
 
+  private static readonly cache = new Map<string, Island>();
+
   private constructor(initialData: IslandData, dbManager: IslandDatabase) {
     super(initialData, dbManager);
   }
@@ -24,14 +26,37 @@ class Island extends DataManager<IslandData, IslandDatabase> {
    */
 
   /**
-   * Loads an island's data from the database.
+   * Loads an island's data from the database or cache.
    * @param name The name of the island to load.
    * @param islandDB The island database manager instance.
    */
   public static async load(name: string): Promise<Island | null> {
+    if (this.cache.has(name)) {
+      return this.cache.get(name)!;
+    }
     const islandData = await IslandDatabase.instance.get(name);
     if (!islandData) return null;
-    return new Island(islandData, IslandDatabase.instance);
+
+    const island = new Island(islandData, IslandDatabase.instance);
+    this.cache.set(name, island);
+    return island
+  }
+
+  /**
+ * Loads an island's data from the cache.
+ * @param name The name of the island to load.
+ * @param islandDB The island database manager instance.
+ */
+  public static loadSync(name: string): Island | null {
+    return this.cache.get(name) ?? null;
+  }
+
+  /**
+   * Removes an island from the cache.
+   * @param name The name of the island to unload.
+   */
+  public static unload(name: string): void {
+    this.cache.delete(name);
   }
 
   /**
@@ -70,7 +95,9 @@ class Island extends DataManager<IslandData, IslandDatabase> {
       lastUpdated: new Date()
     };
     await IslandDatabase.instance.create(initialData);
-    return new Island(initialData, IslandDatabase.instance);
+    const island = new Island(initialData, IslandDatabase.instance);
+    this.cache.set(name, island);
+    return island
   }
 
   /**
@@ -196,10 +223,20 @@ class Island extends DataManager<IslandData, IslandDatabase> {
    */
   public getPlayerRole(xuid: string): IslandRole | undefined {
     if (this.data.members.some(m => m.xuid === xuid)) return "member"
-    if (this.data.admins.some(m => m.xuid === xuid)) return "admin"
-    if (this.data.coowners.some(m => m.xuid === xuid)) return "coowner"
-    if (this.data.owner.xuid === xuid) return "owner"
+    else if (this.data.admins.some(m => m.xuid === xuid)) return "admin"
+    else if (this.data.coowners.some(m => m.xuid === xuid)) return "coowner"
+    else if (this.data.owner.xuid === xuid) return "owner"
     return undefined
+  }
+
+  /** 
+   * Checks if the player has the required role or higher. 
+   */
+  public hasPermission(xuid: string, role: IslandRole) {
+    const playerRole = this.getPlayerRole(xuid);
+    if (!playerRole) return false
+    if (IslandRoleHierarchy[playerRole] >= IslandRoleHierarchy[role]) return true
+    return false
   }
 
   /**
@@ -338,7 +375,16 @@ class Island extends DataManager<IslandData, IslandDatabase> {
    * @param name The new name for the island.
    */
   public async setName(name: string): Promise<OperationResult> {
-    return this.updateOne({ $set: { name: name } });
+    const oldName = this.getName();
+    const result = await this.updateOne({ $set: { name: name } });
+
+    // Update cache
+    if (result.success && Island.cache.has(oldName)) {
+      Island.cache.delete(oldName);
+      Island.cache.set(name, this);
+    }
+
+    return result;
   }
 
   /**

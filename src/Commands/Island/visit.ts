@@ -15,27 +15,26 @@ const IslandVisitCommand = new CommandOverload({
     const player = origin;
     try {
         if (!name.result) return player.error("Expected island name to teleport to.")
-        Island.load(name.result).then(async (island) => {
-            if (!island) return player.error("Island is offline or does not exist.")
-            if (island.getStatus() === false && !island.hasRole(player.xuid)) return player.error("This island is locked to visitors.")
-            const islandWorld = island.getWorld();
-            if (!islandWorld) {
-                Island.logger.error(
-                    "Unable to get island world to warp for " + player.username + "."
-                );
-                return;
-            }
-            player.teleport(new Vector3f(0.5, 2, 0.5), islandWorld.getDimension());
-            player.info(
-                `§eYou have been teleported to island §a${island.getName()}§e's spawn!`
+        const island = Island.loadSync(name.result)
+        if (!island) return player.error("Island is offline or does not exist.")
+        if (island.getStatus() === false && !island.hasRole(player.xuid)) return player.error("This island is locked to visitors.")
+        const islandWorld = island.getWorld();
+        if (!islandWorld) {
+            Island.logger.error(
+                "Unable to get island world to warp for " + player.username + "."
             );
-            const owners = island.getOnlineOwners()
-            for (let owner of owners) {
-                owner.info(
-                    `§a${player.username} §ejust teleported to your island with §d/is visit§e! To prevent visitors, lock your island with §9/is lock§e.`
-                )
-            }
-        })
+            return;
+        }
+        player.teleport(new Vector3f(0.5, 2, 0.5), islandWorld.getDimension());
+        player.info(
+            `§eYou have been teleported to island §a${island.getName()}§e's spawn!`
+        );
+        const owners = island.getOnlineOwners()
+        for (let owner of owners) {
+            owner.info(
+                `§a${player.username} §ejust teleported to your island with §d/is visit§e! To prevent visitors, lock your island with §9/is lock§e.`
+            )
+        }
     } catch (e) {
         Island.logger.warn(
             "Error during island visit for " + player.username + ": " + e

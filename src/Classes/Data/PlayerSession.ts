@@ -70,7 +70,8 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
   public getRank(): RankInfo { return RANKS.get(this.data.rank as PlayerRank)!; }
   public getChatColor(): string { return this.data.chatColor }
   public getIslandName(): string { return this.data.island; }
-  public async getIsland(): Promise<Island | null> { return await Island.load(this.data.island) }
+  public getIsland(): Island | null { return Island.loadSync(this.data.island) }
+  public async getIslandAsync(): Promise<Island | null> { return await Island.load(this.data.island) }
   public getSettings(): { [key in Setting]: string | boolean } { return this.data.settings; }
   public getLastSeen(): Date { return this.data.lastSeen; }
   public getLastUpdated(): Date { return this.data.lastUpdated; }

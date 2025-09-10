@@ -18,7 +18,7 @@ const IslandDeleteCommand = new CommandOverload(
     if (!(origin instanceof Entity) || !origin.isPlayer()) return
     const player = origin
     try {
-        player.getIsland().then(async (island) => {
+        player.getIslandAsync().then(async (island) => {
             if (!island) return player.error(`You don't have an island! Use /is create <name> to create one.`)
 
             const serenity = player.world.serenity
@@ -30,6 +30,7 @@ const IslandDeleteCommand = new CommandOverload(
             rmdir(resolve(`./worlds/${island.getWorldId()}`), { recursive: true })
 
             IslandDatabase.instance.delete(name)
+            Island.unload(name)
             player.setIslandName("")
 
             player.info(`§cYour island §e${name} §chas been deleted.`)

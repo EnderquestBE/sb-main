@@ -52,11 +52,13 @@ declare module "@serenityjs/core" {
     setChatColor(color: string): Promise<OperationResult>;
 
     // Island
-    getIsland(): Promise<Island | null>
+    getIsland(): Island | null;
+    getIslandAsync(): Promise<Island | null>
     getIslandName(): string;
     setIslandName(islandName: string): Promise<OperationResult>;
     isWorldIsland(): boolean;
-    getWorldIsland(): Promise<Island | null>
+    getWorldIsland(): Island | null;
+    getWorldIslandAsync(): Promise<Island | null>
 
     // Settings
     getSettings(): { [key in Setting]: string | boolean };
@@ -235,9 +237,13 @@ Player.prototype.setChatColor = async function (this: Player, color: string): Pr
 }
 
 // Island
-Player.prototype.getIsland = async function (this: Player): Promise<Island | null> {
+Player.prototype.getIsland = function (this: Player): Island | null {
   const session = PlayerExtension.getSession(this)
-  return session ? await session.getIsland() : null
+  return session ? session.getIsland() : null
+}
+Player.prototype.getIslandAsync = async function (this: Player): Promise<Island | null> {
+  const session = PlayerExtension.getSession(this)
+  return session ? await session.getIslandAsync() : null
 }
 Player.prototype.getIslandName = function (this: Player): string {
   const session = PlayerExtension.getSession(this);
@@ -251,7 +257,12 @@ Player.prototype.setIslandName = async function (this: Player, islandName: strin
 Player.prototype.isWorldIsland = function (this: Player): boolean {
   return this.world.identifier.startsWith("sb_")
 }
-Player.prototype.getWorldIsland = function (this: Player): Promise<Island | null> {
+Player.prototype.getWorldIsland = function (this: Player): Island | null {
+  if (!this.isWorldIsland()) return null;
+  const islandName = this.world.identifier.substring(3);
+  return Island.loadSync(islandName);
+}
+Player.prototype.getWorldIslandAsync = function (this: Player): Promise<Island | null> {
   return Island.load(this.world.identifier.substring(3))
 }
 

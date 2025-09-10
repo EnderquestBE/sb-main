@@ -1,9 +1,8 @@
 import { Player, Serenity, World, WorldEvent } from "@serenityjs/core";
 import { DisplaySlotType, ObjectiveSortOrder } from "@serenityjs/protocol";
-import { Server } from "../server";
-import { Utils } from "../Utils/utils";
-import { Island } from "../Classes/classes";
-import { PlayerExtension } from "../extensions/player";
+import { Island } from "../../Classes/classes";
+import { Server } from "../../server";
+import { Utils } from "../../Utils/utils";
 
 class Scorebar {
     private static barTitle = "§l§dEnder§eQuest §bSB"
@@ -14,9 +13,9 @@ class Scorebar {
             for (let player of world.getPlayers()) {
                 const hudMode = player.getSetting("hudMode")
                 if (hudMode === "scoreboard")
-                    this.updateScoreboard(player, world, player.isWorldIsland() ? await player.getWorldIsland() : await player.getIsland())
+                    this.updateScoreboard(player, world, player.isWorldIsland() ? player.getWorldIsland() : player.getIsland())
                 else if (hudMode === "tooltip")
-                    this.updateTooltip(player, world, player.isWorldIsland() ? await player.getWorldIsland() : await player.getIsland())
+                    this.updateTooltip(player, world, player.isWorldIsland() ? player.getWorldIsland() : player.getIsland())
                 else continue
             }
         })
