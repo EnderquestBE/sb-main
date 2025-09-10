@@ -1,6 +1,5 @@
 import { Vector3f } from "@serenityjs/protocol";
 import { Document } from "mongodb";
-import { IslandMember } from "./member";
 import { IslandLimitType } from "./limitType";
 import { IslandLimit } from "./limit";
 import { IslandHome } from "./home";
@@ -43,7 +42,15 @@ interface IslandData extends Document {
   /**
    * List of island members.
    */
-  members: IslandMember[];
+  members: PlayerInfo[];
+  /**
+   * List of island admins.
+   */
+  admins: PlayerInfo[];
+  /**
+   * List of island co-owners.
+   */
+  coowners: PlayerInfo[];
   /**
    * List of users that are banned from the island, format of XUIDs.
    */

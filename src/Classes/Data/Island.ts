@@ -3,11 +3,9 @@ import { Player, World } from "@serenityjs/core";
 import { UpdateFilter } from "mongodb";
 import { DataManager } from "./Manager";
 import { IslandDatabase } from "../Database/Collections/Island";
-import { BankLogEntry, IslandData, IslandHome, IslandLimit, IslandLimitType, IslandMember, IslandRole, OperationResult, PlayerInfo } from "../../Types/types";
+import { BankLogEntry, IslandData, IslandHome, IslandLimit, IslandLimitType, IslandRole, OperationResult, PlayerInfo } from "../../Types/types";
 import { Server } from "../../server";
 import { Logger, LoggerColors } from "@serenityjs/logger";
-
-const ROLE_HIERARCHY = Object.values(IslandRole);
 
 /**
  * @name Island
@@ -59,6 +57,8 @@ class Island extends DataManager<IslandData, IslandDatabase> {
       spawn: new Vector3f(0.5, 3, 0.5),
       world: world,
       members: [],
+      admins: [],
+      coowners: [],
       banned: [],
       bank: 0,
       bankLogs: [],
@@ -84,7 +84,9 @@ class Island extends DataManager<IslandData, IslandDatabase> {
   public getSpawn(): Vector3f { return this.data.spawn; }
   public getWorldId(): string { return this.data.world; }
   public getWorld(): World | null { return Server.instance.getWorld(this.getWorldId()); }
-  public getMembers(): IslandMember[] { return this.data.members; }
+  public getMembers(): PlayerInfo[] { return this.data.members; }
+  public getAdmins(): PlayerInfo[] { return this.data.admins; }
+  public getCoOwners(): PlayerInfo[] { return this.data.coowners; }
   public getBankBalance(): number { return this.data.bank; }
   public getBankLogs(): BankLogEntry[] { return this.data.bankLogs; }
   public getHomes(): IslandHome[] { return this.data.homes; }
@@ -112,7 +114,23 @@ class Island extends DataManager<IslandData, IslandDatabase> {
    * @param xuid The XUID of the user to check.
    */
   public isMember(xuid: string): boolean {
-    return this.data.members.some(m => m.xuid === xuid);
+    return this.data.members.some(x => x.xuid === xuid);
+  }
+
+  /**
+   * Checks if a user is an admin of the island.
+   * @param xuid The XUID of the user to check.
+   */
+  public isAdmin(xuid: string): boolean {
+    return this.data.admins.some(x => x.xuid === xuid);
+  }
+
+  /**
+   * Checks if a user is an owner of the island.
+   * @param xuid The XUID of the user to check.
+   */
+  public isOwner(xuid: string): boolean {
+    return this.data.owner.xuid === xuid || this.data.coowners.some(x => x.xuid === xuid);
   }
 
   /**
@@ -121,6 +139,13 @@ class Island extends DataManager<IslandData, IslandDatabase> {
    */
   public isBanned(xuid: string): boolean {
     return this.data.banned.includes(xuid);
+  }
+
+  /**
+   * Whether or not the island is online and accessible to visitors.
+   */
+  public isOnline(): boolean {
+    return Server.instance.getPlayers().some((x) => this.isOwner(x.xuid))
   }
 
   /**
@@ -149,16 +174,32 @@ class Island extends DataManager<IslandData, IslandDatabase> {
    * Retrieves the full data object for a member.
    * @param xuid The XUID of the member to find.
    */
-  public getMember(xuid: string): IslandMember | undefined {
+  public getMember(xuid: string): PlayerInfo | undefined {
     return this.data.members.find(m => m.xuid === xuid);
   }
 
+
   /**
-   * Retrieves the role of a specific member.
+   * Whether or not a player has a role on the island.
+   * @param xuid The XUID of the player.
+   */
+  public hasRole(xuid: string): boolean {
+    return this.data.owner.xuid === xuid ||
+      this.data.coowners.some(x => x.xuid === xuid) ||
+      this.data.admins.some(x => x.xuid === xuid) ||
+      this.data.members.some(x => x.xuid === xuid);
+  }
+
+  /**
+   * Retrieves the role of a specific island member.
    * @param xuid The XUID of the member.
    */
-  public getMemberRole(xuid: string): IslandRole | undefined {
-    return this.getMember(xuid)?.role;
+  public getPlayerRole(xuid: string): IslandRole | undefined {
+    if (this.data.members.some(m => m.xuid === xuid)) return "member"
+    if (this.data.admins.some(m => m.xuid === xuid)) return "admin"
+    if (this.data.coowners.some(m => m.xuid === xuid)) return "coowner"
+    if (this.data.owner.xuid === xuid) return "owner"
+    return undefined
   }
 
   /**
@@ -166,44 +207,31 @@ class Island extends DataManager<IslandData, IslandDatabase> {
    * @param xuid The XUID of the member to update.
    * @param role The new role to assign.
    */
-  public async updateMemberRole(xuid: string, role: IslandRole): Promise<OperationResult> {
-    const result = await this.db.updateMemberRole(this.getName(), xuid, role);
-    const success = result.modifiedCount > 0;
-    if (success) {
-      const member = this.getMember(xuid);
-      if (member) member.role = role;
+  public async updateMemberRole(xuid: string, username: string, role: IslandRole): Promise<OperationResult> {
+    const prevRole = this.getPlayerRole(xuid);
+    if (!prevRole) return { success: false, reason: "Player is not a member of this island." }
+    if (prevRole === 'owner') return { success: false, reason: "The island owner's role cannot be changed." };
+
+    // Remove from the previous role
+    if (prevRole === "member") await this.removeMember(xuid);
+    else if (prevRole === "admin") await this.removeAdmin(xuid);
+    else if (prevRole === "coowner") await this.removeCoOwner(xuid);
+
+    // Add to the new role
+    switch (role) {
+      case "member":
+        return this.addMember({ xuid, username });
+      case "admin":
+        return this.addAdmin({ xuid, username });
+      case "coowner":
+        return this.addCoOwner({ xuid, username });
     }
-    return { success };
+
+    return { success: false, reason: "Invalid role specified." };
   }
 
-  /**
-   * Promotes a member to the next highest role.
-   * @param xuid The XUID of the member to promote.
-   */
-  public async promoteMember(xuid: string): Promise<OperationResult> {
-    const member = this.getMember(xuid);
-    if (!member) return { success: false, reason: "Player is not a member." };
-
-    const currentRole = ROLE_HIERARCHY.indexOf(member.role);
-    if (currentRole >= ROLE_HIERARCHY.length - 1) return { success: false, reason: "Member is already at the highest role." };
-
-    const role = ROLE_HIERARCHY[currentRole + 1]!
-    return this.updateMemberRole(xuid, role);
-  }
-
-  /**
-   * Demotes a member to the next lowest role.
-   * @param xuid The XUID of the member to demote.
-   */
-  public async demoteMember(xuid: string): Promise<OperationResult> {
-    const member = this.getMember(xuid);
-    if (!member) return { success: false, reason: "Player is not a member." };
-
-    const currentRole = ROLE_HIERARCHY.indexOf(member.role);
-    if (currentRole <= 0) return { success: false, reason: "Member is already at the lowest role." };
-
-    const role = ROLE_HIERARCHY[currentRole - 1]!
-    return this.updateMemberRole(xuid, role);
+  public getOnlineOwners(): Player[] {
+    return Server.instance.getPlayers().filter(x => this.isOwner(x.xuid));
   }
 
   /**
@@ -383,7 +411,7 @@ class Island extends DataManager<IslandData, IslandDatabase> {
    * Adds a new member to the island.
    * @param member The member object to add.
    */
-  public async addMember(member: IslandMember): Promise<OperationResult> {
+  public async addMember(member: PlayerInfo): Promise<OperationResult> {
     if (this.isMember(member.xuid)) return { success: false, reason: "Player is already a member." };
     return this._addToArray('members', member);
   }
@@ -395,6 +423,42 @@ class Island extends DataManager<IslandData, IslandDatabase> {
   public async removeMember(xuid: string): Promise<OperationResult> {
     if (!this.isMember(xuid)) return { success: true };
     return this._removeFromArrayByField('members', 'xuid', xuid);
+  }
+
+  /**
+   * Adds a new admin to the island.
+   * @param member The member object to add.
+   */
+  public async addAdmin(member: PlayerInfo): Promise<OperationResult> {
+    if (this.isAdmin(member.xuid)) return { success: false, reason: "Player is already an admin." };
+    return this._addToArray('admins', member);
+  }
+
+  /**
+   * Removes an admin from the island.
+   * @param xuid The XUID of the admin to remove.
+   */
+  public async removeAdmin(xuid: string): Promise<OperationResult> {
+    if (!this.isAdmin(xuid)) return { success: true };
+    return this._removeFromArrayByField('admins', 'xuid', xuid);
+  }
+
+  /**
+   * Adds a new co-owner to the island.
+   * @param member The member object to add.
+   */
+  public async addCoOwner(member: PlayerInfo): Promise<OperationResult> {
+    if (this.data.coowners.some(c => c.xuid === member.xuid)) return { success: false, reason: "Player is already a co-owner." };
+    return this._addToArray('coowners', member);
+  }
+
+  /**
+   * Removes a co-owner from the island.
+   * @param xuid The XUID of the co-owner to remove.
+   */
+  public async removeCoOwner(xuid: string): Promise<OperationResult> {
+    if (!this.data.coowners.some(c => c.xuid === xuid)) return { success: true };
+    return this._removeFromArrayByField('coowners', 'xuid', xuid);
   }
 
   /**

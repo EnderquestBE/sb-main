@@ -219,7 +219,7 @@ Player.prototype.getRank = function (this: Player): RankInfo {
   const session = PlayerExtension.getSession(this);
   return session ? session.getRank() : RANKS.get("GUEST")!;
 }
-Player.prototype.setRank = async function (this: Player, rankId: string): Promise<OperationResult> {
+Player.prototype.setRank = async function (this: Player, rankId: keyof typeof PlayerRank): Promise<OperationResult> {
   const session = PlayerExtension.getSession(this);
   if (!session) return PlayerExtension['NO_SESSION_RESULT'];
   return session.setRank(rankId);

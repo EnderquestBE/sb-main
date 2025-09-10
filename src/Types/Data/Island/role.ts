@@ -1,8 +1,3 @@
-enum IslandRole {
-  Member = "MEMBER",
-  Helper = "HELPER",
-  Admin = "ADMIN",
-  CoOwner = "CO-OWNER"
-}
+type IslandRole = "member" | "admin" | "owner" | "coowner"
 
 export { IslandRole }

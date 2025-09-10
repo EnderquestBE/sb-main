@@ -105,7 +105,7 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
    * Checks if the player owns a specific rank.
    * @param rankId The ID of the rank to check.
    */
-  public hasRank(rankId: string): boolean {
+  public hasRank(rankId: keyof typeof PlayerRank): boolean {
     return this.data.ranks.includes(rankId);
   }
 
@@ -186,7 +186,7 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
    * Gives a player a new rank.
    * @param rankId The ID of the rank to give.
    */
-  public async addRank(rankId: string): Promise<OperationResult> {
+  public async addRank(rankId: keyof typeof PlayerRank): Promise<OperationResult> {
     if (this.hasRank(rankId)) return { success: false, reason: "Player already has this rank." };
     return this._addToArray('ranks', rankId);
   }
@@ -195,7 +195,7 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
    * Removes a rank from a player.
    * @param rankId The ID of the rank to remove.
    */
-  public async removeRank(rankId: string): Promise<OperationResult> {
+  public async removeRank(rankId: keyof typeof PlayerRank): Promise<OperationResult> {
     if (!this.hasRank(rankId)) return { success: true };
     return this._removeFromArrayByValue('ranks', rankId);
   }
@@ -204,8 +204,8 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
    * Sets the player's active rank.
    * @param rankId The ID of the rank to set as active.
    */
-  public async setRank(rankId: string): Promise<OperationResult> {
-    if (!this.hasRank(rankId) && rankId !== "default") return { success: false, reason: "Player does not own this rank." };
+  public async setRank(rankId: keyof typeof PlayerRank): Promise<OperationResult> {
+    if (!this.hasRank(rankId)) return { success: false, reason: "Player does not own this rank." };
     return this.updateOne({ $set: { rank: rankId } });
   }
 
