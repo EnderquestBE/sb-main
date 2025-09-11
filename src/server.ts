@@ -1,9 +1,10 @@
-import { Player, Serenity } from "@serenityjs/core";
+import { Player, Serenity, WorldEvent } from "@serenityjs/core";
 import { Logger, LoggerColors } from "@serenityjs/logger";
 import { CommandBuilder, DatabaseService, Island, IslandDatabase, PlayerDatabase } from "./Classes/classes";
 import { PlayerExtension } from "./extensions/player";
 import { Scorebar } from "./Handlers/Scorebar/scorebar";
 import { Warp } from "./Classes/Warp/warp";
+import { BoundaryHandler } from "./Handlers/Boundary/handler";
 
 class Server {
     public static readonly logger: Logger = new Logger("Enderquest", LoggerColors.LightPurple);
@@ -22,7 +23,10 @@ class Server {
         // Register commands.
         CommandBuilder.registerAll(this.instance.commandPalette);
         // Start Scorebar runtime.
-        Scorebar.runtime(this.instance)
+        instance.on(WorldEvent.WorldTick, async (event) => {
+            Scorebar.runtime(event)
+            BoundaryHandler.runtime(event)
+        })
         setTimeout(() => {
             for (let player of this.instance.getPlayers()) {
                 this.onPlayerJoin(player)

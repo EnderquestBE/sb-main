@@ -7,6 +7,7 @@ import { ChatSource, DEFAULT_PLAYER_DATA, PERMISSION_INTEGER } from "../Configur
 import { PlayerRank, RANKS } from "../Configuration/Ranks/ranks";
 import { Island } from "../Classes/Data/Island";
 import { Setting } from "../Configuration/Settings/settings";
+import { PlayerInventory } from "./inventory";
 
 const sessionSymbol = Symbol("player-session");
 
@@ -30,6 +31,9 @@ declare module "@serenityjs/core" {
     // Permissions
     getPermission(): PERMISSION_INTEGER;
     setPermission(permission: PERMISSION_INTEGER): Promise<OperationResult>;
+
+    // Inventory
+    get inventory(): PlayerInventory
 
     // Balance
     getMoney(): number;
@@ -140,6 +144,13 @@ Player.prototype.warn = function (this: Player, message: string, source: ChatSou
 Player.prototype.error = function (this: Player, message: string, source: ChatSource = ChatSource.server): void {
   this.sendMessage(`${source}§r §4[Error] §c${message}`)
 }
+
+// Inventory
+Object.defineProperty(Player.prototype, "inventory", {
+  get: function (this: Player): PlayerInventory {
+    return new PlayerInventory(this);
+  },
+});
 
 // Permissions
 Player.prototype.getPermission = function (this: Player): PERMISSION_INTEGER {

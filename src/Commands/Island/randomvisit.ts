@@ -24,15 +24,8 @@ const IslandRandomVisitCommand = new CommandOverload({
         function chooseRandomIsland() {
             const name = islandNames[Math.floor(Math.random() * islandNames.length)]!
             const island = Island.loadSync(name)
-            if (!island || (island.getStatus() === false && !island.hasRole(player.xuid))) return chooseRandomIsland()
-            const islandWorld = island.getWorld();
-            if (!islandWorld) {
-                Island.logger.error(
-                    "Unable to get island world to warp for " + player.username + "."
-                );
-                return;
-            }
-            player.teleport(new Vector3f(0.5, 2, 0.5), islandWorld.getDimension());
+            if (!island || (island.getStatus() === false && !island.isMember(player.xuid))) return chooseRandomIsland()
+            island.teleport(player)
             player.info(
                 `§eYou have been teleported to island §a${island.getName()}§e's spawn!`
             );

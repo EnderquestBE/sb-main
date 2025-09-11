@@ -19,15 +19,7 @@ const IslandGoCommand = new CommandOverload({
                 `You don't have an island! Use /is create <name> to create one.`
             );
 
-        const islandWorld = island.getWorld();
-        if (!islandWorld) {
-            Island.logger.error(
-                "Unable to get island world to warp for " + player.username + "."
-            );
-            return;
-        }
-
-        player.teleport(new Vector3f(0.5, 2, 0.5), islandWorld.getDimension());
+        island.teleport(player)
 
         player.info(
             `§aYou have been teleported to your island §e${island.getName()}§a spawn successfully!`

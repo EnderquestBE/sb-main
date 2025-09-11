@@ -18,14 +18,7 @@ const IslandVisitCommand = new CommandOverload({
         const island = Island.loadSync(name.result)
         if (!island) return player.error("Island is offline or does not exist.")
         if (island.getStatus() === false && !island.isMember(player.xuid)) return player.error("This island is locked to visitors.")
-        const islandWorld = island.getWorld();
-        if (!islandWorld) {
-            Island.logger.error(
-                "Unable to get island world to warp for " + player.username + "."
-            );
-            return;
-        }
-        player.teleport(new Vector3f(0.5, 2, 0.5), islandWorld.getDimension());
+        island.teleport(player)
         player.info(
             `§eYou have been teleported to island §a${island.getName()}§e's spawn!`
         );

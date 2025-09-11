@@ -36,6 +36,10 @@ interface IslandData extends Document {
    */
   size: number;
   /**
+   * The height limit of the island.
+   */
+  height: number;
+  /**
    * The spawn location of the island.
    */
   spawn: Vector3f

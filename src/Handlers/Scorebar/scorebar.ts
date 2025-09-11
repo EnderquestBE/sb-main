@@ -1,4 +1,4 @@
-import { Player, Serenity, World, WorldEvent } from "@serenityjs/core";
+import { Player, World, WorldTickSignal } from "@serenityjs/core";
 import { DisplaySlotType, ObjectiveSortOrder } from "@serenityjs/protocol";
 import { Island, IslandLevel } from "../../Classes/classes";
 import { Server } from "../../server";
@@ -7,18 +7,16 @@ import { Utils } from "../../Utils/utils";
 class Scorebar {
     private static barTitle = "§l§dEnder§eQuest §bSB"
 
-    public static runtime(serenity: Serenity) {
-        serenity.on(WorldEvent.WorldTick, async ({ currentTick, world }) => {
-            if (Number(currentTick) % 20 !== 0) return
-            for (let player of world.getPlayers()) {
-                const hudMode = player.getSetting("hudMode")
-                if (hudMode === "scoreboard")
-                    this.updateScoreboard(player, world, player.isWorldIsland() ? player.getWorldIsland() : player.getIsland())
-                else if (hudMode === "tooltip")
-                    this.updateTooltip(player, world, player.isWorldIsland() ? player.getWorldIsland() : player.getIsland())
-                else continue
-            }
-        })
+    public static runtime({ currentTick, world }: WorldTickSignal) {
+        if (Number(currentTick) % 20 !== 0) return
+        for (const player of world.getPlayers()) {
+            const hudMode = player.getSetting("hudMode")
+            if (hudMode === "scoreboard")
+                this.updateScoreboard(player, world, player.isWorldIsland() ? player.getWorldIsland() : player.getIsland())
+            else if (hudMode === "tooltip")
+                this.updateTooltip(player, world, player.isWorldIsland() ? player.getWorldIsland() : player.getIsland())
+            else continue
+        }
     }
 
     public static initialize(player: Player, world: World) {

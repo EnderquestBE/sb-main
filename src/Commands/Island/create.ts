@@ -52,7 +52,7 @@ const IslandCreateCommand = new CommandOverload(
                         }
                         await Island.createDefault(name, player, worldKey)
                         player.setIslandName(name)
-                        player.teleport(new Vector3f(0.5, 2, 0.5), world.getDimension())
+                        player.teleport(new Vector3f(0.5, 5, 0.5), world.getDimension())
                         player.gamemode = Gamemode.Survival
                         player.info(`§aYour island §e${name} §ahas been created! Use §6/is go §ato teleport there.`)
                     })

@@ -13,7 +13,8 @@ new CommandBuilder("cgive", "Gives an unrestricted itemstack.")
                 const item = new ItemStack(type.result!, { stackSize: amount.result! })
                 origin.getTrait(EntityInventoryTrait).container.addItem(item)
             } catch (error) {
-                origin.error("Failed to construct item.");
+                //@ts-ignore
+                origin.error("Failed to construct item:", error);
             }
         })
     ).register("Admin");

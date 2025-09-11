@@ -80,8 +80,9 @@ class Island extends DataManager<IslandData, IslandDatabase> {
       level: 1,
       points: 0,
       ceil: 1,
-      size: 16,
-      spawn: new Vector3f(0.5, 3, 0.5),
+      size: 10,
+      height: 32,
+      spawn: new Vector3f(0.5, 5, 0.5),
       world: world,
       members: [],
       helpers: [],
@@ -122,6 +123,7 @@ class Island extends DataManager<IslandData, IslandDatabase> {
   public getPoints(): number { return this.data.points; }
   public getLevelCeil(): number { return this.data.ceil }
   public getSize(): number { return this.data.size; }
+  public getHeight(): number { return this.data.height; }
   public getSpawn(): Vector3f { return this.data.spawn; }
   public getWorldId(): string { return this.data.world; }
   public getWorld(): World | null { return Server.instance.getWorld(this.getWorldId()); }
@@ -149,6 +151,10 @@ class Island extends DataManager<IslandData, IslandDatabase> {
     return JSON.stringify(this.data);
   }
 
+  // Warp
+  public teleport(player: Player) {
+    player.teleport(this.data.spawn, Server.instance.getWorld(this.getWorldId())!.getDimension())
+  }
 
   /**
    * @tab Boolean Methods
@@ -199,6 +205,18 @@ class Island extends DataManager<IslandData, IslandDatabase> {
    */
   public isOnline(): boolean {
     return Server.instance.getPlayers().some((x) => this.isOwner(x.xuid))
+  }
+
+  /**
+   * @tab Boundaries
+   */
+  public isInBounds(location: Vector3f) {
+    const y = location.y
+    if (y > this.data.height || y < 0) return false
+    const size = this.data.size
+    const dist = location.x * location.x + location.z * location.z;
+    const radius2 = size * size;
+    return dist <= radius2
   }
 
   /**

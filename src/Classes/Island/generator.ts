@@ -24,7 +24,7 @@ class IslandGenerator extends TerrainGenerator {
         if (x === 3 && z === 3)
             await this.dimension.placeStructure(
                 IslandGenerator.islandStructure,
-                { x: -5, y: -2, z: -1 },
+                { x: -5, y: 0, z: -1 },
                 { placeAirBlocks: false }
             );
     }

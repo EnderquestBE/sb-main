@@ -46,6 +46,14 @@ const BlockPointValues: { [key in BlockIdentifier]?: BlockBreak } = {
     [BlockIdentifier.EmeraldBlock]: {
         place: { points: 25 },
         break: { points: -25 }
+    },
+    [BlockIdentifier.QuartzBlock]: {
+        place: { points: 5 },
+        break: { points: -5 }
+    },
+    [BlockIdentifier.Bedrock]: {
+        place: { points: 18 },
+        break: { points: 18 }
     }
 
 }
