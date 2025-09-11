@@ -55,7 +55,8 @@ class Scorebar {
         }
         addScore(` §d➲ §aGT: §f${player.username}`);
         addScore(` §d➲ §ePlayers: §f${world.getPlayers().length}§7/§f${20}`);
-        addScore(` §d➲ §3Ping: §f10ms`);
+        //@ts-ignore
+        addScore(` §d➲ §3Ping: §f${player.connection.ping}ms`);
         addScore(` §d➲ §6Money: §f$${Utils.formatInt(player.getMoney())}`);
         if (player.isWorldIsland() && island) {
             addScore(`§b❖ Island Stats ❖`);

@@ -35,7 +35,15 @@ const IslandCreateCommand = new CommandOverload(
                         }],
                         gamemode: Gamemode.Survival,
                         gamerules: {
-                            keepInventory: true
+                            doEntityDrops: false,
+                            doFireTick: false,
+                            doLimitedCrafting: true,
+                            doTileDrops: false,
+                            fallDamage: false,
+                            fireDamage: false,
+                            keepInventory: true,
+                            pvp: false,
+                            showCoordinates: false
                         }
                     }).then(async (world) => {
                         if (!world) {

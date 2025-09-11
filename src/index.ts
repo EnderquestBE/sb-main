@@ -52,7 +52,6 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     // Register island block traits.
     if (world.identifier.startsWith("sb_")) {
       for (let trait of this.blockTraits) {
-        console.log("registered for " + world.identifier)
         world.blockPalette.registerTrait(trait);
       }
     }
