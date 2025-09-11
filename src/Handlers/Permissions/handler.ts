@@ -1,8 +1,16 @@
-import { EntityHitSignal, PlayerBreakBlockSignal, PlayerContainerInteractionSignal, PlayerInteractWithBlockSignal, PlayerPlaceBlockSignal } from "@serenityjs/core";
+import { BlockIdentifier, EntityHitSignal, PlayerBreakBlockSignal, PlayerContainerInteractionSignal, PlayerInteractWithBlockSignal, PlayerPlaceBlockSignal } from "@serenityjs/core";
 
 const MessageCooldown = new Map<string, number>()
 
 class PermissionsHandler {
+
+    private static readonly PLACEMENT_BLACKLIST: Set<BlockIdentifier> = new Set([
+        BlockIdentifier.IronOre,
+        BlockIdentifier.GoldOre,
+        BlockIdentifier.Pumpkin,
+        BlockIdentifier.MelonBlock
+    ])
+
     public static onBreak({ player }: PlayerBreakBlockSignal) {
         if (!player.isWorldIsland()) {
             player.error("You do not have permission to break blocks here.")
@@ -16,7 +24,11 @@ class PermissionsHandler {
         return true
     }
 
-    public static onPlace({ player }: PlayerPlaceBlockSignal) {
+    public static onPlace({ player, permutationBeingPlaced }: PlayerPlaceBlockSignal) {
+        if (this.PLACEMENT_BLACKLIST.has(permutationBeingPlaced.type.identifier)) {
+            player.error("This block cannot be placed.")
+            return false
+        }
         if (!player.isWorldIsland()) {
             player.error("You do not have permission to place blocks here.")
             return false

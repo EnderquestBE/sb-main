@@ -2,7 +2,8 @@ import { Scorebar } from "../../Handlers/Scorebar/scorebar"
 import { UserSetting } from "../../Types/types"
 
 enum Setting {
-    hudMode = "hudMode"
+    hudMode = "hudMode",
+    showXpOverlay = "showXpOverlay"
 }
 
 
@@ -20,6 +21,12 @@ const USERSETTINGS = new Map<keyof typeof Setting, UserSetting>([
                     Scorebar.removeTooltip(player)
                 }
             }
+        }
+    ],
+    [
+        Setting.showXpOverlay,
+        {
+            name: "Show XP Overlay"
         }
     ]
 ])

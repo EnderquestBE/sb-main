@@ -1,6 +1,6 @@
 import { Plugin, PluginEvents } from "@serenityjs/plugins";
 import { EntityDimensionChangeSignal, EntityHitSignal, PlayerBreakBlockSignal, PlayerChatSignal, PlayerContainerInteractionSignal, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerPlaceBlockSignal, WorldInitializeSignal } from "@serenityjs/core";
-import { DisplaySlotType, ObjectiveSortOrder } from "@serenityjs/protocol";
+import { ContainerType, DisplaySlotType, ObjectiveSortOrder } from "@serenityjs/protocol";
 import { IslandGenerator } from "./Classes/Island/generator";
 import { Scorebar } from "./Handlers/Scorebar/scorebar";
 import { ChatHandler } from "./Handlers/Chat/handler";
@@ -88,11 +88,22 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
   }
 
   public beforePlayerContainerInteraction(event: PlayerContainerInteractionSignal): boolean {
+    if (event.sourceContainer.type === ContainerType.Inventory) return true
     return PermissionsHandler.onUseContainer(event)
   }
 
   public beforeEntityHit(event: EntityHitSignal): boolean {
     return PermissionsHandler.onEntityHit(event)
+  }
+
+  // Point events.
+
+  public onPlayerBreakBlock(event: PlayerBreakBlockSignal): void {
+    PointHandler.onBreak(event)
+  }
+
+  public afterPlayerPlaceBlock(event: PlayerPlaceBlockSignal): void {
+    PointHandler.onPlace(event)
   }
 }
 
@@ -105,3 +116,4 @@ export default new EnderquestPlugin();
 import "./Commands/commands"
 import "./BlockTraits/Liquid/liquidInteraction"
 import { NametagHandler } from "./Handlers/Nametag/handler";
+import { PointHandler } from "./Handlers/Point/handler";

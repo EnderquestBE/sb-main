@@ -16,7 +16,8 @@ const DEFAULT_PLAYER_DATA: PlayerData = {
     chatColor: "white",
     island: "",
     settings: {
-        hudMode: "scoreboard"
+        hudMode: "scoreboard",
+        showXpOverlay: true
     },
     timePlayed: 0,
     lastSeen: new Date(),

@@ -1,6 +1,6 @@
 import { Player, Serenity, World, WorldEvent } from "@serenityjs/core";
 import { DisplaySlotType, ObjectiveSortOrder } from "@serenityjs/protocol";
-import { Island } from "../../Classes/classes";
+import { Island, IslandLevel } from "../../Classes/classes";
 import { Server } from "../../server";
 import { Utils } from "../../Utils/utils";
 
@@ -64,7 +64,9 @@ class Scorebar {
             addScore(` §b匚 §6Owner: §f${island.getOwner().username}`);
             addScore(` §b匚 §cBank: §f$${Utils.formatInt(island.getBankBalance())}`);
             addScore(` §b匚 §aLevel: §f${island.getLevel()}`);
-            addScore(` §b匚 §2Points: §f${0}§7/§f${150}`);
+            const totalPoints = island.getPoints();
+            const currentLevel = IslandLevel.fromPoints(totalPoints);
+            addScore(` §b匚 §2Points: §f${totalPoints - IslandLevel.toPoints(currentLevel - 1)}§7/§f${150 * currentLevel}`);
             addScore(` §b匚 §dSize: §f${island.getSize()} Blocks`);
             addScore(`§d➤ §7Try using §6/is help§7.`);
         } else {

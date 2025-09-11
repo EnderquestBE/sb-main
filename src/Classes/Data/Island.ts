@@ -285,6 +285,14 @@ class Island extends DataManager<IslandData, IslandDatabase> {
     return Server.instance.getPlayers().filter(x => this.isOwner(x.xuid));
   }
 
+  public getMembersInWorld(): Player[] {
+    return Server.instance.getWorld(this.getWorldId())!.getPlayers().filter((x) => this.isMember(x.xuid))
+  }
+
+  public getInWorld(): Player[] {
+    return Server.instance.getWorld(this.getWorldId())!.getPlayers()
+  }
+
   /**
    * @tab Limit Methods
    */
@@ -475,7 +483,7 @@ class Island extends DataManager<IslandData, IslandDatabase> {
    * @param amount The number of points to add.
    */
   public async addPoints(amount: number): Promise<OperationResult> {
-    this.updateOne({ $inc: { points: amount } });
+    await this.updateOne({ $inc: { points: amount } });
     return this.updateLevel();
   }
 
@@ -486,7 +494,7 @@ class Island extends DataManager<IslandData, IslandDatabase> {
   public async removePoints(amount: number): Promise<OperationResult> {
     const currentPoints = this.getPoints();
     const change = Math.min(currentPoints, amount);
-    this.updateOne({ $inc: { points: -change } });
+    await this.updateOne({ $inc: { points: -change } });
     return this.updateLevel();
   }
 
@@ -498,6 +506,12 @@ class Island extends DataManager<IslandData, IslandDatabase> {
     const level = IslandLevel.fromPoints(this.data.points)
     if (this.data.ceil < level) {
       this.updateOne({ $set: { ceil: level } })
+      // Show level-up message.
+      const members = this.getMembersInWorld()
+      for (const member of members) {
+        member.onScreenDisplay.updateSubtitle(`§6${level - 1} §a-> §e${level}`)
+        member.onScreenDisplay.setTitle("§eIsland §aLevel Up!")
+      }
     }
     return this.updateOne({ $set: { level: level } });
   }
