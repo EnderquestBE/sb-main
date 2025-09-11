@@ -1,7 +1,7 @@
-type IslandRole = "member" | "admin" | "owner" | "coowner"
+type IslandRole = "helper" | "admin" | "owner" | "coowner"
 
 const IslandRoleHierarchy: Record<IslandRole, number> = {
-    member: 0,
+    helper: 0,
     admin: 1,
     coowner: 2,
     owner: 3,

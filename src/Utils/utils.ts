@@ -17,6 +17,29 @@ class Utils {
     [1, "I"],
   ]);
 
+  private static readonly NUMBER_FORMAT_RULES = [
+    {
+      threshold: 1_000_000_000,
+      format: (num: number) => `${(Math.floor(num / 100_000_000) / 10).toFixed(1)}B`,
+    },
+    {
+      threshold: 100_000_000,
+      format: (num: number) => `${(Math.floor(num / 100_000) / 10).toFixed(1)}M`,
+    },
+    {
+      threshold: 1_000_000,
+      format: (num: number) => num.toLocaleString('en-US'),
+    },
+    {
+      threshold: 100_000,
+      format: (num: number) => `${(Math.floor(num / 100) / 10).toFixed(1)}K`,
+    },
+    {
+      threshold: 1_000,
+      format: (num: number) => num.toLocaleString('en-US'),
+    },
+  ];
+
   public static readonly formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
@@ -50,7 +73,16 @@ class Utils {
     }
   }
 
-  public static readonly formatInt = (value: number, fixed?: number) => {
+  public static readonly formatInt = (num: number) => {
+    for (const rule of this.NUMBER_FORMAT_RULES) {
+      if (num >= rule.threshold) {
+        return rule.format(num);
+      }
+    }
+    return String(num);
+  }
+
+  public static readonly formatIntToFixed = (value: number, fixed?: number) => {
     const types = ["", "k", "m", "b", "t", "qt"];
     if (value < 1e3) return value.toString();
     let logBase1000 = Math.log(value) / Math.log(1000);

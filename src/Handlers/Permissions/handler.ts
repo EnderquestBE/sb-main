@@ -9,7 +9,7 @@ class PermissionsHandler {
             return false
         }
         const island = player.getIsland()
-        if (!island || !island.hasRole(player.xuid)) {
+        if (!island || !island.isMember(player.xuid)) {
             player.error("You must be a member of this island to break blocks.")
             return false
         }
@@ -22,7 +22,7 @@ class PermissionsHandler {
             return false
         }
         const island = player.getIsland()
-        if (!island || !island.hasRole(player.xuid)) {
+        if (!island || !island.isMember(player.xuid)) {
             player.error("You must be a member of this island to place blocks.")
             return false
         }
@@ -38,7 +38,7 @@ class PermissionsHandler {
             return false
         }
         const island = source.getIsland()
-        if (!island || !island.hasRole(source.xuid)) {
+        if (!island || !island.isMember(source.xuid)) {
             if (!MessageCooldown.has(source.xuid) || MessageCooldown.get(source.xuid)! < Date.now()) {
                 source.error("You must be a member of this island to interact.")
                 MessageCooldown.set(source.xuid, Date.now() + 100)
@@ -68,7 +68,7 @@ class PermissionsHandler {
             return false
         }
         const island = damagingEntity.getIsland()
-        if (!island || !island.hasRole(damagingEntity.xuid)) {
+        if (!island || !island.isMember(damagingEntity.xuid)) {
             damagingEntity.error("You must be a member of this island to attack.")
             return false
         }

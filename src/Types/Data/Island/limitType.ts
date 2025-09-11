@@ -1,9 +1,3 @@
-enum IslandLimitType {
-  Crops = "crops",
-  Spawners = "spawners",
-  Hoppers = "hoppers",
-  Members = "members",
-  Homes = "homes"
-}
+type IslandLimitType = "crops" | "spawners" | "hoppers" | "members" | "coowners" | "homes" | "bank"
 
 export { IslandLimitType }

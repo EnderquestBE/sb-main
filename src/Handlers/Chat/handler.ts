@@ -4,31 +4,25 @@ import { Filter, Island } from "../../Classes/classes";
 class ChatHandler {
 
     public static onChat({ player, message }: PlayerChatSignal, serenity: Serenity) {
-        const worlds = serenity.getWorlds()
-        for (let world of worlds) {
-            if (world.getPlayers().length > 0) {
-                const island = player.getIsland()
-                world.sendMessage(this.format(player, island, Filter.censor(message)))
-            }
+        const recipients = serenity.getPlayers()
+        for (const recipient of recipients) {
+            const island = player.getIsland()
+            recipient.sendMessage(this.format(player, island, Filter.censor(message)))
         }
         return false
     }
 
     public static onJoin(player: Player, serenity: Serenity) {
-        const worlds = serenity.getWorlds()
-        for (let world of worlds) {
-            if (world.getPlayers().length > 0) {
-                world.sendMessage(`§f➙ §f[§a+§f] §a${player.username} §ejoined the server!`)
-            }
+        const recipients = serenity.getPlayers()
+        for (const recipient of recipients) {
+            recipient.sendMessage(`§f➙ §f[§a+§f] §a${player.username} §ejoined the server!`)
         }
     }
 
     public static onLeave(player: Player, serenity: Serenity) {
-        const worlds = serenity.getWorlds()
-        for (let world of worlds) {
-            if (world.getPlayers().length > 0) {
-                world.sendMessage(`§f➙ §f[§c-§f] §a${player.username} §cleft the server!`)
-            }
+        const recipients = serenity.getPlayers()
+        for (const recipient of recipients) {
+            recipient.sendMessage(`§f➙ §f[§c-§f] §a${player.username} §cleft the server!`)
         }
     }
 

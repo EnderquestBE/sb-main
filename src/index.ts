@@ -1,13 +1,20 @@
 import { Plugin, PluginEvents } from "@serenityjs/plugins";
-import { EntityDimensionChangeSignal, EntityHitSignal, PlayerBreakBlockSignal, PlayerChatSignal, PlayerContainerInteractionSignal, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerPlaceBlockSignal } from "@serenityjs/core";
+import { EntityDimensionChangeSignal, EntityHitSignal, PlayerBreakBlockSignal, PlayerChatSignal, PlayerContainerInteractionSignal, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerPlaceBlockSignal, WorldInitializeSignal } from "@serenityjs/core";
 import { DisplaySlotType, ObjectiveSortOrder } from "@serenityjs/protocol";
 import { IslandGenerator } from "./Classes/Island/generator";
 import { Scorebar } from "./Handlers/Scorebar/scorebar";
 import { ChatHandler } from "./Handlers/Chat/handler";
 import { PermissionsHandler } from "./Handlers/Permissions/handler";
+import { FlowingLiquidBlockTrait, LiquidInteractionBlockTrait, SourceLiquidBlockTrait } from "./BlockTraits/traits";
 import { Server } from "./server";
 
 class EnderquestPlugin extends Plugin implements PluginEvents {
+
+  private readonly blockTraits = [
+    LiquidInteractionBlockTrait,
+    SourceLiquidBlockTrait,
+    FlowingLiquidBlockTrait,
+  ];
 
   public constructor() {
     super("enderquest", "0.0.1+indev");
@@ -33,11 +40,22 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
   public onPlayerJoin({ player }: PlayerJoinSignal): void {
     Server.onPlayerJoin(player)
     ChatHandler.onJoin(player, this.serenity)
+    NametagHandler.format(player)
   }
 
   public onPlayerLeave({ player }: PlayerLeaveSignal): void {
     Server.onPlayerLeave(player)
     ChatHandler.onLeave(player, this.serenity)
+  }
+
+  public onWorldInitialize({ world }: WorldInitializeSignal): void {
+    // Register island block traits.
+    if (world.identifier.startsWith("sb_")) {
+      for (let trait of this.blockTraits) {
+        console.log("registered for " + world.identifier)
+        world.blockPalette.registerTrait(trait);
+      }
+    }
   }
 
   public onEntityDimensionChange?({ entity, fromDimension, toDimension }: EntityDimensionChangeSignal): void {
@@ -86,3 +104,5 @@ export default new EnderquestPlugin();
  */
 
 import "./Commands/commands"
+import "./BlockTraits/Liquid/liquidInteraction"
+import { NametagHandler } from "./Handlers/Nametag/handler";

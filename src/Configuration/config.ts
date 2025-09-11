@@ -10,3 +10,6 @@ export * from "./Data/player"
 
 /* Ranks */
 export * from "./Ranks/ranks"
+
+/* Island */
+export * from "./Island/limits"

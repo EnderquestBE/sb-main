@@ -17,7 +17,7 @@ const IslandVisitCommand = new CommandOverload({
         if (!name.result) return player.error("Expected island name to teleport to.")
         const island = Island.loadSync(name.result)
         if (!island) return player.error("Island is offline or does not exist.")
-        if (island.getStatus() === false && !island.hasRole(player.xuid)) return player.error("This island is locked to visitors.")
+        if (island.getStatus() === false && !island.isMember(player.xuid)) return player.error("This island is locked to visitors.")
         const islandWorld = island.getWorld();
         if (!islandWorld) {
             Island.logger.error(

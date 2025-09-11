@@ -10,3 +10,7 @@ export * from "./Settings/settings"
 export * from "./Color/color"
 /* Ranks */
 export * from "./Rank/rankInfo"
+/* Utils */
+export * from "./Utils/types"
+/* Block */
+export * from "./Block/types"
