@@ -37,7 +37,7 @@ class PointHandler {
                 this._processRange(info.points, (val) => island.addPoints(val));
             }
             if (info.xp) {
-                const value = (this._processRange(info.xp, (val) => player.addExperience(val)))
+                const value = (this._processRange(info.xp, (val) => player.addXp(val)))
                 if (value && player.getSetting("showXpOverlay")) player.onScreenDisplay.setActionBar(`§l§e>> §aCollected §d${value} §6XP §e<<§r`)
             }
         }
@@ -57,7 +57,7 @@ class PointHandler {
 
         // Debug logging
         //console.log(`Item: ${item.identifier}, Amount: ${itemCount}`);
-        //console.log("LEVEL:", player.getLevel(), "EXPERIENCE:", player.getExperience());
+        //console.log("LEVEL:", player.getLevel(), "EXPERIENCE:", player.getXp());
     }
 
     public static onPlace({ player, block }: PlayerPlaceBlockSignal): void {

@@ -24,9 +24,9 @@ declare module "@serenityjs/core" {
     getDataProperty(key: keyof PlayerData): any;
 
     // Chat
-    info(message: string, source?: ChatSource): void
-    warn(message: string, source?: ChatSource): void
-    error(message: string, source?: ChatSource): void
+    info(message: string, source?: keyof typeof ChatSource): void
+    warn(message: string, source?: keyof typeof ChatSource): void
+    error(message: string, source?: keyof typeof ChatSource): void
 
     // Permissions
     getPermission(): PERMISSION_INTEGER;
@@ -133,16 +133,16 @@ Player.prototype.getDataProperty = function (this: Player, key: keyof PlayerData
 }
 
 // Chat
-Player.prototype.info = function (this: Player, message: string, source: ChatSource = ChatSource.server): void {
-  this.sendMessage(`${source}§r ${message}`)
+Player.prototype.info = function (this: Player, message: string, source: keyof typeof ChatSource = "server"): void {
+  this.sendMessage(`${ChatSource[source]}§r ${message}`)
 }
 
-Player.prototype.warn = function (this: Player, message: string, source: ChatSource = ChatSource.server): void {
-  this.sendMessage(`${source}§r §e[Warning] §6${message}`)
+Player.prototype.warn = function (this: Player, message: string, source: keyof typeof ChatSource = "server"): void {
+  this.sendMessage(`${ChatSource[source]}§r §e[Warning] §6${message}`)
 }
 
-Player.prototype.error = function (this: Player, message: string, source: ChatSource = ChatSource.server): void {
-  this.sendMessage(`${source}§r §4[Error] §c${message}`)
+Player.prototype.error = function (this: Player, message: string, source: keyof typeof ChatSource = "server"): void {
+  this.sendMessage(`${ChatSource[source]}§r §4[Error] §c${message}`)
 }
 
 // Inventory
@@ -200,7 +200,8 @@ Player.prototype.removeXp = async function (this: Player, amount: number): Promi
   if (!session) return PlayerExtension['NO_SESSION_RESULT'];
   if (amount <= 0) return { success: false, reason: "Amount must be a positive number." };
   if (this.getXp() < amount) return { success: false, reason: "Insufficient XP." };
-  this.setExperience(this.getExperience() - amount)
+  //@ts-ignore
+  this.removeExperience(amount)
   return session.removeXp(amount);
 }
 Player.prototype.setXp = async function (this: Player, amount: number): Promise<OperationResult> {

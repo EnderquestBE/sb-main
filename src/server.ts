@@ -5,6 +5,7 @@ import { PlayerExtension } from "./extensions/player";
 import { Scorebar } from "./Handlers/Scorebar/scorebar";
 import { Warp } from "./Classes/Warp/warp";
 import { BoundaryHandler } from "./Handlers/Boundary/handler";
+import { MainShop } from "./Configuration/Shop/Main/main";
 
 class Server {
     public static readonly logger: Logger = new Logger("Enderquest", LoggerColors.LightPurple);
@@ -27,6 +28,8 @@ class Server {
             Scorebar.runtime(event)
             BoundaryHandler.runtime(event)
         })
+        // Initialize shop instances.
+        MainShop.initialize()
         setTimeout(() => {
             for (let player of this.instance.getPlayers()) {
                 this.onPlayerJoin(player)

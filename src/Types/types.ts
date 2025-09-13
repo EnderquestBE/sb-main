@@ -16,3 +16,7 @@ export * from "./Utils/types"
 export * from "./Block/types"
 /* Break */
 export * from "./Break/data"
+/* Form */
+export * from "./Form/dataFormButton"
+/* Shop */
+export * from "./Shop/shop"

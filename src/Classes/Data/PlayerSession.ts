@@ -51,7 +51,9 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
     initialData.username = username;
     initialData.lastUpdated = now;
     initialData.lastSeen = now;
-    if (await playerDB.get(xuid)) {
+    const data = await playerDB.get(xuid)
+    if (data) {
+      initialData.timePlayed = data.timePlayed
       playerDB.delete(xuid);
     }
     await playerDB.create(initialData);
