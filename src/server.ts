@@ -1,4 +1,4 @@
-import { Player, Serenity, WorldEvent } from "@serenityjs/core";
+import { LevelDBProvider, Player, Serenity, WorldEvent } from "@serenityjs/core";
 import { Logger, LoggerColors } from "@serenityjs/logger";
 import { CommandBuilder, DatabaseService, Island, IslandDatabase, PlayerDatabase } from "./Classes/classes";
 import { PlayerExtension } from "./extensions/player";
@@ -6,7 +6,6 @@ import { Scorebar } from "./Handlers/Scorebar/scorebar";
 import { Warp } from "./Classes/Warp/warp";
 import { BoundaryHandler } from "./Handlers/Boundary/handler";
 import { MainShop } from "./Configuration/Shop/Main/main";
-import { IslandDBProvider } from "./Classes/LevelProvider/customdb";
 
 class Server {
     public static readonly logger: Logger = new Logger("Enderquest", LoggerColors.LightPurple);
@@ -64,9 +63,11 @@ class Server {
             const island = await Island.load(islandName);
             if (island) {
                 // Load island world from storage.
+                /*
                 if (island.getOnlineOwners().length <= 1) {
-                    IslandDBProvider.loadWorld(this.instance, island.getWorldId())
+                    LevelDBProvider.loadWorld(this.instance, island.getWorldId())
                 }
+                */
                 this.logger.info(`Loaded island §e${islandName}§r into cache for ${player.username}.`);
             } else {
                 this.logger.error(`§cFailed to load island data for ${player.username}.`)
@@ -94,8 +95,7 @@ class Server {
                             survivor.info(`§cThe island §e${island.getName()} §cis now offline.`)
                         }
                         // Unload island from storage.
-                        //@ts-ignore
-                        this.instance.unregisterWorld(world)
+                        //this.instance.unregisterWorld(world)
                     }
                 }
                 this.logger.info(`Unloaded island §e${islandName}§r from cache.`)
