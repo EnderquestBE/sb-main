@@ -6,6 +6,7 @@ import { Scorebar } from "./Handlers/Scorebar/scorebar";
 import { Warp } from "./Classes/Warp/warp";
 import { BoundaryHandler } from "./Handlers/Boundary/handler";
 import { MainShop } from "./Configuration/Shop/Main/main";
+import { IslandDBProvider } from "./Classes/LevelProvider/customdb";
 
 class Server {
     public static readonly logger: Logger = new Logger("Enderquest", LoggerColors.LightPurple);
@@ -59,8 +60,17 @@ class Server {
         // Load island into cache
         const islandName = player.getIslandName();
         if (islandName) {
-            await Island.load(islandName);
-            this.logger.info(`Loaded island §e${islandName}§r into cache for ${player.username}.`);
+            // Load island
+            const island = await Island.load(islandName);
+            if (island) {
+                // Load island world from storage.
+                if (island.getOnlineOwners().length <= 1) {
+                    IslandDBProvider.loadWorld(this.instance, island.getWorldId())
+                }
+                this.logger.info(`Loaded island §e${islandName}§r into cache for ${player.username}.`);
+            } else {
+                this.logger.error(`§cFailed to load island data for ${player.username}.`)
+            }
         }
 
         // Initialize scorebar.
@@ -72,7 +82,22 @@ class Server {
         if (islandName) {
             const island = await Island.load(islandName);
             if (island) {
-                if (island.getOnlineOwners().length === 0) Island.unload(islandName)
+                if (island.getOnlineOwners().length === 0) {
+                    // Unload island.
+                    Island.unload(islandName)
+                    const world = this.instance.getWorld(island.getWorldId())
+                    if (world) {
+                        // Kick players still in the world, such as island visitors.
+                        const players = world.getPlayers()
+                        for (const survivor of players) {
+                            Warp.to(survivor, "SPAWN")
+                            survivor.info(`§cThe island §e${island.getName()} §cis now offline.`)
+                        }
+                        // Unload island from storage.
+                        //@ts-ignore
+                        this.instance.unregisterWorld(world)
+                    }
+                }
                 this.logger.info(`Unloaded island §e${islandName}§r from cache.`)
             }
         }

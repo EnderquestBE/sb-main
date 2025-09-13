@@ -3,6 +3,7 @@ import { CommandOverload, Island, IslandDatabase } from "../../Classes/classes"
 import { validifyIslandName } from "../../Utils/utils"
 import { IslandGenerator } from "../../Classes/Island/generator"
 import { Gamemode, Vector3f } from "@serenityjs/protocol"
+import { IslandDBProvider } from "../../Classes/LevelProvider/customdb"
 
 class IslandCreateEnum extends CustomEnum {
     public static readonly identifier = "islandCreate"
@@ -25,7 +26,7 @@ const IslandCreateCommand = new CommandOverload(
                     if (!result.success) return player.error(result.message!)
                     const worldKey = `sb_${name}`
                     if (player.world.serenity.getWorld(worldKey)) return
-                    player.world.serenity.createWorld(LevelDBProvider, {
+                    player.world.serenity.createWorld(IslandDBProvider, {
                         identifier: worldKey,
                         dimensions: [{
                             identifier: "overworld",

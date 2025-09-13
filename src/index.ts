@@ -6,6 +6,7 @@ import { Scorebar } from "./Handlers/Scorebar/scorebar";
 import { ChatHandler } from "./Handlers/Chat/handler";
 import { PermissionsHandler } from "./Handlers/Permissions/handler";
 import { FlowingLiquidBlockTrait, LiquidInteractionBlockTrait, SourceLiquidBlockTrait } from "./BlockTraits/traits";
+import { IslandDBProvider } from "./Classes/LevelProvider/customdb";
 import { Server } from "./server";
 
 class EnderquestPlugin extends Plugin implements PluginEvents {
@@ -21,6 +22,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
   }
 
   public onInitialize(): void {
+    this.serenity.registerProvider(IslandDBProvider)
     Server.initialize(this.serenity)
   }
 
@@ -117,3 +119,4 @@ import "./Commands/commands"
 import "./BlockTraits/Liquid/liquidInteraction"
 import { NametagHandler } from "./Handlers/Nametag/handler";
 import { PointHandler } from "./Handlers/Point/handler";
+
