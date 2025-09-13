@@ -4,7 +4,7 @@ import { BlockBreak } from "../../Types/types";
 const BlockPointValues: { [key in BlockIdentifier]?: BlockBreak } = {
     /* Ores */
     [BlockIdentifier.CoalOre]: {
-        break: { points: [0, 1], xp: [0, 2], item: ItemIdentifier.Coal }
+        break: { points: [0, 1], xp: [0, 2], item: ItemIdentifier.Coal, applyFortune: true }
     },
     [BlockIdentifier.IronOre]: {
         break: { points: [0, 2] }
@@ -13,13 +13,13 @@ const BlockPointValues: { [key in BlockIdentifier]?: BlockBreak } = {
         break: { points: [0, 2] }
     },
     [BlockIdentifier.LapisOre]: {
-        break: { points: [0, 3], xp: [2, 5], item: ItemIdentifier.LapisLazuli, amount: [1, 4] }
+        break: { points: [0, 3], xp: [2, 5], item: ItemIdentifier.LapisLazuli, amount: [1, 4], applyFortune: true }
     },
     [BlockIdentifier.DiamondOre]: {
-        break: { points: [0, 3], xp: [2, 6], item: ItemIdentifier.Diamond }
+        break: { points: [0, 3], xp: [2, 6], item: ItemIdentifier.Diamond, applyFortune: true }
     },
     [BlockIdentifier.EmeraldOre]: {
-        break: { points: [0, 3], xp: [3, 7], item: ItemIdentifier.Emerald }
+        break: { points: [0, 3], xp: [3, 7], item: ItemIdentifier.Emerald, applyFortune: true }
     },
 
     /* Ore Blocks */

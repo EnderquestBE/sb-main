@@ -1,18 +1,27 @@
 import {
     EntityInventoryTrait,
     ItemStack,
+    ItemStackEnchantableTrait,
     PlayerBreakBlockSignal,
     PlayerPlaceBlockSignal,
 } from "@serenityjs/core";
 import { BlockPointValues } from "../../Configuration/Point/point";
 import { Utils } from "../../Utils/utils";
-import { Gamemode } from "@serenityjs/protocol";
+import { Enchantment, Gamemode } from "@serenityjs/protocol";
 
-// For better type safety and readability
 type ValueOrRange = number | [number, number];
 
 class PointHandler {
     private static readonly INV_FULL = "§cYour inventory is full!";
+    private static readonly fortunePool = new Map<number, number[]>();
+
+    private static _cacheFortunePool(level: number) {
+        const pool: number[] = [1, 1];
+        for (let i = 2; i <= level + 1; i++) {
+            pool.push(i);
+        }
+        this.fortunePool.set(level, pool);
+    }
 
     private static _processRange(value: ValueOrRange, addFunction: (amount: number) => void): number | null {
         if (typeof value === "number") {
@@ -31,21 +40,48 @@ class PointHandler {
     public static onBreak({ player, block }: PlayerBreakBlockSignal): void {
         const island = player.getWorldIsland();
         if (!island) return;
+
         const info = BlockPointValues[block.identifier]?.break;
-        if (info) {
-            if (info.points) {
-                this._processRange(info.points, (val) => island.addPoints(val));
+        if (!info) {
+            if (player.gamemode === Gamemode.Survival) {
+                const item = new ItemStack(block.identifier, { stackSize: 1 });
+                const inventory = player.getTrait(EntityInventoryTrait);
+                if (!inventory.container.addItem(item)) {
+                    player.info(this.INV_FULL);
+                }
             }
-            if (info.xp) {
-                const value = (this._processRange(info.xp, (val) => player.addXp(val)))
-                if (value && player.getSetting("showXpOverlay")) player.onScreenDisplay.setActionBar(`§l§e>> §aCollected §d${value} §6XP §e<<§r`)
+            return;
+        }
+
+        // Get item info.
+        let itemId = info.item ?? block.identifier;
+        let itemCount = info.amount ? Utils.randomInt(info.amount[0], info.amount[1]) : 1;
+
+        // Handle point data.
+        if (info.points) {
+            this._processRange(info.points, (val) => island.addPoints(val));
+        }
+        if (info.xp) {
+            const value = (this._processRange(info.xp, (val) => player.addXp(val)))
+            if (value && player.getSetting("showXpOverlay")) player.onScreenDisplay.setActionBar(`§l§e>> §aCollected §d${value} §6XP §e<<§r`)
+        }
+        if (info.applyFortune) {
+            const heldItem = player.getHeldItem();
+            if (heldItem) {
+                const enchantable = heldItem.getTrait(ItemStackEnchantableTrait)
+                if (enchantable) {
+                    const fortuneLevel = enchantable.getEnchantment(Enchantment.Fortune)
+
+                    if (fortuneLevel && fortuneLevel > 0) {
+                        const pool = this.fortunePool.get(fortuneLevel)!
+                        const multiplier = pool[Utils.randomInt(0, pool.length - 1)]!
+                        itemCount *= multiplier;
+                    }
+                }
             }
         }
 
         if (player.gamemode !== Gamemode.Survival) return
-
-        const itemId = info?.item ?? block.identifier;
-        const itemCount = info?.amount ? Utils.randomInt(info.amount[0], info.amount[1]) : 1;
 
         if (itemCount <= 0) return;
         const item = new ItemStack(itemId, { stackSize: itemCount });
@@ -54,10 +90,6 @@ class PointHandler {
         if (!inventory.container.addItem(item)) {
             player.info(this.INV_FULL);
         }
-
-        // Debug logging
-        //console.log(`Item: ${item.identifier}, Amount: ${itemCount}`);
-        //console.log("LEVEL:", player.getLevel(), "EXPERIENCE:", player.getXp());
     }
 
     public static onPlace({ player, block }: PlayerPlaceBlockSignal): void {
@@ -67,6 +99,12 @@ class PointHandler {
         const points = BlockPointValues[block.identifier]?.place?.points;
         if (points) {
             island.addPoints(points);
+        }
+    }
+
+    public static initialize() {
+        for (let i = 0; i < 10;) {
+            this._cacheFortunePool(++i)
         }
     }
 }

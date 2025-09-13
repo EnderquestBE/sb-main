@@ -6,7 +6,6 @@ import { Scorebar } from "./Handlers/Scorebar/scorebar";
 import { ChatHandler } from "./Handlers/Chat/handler";
 import { PermissionsHandler } from "./Handlers/Permissions/handler";
 import { FlowingLiquidBlockTrait, LiquidInteractionBlockTrait, SourceLiquidBlockTrait } from "./BlockTraits/traits";
-import { IslandDBProvider } from "./Classes/LevelProvider/customdb";
 import { Server } from "./server";
 
 class EnderquestPlugin extends Plugin implements PluginEvents {
@@ -22,7 +21,6 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
   }
 
   public onInitialize(): void {
-    this.serenity.registerProvider(IslandDBProvider)
     Server.initialize(this.serenity)
   }
 
@@ -31,6 +29,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     // Register island world generator.
     this.serenity.registerGenerator(IslandGenerator)
     IslandGenerator.registerStructure(this.serenity.getWorld())
+    PointHandler.initialize()
     this.logger.info("§5Ender§dquest§r has started.");
   }
 
@@ -43,11 +42,14 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     Server.onPlayerJoin(player)
     ChatHandler.onJoin(player, this.serenity)
     NametagHandler.format(player)
+    PlayerEnum.options.push(player.username)
   }
 
   public onPlayerLeave({ player }: PlayerLeaveSignal): void {
     Server.onPlayerLeave(player)
     ChatHandler.onLeave(player, this.serenity)
+    if (PlayerEnum.options.some((x) => x === player.username))
+      PlayerEnum.options.splice(PlayerEnum.options.indexOf(player.username), 1)
   }
 
   public onWorldInitialize({ world }: WorldInitializeSignal): void {
@@ -126,4 +128,5 @@ import "./Commands/commands"
 import "./BlockTraits/Liquid/liquidInteraction"
 import { NametagHandler } from "./Handlers/Nametag/handler";
 import { PointHandler } from "./Handlers/Point/handler";
+import { PlayerEnum } from "./Classes/Command/Enums/player";
 

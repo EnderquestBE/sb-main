@@ -3,6 +3,7 @@ interface BreakData {
     amount?: [number, number] // Amount range to drop of the item. If undefined, uses 1.
     points?: number | [number, number]; // Island points to be given on break.
     xp?: number | [number, number]; // XP to be given on break.
+    applyFortune?: boolean // Whether or not to apply a multiplier to the amount from the fortune enchantment.
 }
 
 interface PlaceData {
