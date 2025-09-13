@@ -59,14 +59,21 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     }
   }
 
-  public onEntityDimensionChange?({ entity, fromDimension, toDimension }: EntityDimensionChangeSignal): void {
-    if (!entity.isPlayer()) return
+  public beforeEntityDimensionChange({ entity, fromDimension }: EntityDimensionChangeSignal): boolean {
+    if (!entity.isPlayer()) return true
     if (entity.getSetting("hudMode") === "scoreboard") {
       const objective = fromDimension.world.scoreboard.getObjective(`sbs_${entity.xuid}`)
       if (objective) {
         fromDimension.world.scoreboard.removeObjective(objective)
         fromDimension.world.scoreboard.clearObjectiveAtDisplaySlot(DisplaySlotType.Sidebar, { player: entity, objective: objective, sortOrder: ObjectiveSortOrder.Ascending })
       }
+    }
+    return true
+  }
+
+  public afterEntityDimensionChange({ entity, toDimension }: EntityDimensionChangeSignal): void {
+    if (!entity.isPlayer()) return
+    if (entity.getSetting("hudMode") === "scoreboard") {
       Scorebar.initialize(entity, toDimension.world)
     }
   }
