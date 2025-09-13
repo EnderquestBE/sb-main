@@ -1,6 +1,5 @@
 import { Vector3f } from "@serenityjs/protocol";
 import { Document } from "mongodb";
-import { IslandMember } from "./member";
 import { IslandLimitType } from "./limitType";
 import { IslandLimit } from "./limit";
 import { IslandHome } from "./home";
@@ -29,9 +28,17 @@ interface IslandData extends Document {
    */
   points: number;
   /**
+   * The highest level the island has ever reached, used for perks and such.
+   */
+  ceil: number;
+  /**
    * The size radius of the island.
    */
   size: number;
+  /**
+   * The height limit of the island.
+   */
+  height: number;
   /**
    * The spawn location of the island.
    */
@@ -41,9 +48,21 @@ interface IslandData extends Document {
    */
   world: string
   /**
-   * List of island members.
+   * List of all island members.
    */
-  members: IslandMember[];
+  members: PlayerInfo[];
+  /**
+   * List of island helpers.
+   */
+  helpers: PlayerInfo[];
+  /**
+   * List of island admins.
+   */
+  admins: PlayerInfo[];
+  /**
+   * List of island co-owners.
+   */
+  coowners: PlayerInfo[];
   /**
    * List of users that are banned from the island, format of XUIDs.
    */
@@ -60,12 +79,20 @@ interface IslandData extends Document {
    * Island limit values.
    */
   limits: {
-    [key in IslandLimitType]?: IslandLimit
+    [key in IslandLimitType]: IslandLimit
   };
   /**
    * All of the island homes available.
    */
   homes: IslandHome[];
+  /**
+   * Perk IDs that the island has unlocked.
+   */
+  perks: string[];
+  /**
+   * Permissions to grant to all members of the island while on the island.
+   */
+  commandPermissions: string[];
   /**
    * Whether or not the island is open to visitors.
    */

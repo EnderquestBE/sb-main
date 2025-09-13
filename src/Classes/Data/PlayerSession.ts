@@ -1,5 +1,5 @@
-import { DEFAULT_PLAYER_DATA, PERMISSION_INTEGER } from "../../Configuration/config";
-import { OperationResult, PlayerData } from "../../Types/types";
+import { DEFAULT_PLAYER_DATA, PERMISSION_INTEGER, PlayerRank, RANKS } from "../../Configuration/config";
+import { OperationResult, PlayerData, RankInfo } from "../../Types/types";
 import { DataManager } from "./Manager";
 import { Island } from "./Island";
 import { PlayerDatabase } from "../Database/Collections/Player";
@@ -51,7 +51,9 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
     initialData.username = username;
     initialData.lastUpdated = now;
     initialData.lastSeen = now;
-    if (await playerDB.get(xuid)) {
+    const data = await playerDB.get(xuid)
+    if (data) {
+      initialData.timePlayed = data.timePlayed
       playerDB.delete(xuid);
     }
     await playerDB.create(initialData);
@@ -66,11 +68,12 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
   public getPermission(): PERMISSION_INTEGER { return this.data.permission; }
   public getMoney(): number { return this.data.balance.money; }
   public getXp(): number { return this.data.balance.xp; }
-  public getRanks(): string[] { return this.data.ranks; }
-  public getRank(): string { return this.data.rank; }
+  public getRankIds(): string[] { return this.data.ranks; }
+  public getRank(): RankInfo { return RANKS.get(this.data.rank as PlayerRank)!; }
   public getChatColor(): string { return this.data.chatColor }
   public getIslandName(): string { return this.data.island; }
-  public async getIsland(): Promise<Island | null> { return await Island.load(this.data.island) }
+  public getIsland(): Island | null { return Island.loadSync(this.data.island) }
+  public async getIslandAsync(): Promise<Island | null> { return await Island.load(this.data.island) }
   public getSettings(): { [key in Setting]: string | boolean } { return this.data.settings; }
   public getLastSeen(): Date { return this.data.lastSeen; }
   public getLastUpdated(): Date { return this.data.lastUpdated; }
@@ -105,7 +108,7 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
    * Checks if the player owns a specific rank.
    * @param rankId The ID of the rank to check.
    */
-  public hasRank(rankId: string): boolean {
+  public hasRank(rankId: keyof typeof PlayerRank): boolean {
     return this.data.ranks.includes(rankId);
   }
 
@@ -186,7 +189,7 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
    * Gives a player a new rank.
    * @param rankId The ID of the rank to give.
    */
-  public async addRank(rankId: string): Promise<OperationResult> {
+  public async addRank(rankId: keyof typeof PlayerRank): Promise<OperationResult> {
     if (this.hasRank(rankId)) return { success: false, reason: "Player already has this rank." };
     return this._addToArray('ranks', rankId);
   }
@@ -195,7 +198,7 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
    * Removes a rank from a player.
    * @param rankId The ID of the rank to remove.
    */
-  public async removeRank(rankId: string): Promise<OperationResult> {
+  public async removeRank(rankId: keyof typeof PlayerRank): Promise<OperationResult> {
     if (!this.hasRank(rankId)) return { success: true };
     return this._removeFromArrayByValue('ranks', rankId);
   }
@@ -204,8 +207,8 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
    * Sets the player's active rank.
    * @param rankId The ID of the rank to set as active.
    */
-  public async setRank(rankId: string): Promise<OperationResult> {
-    if (!this.hasRank(rankId) && rankId !== "default") return { success: false, reason: "Player does not own this rank." };
+  public async setRank(rankId: keyof typeof PlayerRank): Promise<OperationResult> {
+    if (!this.hasRank(rankId)) return { success: false, reason: "Player does not own this rank." };
     return this.updateOne({ $set: { rank: rankId } });
   }
 

@@ -1,9 +1,11 @@
-import { Player, Serenity } from "@serenityjs/core";
+import { Player, Serenity, WorldEvent } from "@serenityjs/core";
 import { Logger, LoggerColors } from "@serenityjs/logger";
-import { CommandBuilder, DatabaseService, IslandDatabase, PlayerDatabase } from "./Classes/classes";
+import { CommandBuilder, DatabaseService, Island, IslandDatabase, PlayerDatabase } from "./Classes/classes";
 import { PlayerExtension } from "./extensions/player";
-import { Scorebar } from "./Scorebar/scorebar";
+import { Scorebar } from "./Handlers/Scorebar/scorebar";
 import { Warp } from "./Classes/Warp/warp";
+import { BoundaryHandler } from "./Handlers/Boundary/handler";
+import { MainShop } from "./Configuration/Shop/Main/main";
 
 class Server {
     public static readonly logger: Logger = new Logger("Enderquest", LoggerColors.LightPurple);
@@ -22,7 +24,12 @@ class Server {
         // Register commands.
         CommandBuilder.registerAll(this.instance.commandPalette);
         // Start Scorebar runtime.
-        Scorebar.runtime(this.instance)
+        instance.on(WorldEvent.WorldTick, async (event) => {
+            Scorebar.runtime(event)
+            BoundaryHandler.runtime(event)
+        })
+        // Initialize shop instances.
+        MainShop.initialize()
         setTimeout(() => {
             for (let player of this.instance.getPlayers()) {
                 this.onPlayerJoin(player)
@@ -48,11 +55,27 @@ class Server {
         } else {
             this.logger.info(`Loaded session for player ${player.username}.`);
         }
+
+        // Load island into cache
+        const islandName = player.getIslandName();
+        if (islandName) {
+            await Island.load(islandName);
+            this.logger.info(`Loaded island §e${islandName}§r into cache for ${player.username}.`);
+        }
+
         // Initialize scorebar.
         Scorebar.initialize(player, player.world)
     }
 
     public static async onPlayerLeave(player: Player) {
+        const islandName = player.getIslandName();
+        if (islandName) {
+            const island = await Island.load(islandName);
+            if (island) {
+                if (island.getOnlineOwners().length === 0) Island.unload(islandName)
+                this.logger.info(`Unloaded island §e${islandName}§r from cache.`)
+            }
+        }
         // Uncache player data.
         player.setTimePlayed(player.getTimePlayed())
         PlayerExtension.removeSession(player);

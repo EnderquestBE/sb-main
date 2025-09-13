@@ -5,37 +5,49 @@ import { Logger, LoggerColors } from "@serenityjs/logger";
 class Settings {
     private static readonly logger = new Logger("Settings", LoggerColors.Aqua)
 
-    public static show(player: Player) {
-        const form = new ModalForm("Settings")
-        for (const setting of Object.entries(player.getSettings()) as [keyof typeof Setting, string | boolean][]) {
-            const info = USERSETTINGS.get(setting[0])
-            if (!info) continue
-            if (info.options) {
-                form.dropdown(info.name, info.options, info.options.indexOf(setting[1] as string))
-            } else {
-                form.toggle(info.name, setting[1] as boolean)
+    public static async show(player: Player) {
+        try {
+            const form = new ModalForm("Settings");
+            const current = player.getSettings();
+            const keys: (keyof typeof Setting)[] = [];
+
+            for (const [key, info] of USERSETTINGS.entries()) {
+                const currentValue = current[key];
+                keys.push(key);
+                if (info.options) {
+                    const currentIndex = info.options.indexOf(currentValue as string);
+                    form.dropdown(info.name, info.options, currentIndex > -1 ? currentIndex : 0);
+                } else {
+                    form.toggle(info.name, currentValue as boolean);
+                }
             }
-            form.show(player).then((result) => {
-                if (!result) return
-                if (result instanceof Error) {
-                    player.error("Something went wrong changing your settings.")
-                    this.logger.error(`Failed to set settings for ${player.username}: ${result.message}`)
-                    return
-                }
-                for (const option of (result as (number | boolean)[])) {
-                    let value: string | boolean
-                    if (typeof option === "number") {
-                        value = info.options![option]!
+
+            const result = await form.show(player).then((result) => {
+                if (!result) return player.info("§cYour settings changes have been canceled.")
+                const options = result as (number | boolean)[]
+                for (let i = 0; i < options.length; i++) {
+                    const option = options[i]
+                    const key = keys[i]
+                    if (!key) return;
+
+                    const info = USERSETTINGS.get(key)!;
+                    let finalValue: string | boolean;
+
+                    if (typeof option === "number" && info.options) {
+                        finalValue = info.options[option]!
                     } else {
-                        value = option
+                        finalValue = option as boolean
                     }
-                    player.setSetting(setting[0], value)
-                    if (info.function) {
-                        info.function(player, value)
-                    }
+
+                    player.setSetting(key, finalValue);
+                    info.function?.(player, finalValue);
                 }
-                player.info("§aYour settings have been changed.")
             })
+            player.info("§aYour settings have been updated!");
+
+        } catch (error) {
+            player.error("Unable to change settings.");
+            this.logger.error(`Failed to set settings for ${player.username}:`, error);
         }
     }
 }

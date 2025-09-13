@@ -1,12 +1,20 @@
 import { Plugin, PluginEvents } from "@serenityjs/plugins";
-import { EntityDimensionChangeSignal, PlayerChatSignal, PlayerJoinSignal, PlayerLeaveSignal } from "@serenityjs/core";
-import { DisplaySlotType, ObjectiveSortOrder } from "@serenityjs/protocol";
+import { EntityDimensionChangeSignal, EntityHitSignal, PlayerBreakBlockSignal, PlayerChatSignal, PlayerContainerInteractionSignal, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerPlaceBlockSignal, WorldInitializeSignal } from "@serenityjs/core";
+import { ContainerType, DisplaySlotType, ObjectiveSortOrder } from "@serenityjs/protocol";
 import { IslandGenerator } from "./Classes/Island/generator";
-import { Scorebar } from "./Scorebar/scorebar";
-import { ChatHandler } from "./Classes/Chat/handler";
+import { Scorebar } from "./Handlers/Scorebar/scorebar";
+import { ChatHandler } from "./Handlers/Chat/handler";
+import { PermissionsHandler } from "./Handlers/Permissions/handler";
+import { FlowingLiquidBlockTrait, LiquidInteractionBlockTrait, SourceLiquidBlockTrait } from "./BlockTraits/traits";
 import { Server } from "./server";
 
 class EnderquestPlugin extends Plugin implements PluginEvents {
+
+  private readonly blockTraits = [
+    LiquidInteractionBlockTrait,
+    SourceLiquidBlockTrait,
+    FlowingLiquidBlockTrait,
+  ];
 
   public constructor() {
     super("enderquest", "0.0.1+indev");
@@ -31,10 +39,22 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
 
   public onPlayerJoin({ player }: PlayerJoinSignal): void {
     Server.onPlayerJoin(player)
+    ChatHandler.onJoin(player, this.serenity)
+    NametagHandler.format(player)
   }
 
   public onPlayerLeave({ player }: PlayerLeaveSignal): void {
     Server.onPlayerLeave(player)
+    ChatHandler.onLeave(player, this.serenity)
+  }
+
+  public onWorldInitialize({ world }: WorldInitializeSignal): void {
+    // Register island block traits.
+    if (world.identifier.startsWith("sb_")) {
+      for (let trait of this.blockTraits) {
+        world.blockPalette.registerTrait(trait);
+      }
+    }
   }
 
   public onEntityDimensionChange?({ entity, fromDimension, toDimension }: EntityDimensionChangeSignal): void {
@@ -50,7 +70,40 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
   }
 
   public beforePlayerChat(event: PlayerChatSignal): boolean {
-    return ChatHandler.onChat(event)
+    return ChatHandler.onChat(event, this.serenity)
+  }
+
+  // World permissions events.
+
+  public beforePlayerBreakBlock(event: PlayerBreakBlockSignal): boolean {
+    return PermissionsHandler.onBreak(event)
+  }
+
+  public beforePlayerPlaceBlock(event: PlayerPlaceBlockSignal): boolean {
+    return PermissionsHandler.onPlace(event)
+  }
+
+  public beforePlayerInteractWithBlock(event: PlayerInteractWithBlockSignal): boolean {
+    return PermissionsHandler.onInteract(event)
+  }
+
+  public beforePlayerContainerInteraction(event: PlayerContainerInteractionSignal): boolean {
+    if (event.sourceContainer.type === ContainerType.Inventory) return true
+    return PermissionsHandler.onUseContainer(event)
+  }
+
+  public beforeEntityHit(event: EntityHitSignal): boolean {
+    return PermissionsHandler.onEntityHit(event)
+  }
+
+  // Point events.
+
+  public onPlayerBreakBlock(event: PlayerBreakBlockSignal): void {
+    PointHandler.onBreak(event)
+  }
+
+  public afterPlayerPlaceBlock(event: PlayerPlaceBlockSignal): void {
+    PointHandler.onPlace(event)
   }
 }
 
@@ -61,3 +114,6 @@ export default new EnderquestPlugin();
  */
 
 import "./Commands/commands"
+import "./BlockTraits/Liquid/liquidInteraction"
+import { NametagHandler } from "./Handlers/Nametag/handler";
+import { PointHandler } from "./Handlers/Point/handler";

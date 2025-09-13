@@ -18,7 +18,7 @@ const IslandCreateCommand = new CommandOverload(
     if (!(origin instanceof Entity) || !origin.isPlayer()) return
     const player = origin
     try {
-        player.getIsland().then(async (island) => {
+        player.getIslandAsync().then(async (island) => {
             if (island) return player.error(`You already own the §e${island.getName()}§c island. Use §6/is go§c to teleport there.`)
             async function createIsland(name: string) {
                 validifyIslandName(name, IslandDatabase.instance).then(async (result) => {
@@ -35,7 +35,15 @@ const IslandCreateCommand = new CommandOverload(
                         }],
                         gamemode: Gamemode.Survival,
                         gamerules: {
-                            keepInventory: true
+                            doEntityDrops: false,
+                            doFireTick: false,
+                            doLimitedCrafting: true,
+                            doTileDrops: false,
+                            fallDamage: false,
+                            fireDamage: false,
+                            keepInventory: true,
+                            pvp: false,
+                            showCoordinates: false
                         }
                     }).then(async (world) => {
                         if (!world) {
@@ -44,7 +52,7 @@ const IslandCreateCommand = new CommandOverload(
                         }
                         await Island.createDefault(name, player, worldKey)
                         player.setIslandName(name)
-                        player.teleport(new Vector3f(0.5, 2, 0.5), world.getDimension())
+                        player.teleport(new Vector3f(0.5, 5, 0.5), world.getDimension())
                         player.gamemode = Gamemode.Survival
                         player.info(`§aYour island §e${name} §ahas been created! Use §6/is go §ato teleport there.`)
                     })

@@ -1,10 +1,10 @@
+import { Entity } from "@serenityjs/core";
 import { CommandBuilder, CommandOverload, Settings } from "../../Classes/classes"
 
 new CommandBuilder("settings", "Change your settings.").setAliases(["pref"]).addOverload(
     new CommandOverload({
     }).onCallback((origin) => {
-        //@ts-ignore
-        const player = origin as Player
-        Settings.show(player)
+        if (!(origin instanceof Entity) || !origin.isPlayer()) return;
+        Settings.show(origin)
     })
 ).register("General")

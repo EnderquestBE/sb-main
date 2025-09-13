@@ -1,24 +1,22 @@
-import { Player, Serenity, World, WorldEvent } from "@serenityjs/core";
+import { Player, World, WorldTickSignal } from "@serenityjs/core";
 import { DisplaySlotType, ObjectiveSortOrder } from "@serenityjs/protocol";
-import { Server } from "../server";
-import { Utils } from "../Utils/utils";
-import { Island } from "../Classes/classes";
+import { Island, IslandLevel } from "../../Classes/classes";
+import { Server } from "../../server";
+import { Utils } from "../../Utils/utils";
 
 class Scorebar {
     private static barTitle = "§l§dEnder§eQuest §bSB"
 
-    public static runtime(serenity: Serenity) {
-        serenity.on(WorldEvent.WorldTick, async ({ currentTick, world }) => {
-            if (Number(currentTick) % 20 !== 0) return
-            for (let player of world.getPlayers()) {
-                const hudMode = player.getSetting("hudMode")
-                if (hudMode === "scoreboard")
-                    this.updateScoreboard(player, world, player.isWorldIsland() ? await player.getWorldIsland() : await player.getIsland())
-                else if (hudMode === "tooltip")
-                    this.updateTooltip(player, world, player.isWorldIsland() ? await player.getWorldIsland() : await player.getIsland())
-                else continue
-            }
-        })
+    public static runtime({ currentTick, world }: WorldTickSignal) {
+        if (Number(currentTick) % 20 !== 0) return
+        for (const player of world.getPlayers()) {
+            const hudMode = player.getSetting("hudMode")
+            if (hudMode === "scoreboard")
+                this.updateScoreboard(player, world, player.isWorldIsland() ? player.getWorldIsland() : player.getIsland())
+            else if (hudMode === "tooltip")
+                this.updateTooltip(player, world, player.isWorldIsland() ? player.getWorldIsland() : player.getIsland())
+            else continue
+        }
     }
 
     public static initialize(player: Player, world: World) {
@@ -55,7 +53,8 @@ class Scorebar {
         }
         addScore(` §d➲ §aGT: §f${player.username}`);
         addScore(` §d➲ §ePlayers: §f${world.getPlayers().length}§7/§f${20}`);
-        addScore(` §d➲ §3Ping: §f10ms`);
+        //@ts-ignore
+        addScore(` §d➲ §3Ping: §f${player.connection.ping}ms`);
         addScore(` §d➲ §6Money: §f$${Utils.formatInt(player.getMoney())}`);
         if (player.isWorldIsland() && island) {
             addScore(`§b❖ Island Stats ❖`);
@@ -63,12 +62,14 @@ class Scorebar {
             addScore(` §b匚 §6Owner: §f${island.getOwner().username}`);
             addScore(` §b匚 §cBank: §f$${Utils.formatInt(island.getBankBalance())}`);
             addScore(` §b匚 §aLevel: §f${island.getLevel()}`);
-            addScore(` §b匚 §2Points: §f${0}§7/§f${150}`);
+            const totalPoints = island.getPoints();
+            const currentLevel = IslandLevel.fromPoints(totalPoints);
+            addScore(` §b匚 §2Points: §f${totalPoints - IslandLevel.toPoints(currentLevel - 1)}§7/§f${150 * currentLevel}`);
             addScore(` §b匚 §dSize: §f${island.getSize()} Blocks`);
             addScore(`§d➤ §7Try using §6/is help§7.`);
         } else {
             addScore(`§b❖ Your Stats ❖`);
-            addScore(` §b匚 §aRank: §f${"Guest"}`);
+            addScore(` §b匚 §aRank: ${player.getRank().displayName}`);
             if (island) {
                 addScore(` §b匚 §2Island: §f${island.getName()}`);
                 addScore(` §b匚 §eLevel: §f${island.getLevel()}`);
@@ -119,7 +120,7 @@ class Scorebar {
             elements.push(`§a[GT: §f${player.username}§a]`);
             elements.push(`§e[Players: §f${world.getPlayers().length}§7/§f${20}§e]`);
             elements.push(`§6[Money: §f$${Utils.formatInt(player.getMoney())}§6]`);
-            elements.push(`§b[Rank: §f${"Guest"}§b]`);
+            elements.push(`§b[Rank: ${player.getRank().displayName}§b]`);
             if (island) {
                 elements.push(`§2[Island: §f${island.getName()}§2]`);
                 elements.push(`§e[Level: §f${island.getLevel()}§e]`);

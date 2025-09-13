@@ -1,5 +1,6 @@
 enum ChatSource {
-  server = "§l§e[§dE§e]>"
+  server = "§l§f[§dE§f]>",
+  shop = "§l§f[§bShop§f]>§r"
 }
 
 export { ChatSource }

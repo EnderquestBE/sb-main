@@ -3,11 +3,10 @@ import { Player, World } from "@serenityjs/core";
 import { UpdateFilter } from "mongodb";
 import { DataManager } from "./Manager";
 import { IslandDatabase } from "../Database/Collections/Island";
-import { BankLogEntry, IslandData, IslandHome, IslandLimit, IslandLimitType, IslandMember, IslandRole, OperationResult, PlayerInfo } from "../../Types/types";
+import { BankLogEntry, IslandData, IslandHome, IslandLimit, IslandLimitType, IslandRole, IslandRoleHierarchy, OperationResult, PlayerInfo } from "../../Types/types";
 import { Server } from "../../server";
 import { Logger, LoggerColors } from "@serenityjs/logger";
-
-const ROLE_HIERARCHY = Object.values(IslandRole);
+import { IslandLevel } from "../classes";
 
 /**
  * @name Island
@@ -16,6 +15,8 @@ const ROLE_HIERARCHY = Object.values(IslandRole);
 class Island extends DataManager<IslandData, IslandDatabase> {
 
   public static readonly logger = new Logger("Island", LoggerColors.MaterialEmerald)
+
+  private static readonly cache = new Map<string, Island>();
 
   private constructor(initialData: IslandData, dbManager: IslandDatabase) {
     super(initialData, dbManager);
@@ -26,14 +27,37 @@ class Island extends DataManager<IslandData, IslandDatabase> {
    */
 
   /**
-   * Loads an island's data from the database.
+   * Loads an island's data from the database or cache.
    * @param name The name of the island to load.
    * @param islandDB The island database manager instance.
    */
   public static async load(name: string): Promise<Island | null> {
+    if (this.cache.has(name)) {
+      return this.cache.get(name)!;
+    }
     const islandData = await IslandDatabase.instance.get(name);
     if (!islandData) return null;
-    return new Island(islandData, IslandDatabase.instance);
+
+    const island = new Island(islandData, IslandDatabase.instance);
+    this.cache.set(name, island);
+    return island
+  }
+
+  /**
+ * Loads an island's data from the cache.
+ * @param name The name of the island to load.
+ * @param islandDB The island database manager instance.
+ */
+  public static loadSync(name: string): Island | null {
+    return this.cache.get(name) ?? null;
+  }
+
+  /**
+   * Removes an island from the cache.
+   * @param name The name of the island to unload.
+   */
+  public static unload(name: string): void {
+    this.cache.delete(name);
   }
 
   /**
@@ -55,22 +79,39 @@ class Island extends DataManager<IslandData, IslandDatabase> {
       founder: { xuid: player.xuid, username: player.username },
       level: 1,
       points: 0,
-      size: 16,
-      spawn: new Vector3f(0.5, 3, 0.5),
+      ceil: 1,
+      size: 10,
+      height: 32,
+      spawn: new Vector3f(0.5, 5, 0.5),
       world: world,
       members: [],
+      helpers: [],
+      admins: [],
+      coowners: [],
       banned: [],
       bank: 0,
       bankLogs: [],
-      limits: {},
+      limits: {
+        crops: { amount: 0, max: 175 },
+        spawners: { amount: 0, max: 1 },
+        hoppers: { amount: 0, max: 2 },
+        coowners: { amount: 0, max: 0 },
+        members: { amount: 0, max: 3 },
+        homes: { amount: 0, max: 3 },
+        bank: { amount: 0, max: 25000 }
+      },
       homes: [],
+      perks: [],
+      commandPermissions: [],
       status: true,
       preset: 'default',
       createdAt: new Date(),
       lastUpdated: new Date()
     };
     await IslandDatabase.instance.create(initialData);
-    return new Island(initialData, IslandDatabase.instance);
+    const island = new Island(initialData, IslandDatabase.instance);
+    this.cache.set(name, island);
+    return island
   }
 
   /**
@@ -80,11 +121,16 @@ class Island extends DataManager<IslandData, IslandDatabase> {
   public getName(): string { return this.data.name; }
   public getLevel(): number { return this.data.level; }
   public getPoints(): number { return this.data.points; }
+  public getLevelCeil(): number { return this.data.ceil }
   public getSize(): number { return this.data.size; }
+  public getHeight(): number { return this.data.height; }
   public getSpawn(): Vector3f { return this.data.spawn; }
   public getWorldId(): string { return this.data.world; }
   public getWorld(): World | null { return Server.instance.getWorld(this.getWorldId()); }
-  public getMembers(): IslandMember[] { return this.data.members; }
+  public getMembers(): PlayerInfo[] { return this.data.members; }
+  public getHelpers(): PlayerInfo[] { return this.data.helpers; }
+  public getAdmins(): PlayerInfo[] { return this.data.admins; }
+  public getCoOwners(): PlayerInfo[] { return this.data.coowners; }
   public getBankBalance(): number { return this.data.bank; }
   public getBankLogs(): BankLogEntry[] { return this.data.bankLogs; }
   public getHomes(): IslandHome[] { return this.data.homes; }
@@ -92,6 +138,9 @@ class Island extends DataManager<IslandData, IslandDatabase> {
   public getStatus(): boolean { return this.data.status; }
   public getOwner(): PlayerInfo { return this.data.owner; }
   public getFounder(): PlayerInfo { return this.data.founder; }
+  public getLimits(): { [key in IslandLimitType]: IslandLimit } { return this.data.limits; }
+  public getPerks(): string[] { return this.data.perks; }
+  public getCommandPermissions(): string[] { return this.data.commandPermissions; }
 
   // Data
   public getData(): IslandData {
@@ -102,6 +151,10 @@ class Island extends DataManager<IslandData, IslandDatabase> {
     return JSON.stringify(this.data);
   }
 
+  // Warp
+  public teleport(player: Player) {
+    player.teleport(this.data.spawn, Server.instance.getWorld(this.getWorldId())!.getDimension())
+  }
 
   /**
    * @tab Boolean Methods
@@ -112,7 +165,31 @@ class Island extends DataManager<IslandData, IslandDatabase> {
    * @param xuid The XUID of the user to check.
    */
   public isMember(xuid: string): boolean {
-    return this.data.members.some(m => m.xuid === xuid);
+    return this.data.members.some(x => x.xuid === xuid) || this.data.owner.xuid === xuid
+  }
+
+  /**
+   * Checks if a user is a helper of the island.
+   * @param xuid The XUID of the user to check.
+   */
+  public isHelper(xuid: string): boolean {
+    return this.data.helpers.some(x => x.xuid === xuid);
+  }
+
+  /**
+   * Checks if a user is an admin of the island.
+   * @param xuid The XUID of the user to check.
+   */
+  public isAdmin(xuid: string): boolean {
+    return this.data.admins.some(x => x.xuid === xuid);
+  }
+
+  /**
+   * Checks if a user is an owner of the island.
+   * @param xuid The XUID of the user to check.
+   */
+  public isOwner(xuid: string): boolean {
+    return this.data.owner.xuid === xuid || this.data.coowners.some(x => x.xuid === xuid);
   }
 
   /**
@@ -121,6 +198,25 @@ class Island extends DataManager<IslandData, IslandDatabase> {
    */
   public isBanned(xuid: string): boolean {
     return this.data.banned.includes(xuid);
+  }
+
+  /**
+   * Whether or not the island is online and accessible to visitors.
+   */
+  public isOnline(): boolean {
+    return Server.instance.getPlayers().some((x) => this.isOwner(x.xuid))
+  }
+
+  /**
+   * @tab Boundaries
+   */
+  public isInBounds(location: Vector3f) {
+    const y = location.y
+    if (y > this.data.height || y < 0) return false
+    const size = this.data.size
+    const dist = location.x * location.x + location.z * location.z;
+    const radius2 = size * size;
+    return dist <= radius2
   }
 
   /**
@@ -149,16 +245,30 @@ class Island extends DataManager<IslandData, IslandDatabase> {
    * Retrieves the full data object for a member.
    * @param xuid The XUID of the member to find.
    */
-  public getMember(xuid: string): IslandMember | undefined {
+  public getMember(xuid: string): PlayerInfo | undefined {
     return this.data.members.find(m => m.xuid === xuid);
   }
 
   /**
-   * Retrieves the role of a specific member.
+   * Retrieves the role of a specific island member.
    * @param xuid The XUID of the member.
    */
-  public getMemberRole(xuid: string): IslandRole | undefined {
-    return this.getMember(xuid)?.role;
+  public getPlayerRole(xuid: string): IslandRole | undefined {
+    if (this.data.helpers.some(m => m.xuid === xuid)) return "helper"
+    else if (this.data.admins.some(m => m.xuid === xuid)) return "admin"
+    else if (this.data.coowners.some(m => m.xuid === xuid)) return "coowner"
+    else if (this.data.owner.xuid === xuid) return "owner"
+    return undefined
+  }
+
+  /** 
+   * Checks if the player has the required role or higher. 
+   */
+  public hasPermission(xuid: string, role: IslandRole) {
+    const playerRole = this.getPlayerRole(xuid);
+    if (!playerRole) return false
+    if (IslandRoleHierarchy[playerRole] >= IslandRoleHierarchy[role]) return true
+    return false
   }
 
   /**
@@ -166,44 +276,39 @@ class Island extends DataManager<IslandData, IslandDatabase> {
    * @param xuid The XUID of the member to update.
    * @param role The new role to assign.
    */
-  public async updateMemberRole(xuid: string, role: IslandRole): Promise<OperationResult> {
-    const result = await this.db.updateMemberRole(this.getName(), xuid, role);
-    const success = result.modifiedCount > 0;
-    if (success) {
-      const member = this.getMember(xuid);
-      if (member) member.role = role;
+  public async updateMemberRole(xuid: string, username: string, role: IslandRole): Promise<OperationResult> {
+    const prevRole = this.getPlayerRole(xuid);
+    if (!prevRole) return { success: false, reason: "Player is not a member of this island." }
+    if (prevRole === 'owner') return { success: false, reason: "The island owner's role cannot be changed." };
+
+    // Remove from the previous role
+    if (prevRole === "helper") await this.removeHelper(xuid);
+    else if (prevRole === "admin") await this.removeAdmin(xuid);
+    else if (prevRole === "coowner") await this.removeCoOwner(xuid);
+
+    // Add to the new role
+    switch (role) {
+      case "helper":
+        return this.addHelper({ xuid, username });
+      case "admin":
+        return this.addAdmin({ xuid, username });
+      case "coowner":
+        return this.addCoOwner({ xuid, username });
     }
-    return { success };
+
+    return { success: false, reason: "Invalid role specified." };
   }
 
-  /**
-   * Promotes a member to the next highest role.
-   * @param xuid The XUID of the member to promote.
-   */
-  public async promoteMember(xuid: string): Promise<OperationResult> {
-    const member = this.getMember(xuid);
-    if (!member) return { success: false, reason: "Player is not a member." };
-
-    const currentRole = ROLE_HIERARCHY.indexOf(member.role);
-    if (currentRole >= ROLE_HIERARCHY.length - 1) return { success: false, reason: "Member is already at the highest role." };
-
-    const role = ROLE_HIERARCHY[currentRole + 1]!
-    return this.updateMemberRole(xuid, role);
+  public getOnlineOwners(): Player[] {
+    return Server.instance.getPlayers().filter(x => this.isOwner(x.xuid));
   }
 
-  /**
-   * Demotes a member to the next lowest role.
-   * @param xuid The XUID of the member to demote.
-   */
-  public async demoteMember(xuid: string): Promise<OperationResult> {
-    const member = this.getMember(xuid);
-    if (!member) return { success: false, reason: "Player is not a member." };
+  public getMembersInWorld(): Player[] {
+    return Server.instance.getWorld(this.getWorldId())!.getPlayers().filter((x) => this.isMember(x.xuid))
+  }
 
-    const currentRole = ROLE_HIERARCHY.indexOf(member.role);
-    if (currentRole <= 0) return { success: false, reason: "Member is already at the lowest role." };
-
-    const role = ROLE_HIERARCHY[currentRole - 1]!
-    return this.updateMemberRole(xuid, role);
+  public getInWorld(): Player[] {
+    return Server.instance.getWorld(this.getWorldId())!.getPlayers()
   }
 
   /**
@@ -273,6 +378,67 @@ class Island extends DataManager<IslandData, IslandDatabase> {
     return this.updateOne(updateDoc);
   }
 
+
+  /**
+   * @tab Permissions Methods
+   */
+
+  /**
+   * Adds a permission string to the island
+   * @param permission Permission string to add.
+   */
+  public async addCommandPermission(permission: string): Promise<OperationResult> {
+    if (this.hasCommandPermission(permission)) return { success: false, reason: "Permission is already granted." };
+    return this._addToArray('permissions', permission);
+  }
+
+  /**
+   * Removes a permission string from the island
+   * @param permission Permission string to remove.
+   */
+  public async removeCommandPermissions(permission: string): Promise<OperationResult> {
+    if (!this.hasCommandPermission(permission)) return { success: true };
+    return this._removeFromArrayByValue('permissions', permission);
+  }
+
+  /**
+   * Whether or not the island has a permission.
+   * @param permission Permission string to check.
+   */
+  public hasCommandPermission(permission: string): boolean {
+    return this.data.permissions.includes(permission);
+  }
+
+  /**
+   * @tab Perk Methods
+   */
+
+  /**
+   * Defines a perk as 'unlocked' for the island.
+   * @param id Perk ID to add.
+   */
+  public async addPerk(id: string): Promise<OperationResult> {
+    if (this.data.perks.includes(id)) return { success: false, reason: "Perk is already unlocked." };
+    return this._addToArray('perks', id);
+  }
+
+  /**
+   * Removes an unlocked perk from the island.
+   * @param id Perk ID to remove.
+   */
+  public async removePerk(id: string): Promise<OperationResult> {
+    if (!this.data.perks.includes(id)) return { success: true };
+    return this._removeFromArrayByValue('perks', id);
+  }
+
+  /**
+   * Whether or not the island has this perk unlocked.
+   * @param id Perk ID to check.
+   */
+  public hasPerk(id: string): boolean {
+    return this.data.perks.includes(id);
+  }
+
   /**
    * @tab Bank Methods
    */
@@ -310,7 +476,16 @@ class Island extends DataManager<IslandData, IslandDatabase> {
    * @param name The new name for the island.
    */
   public async setName(name: string): Promise<OperationResult> {
-    return this.updateOne({ $set: { name: name } });
+    const oldName = this.getName();
+    const result = await this.updateOne({ $set: { name: name } });
+
+    // Update cache
+    if (result.success && Island.cache.has(oldName)) {
+      Island.cache.delete(oldName);
+      Island.cache.set(name, this);
+    }
+
+    return result;
   }
 
   /**
@@ -326,7 +501,8 @@ class Island extends DataManager<IslandData, IslandDatabase> {
    * @param amount The number of points to add.
    */
   public async addPoints(amount: number): Promise<OperationResult> {
-    return this.updateOne({ $inc: { points: amount } });
+    await this.updateOne({ $inc: { points: amount } });
+    return this.updateLevel();
   }
 
   /**
@@ -336,15 +512,25 @@ class Island extends DataManager<IslandData, IslandDatabase> {
   public async removePoints(amount: number): Promise<OperationResult> {
     const currentPoints = this.getPoints();
     const change = Math.min(currentPoints, amount);
-    if (change <= 0) return { success: true };
-    return this.updateOne({ $inc: { points: -change } });
+    await this.updateOne({ $inc: { points: -change } });
+    return this.updateLevel();
   }
 
   /**
    * Sets the island's level to a specific value.
    * @param level The new level.
    */
-  public async setLevel(level: number): Promise<OperationResult> {
+  public async updateLevel(): Promise<OperationResult> {
+    const level = IslandLevel.fromPoints(this.data.points)
+    if (this.data.ceil < level) {
+      this.updateOne({ $set: { ceil: level } })
+      // Show level-up message.
+      const members = this.getMembersInWorld()
+      for (const member of members) {
+        member.onScreenDisplay.updateSubtitle(`§6${level - 1} §a-> §e${level}`)
+        member.onScreenDisplay.setTitle("§eIsland §aLevel Up!")
+      }
+    }
     return this.updateOne({ $set: { level: level } });
   }
 
@@ -383,8 +569,9 @@ class Island extends DataManager<IslandData, IslandDatabase> {
    * Adds a new member to the island.
    * @param member The member object to add.
    */
-  public async addMember(member: IslandMember): Promise<OperationResult> {
+  public async addMember(member: PlayerInfo): Promise<OperationResult> {
     if (this.isMember(member.xuid)) return { success: false, reason: "Player is already a member." };
+    this._addToArray('helpers', member);
     return this._addToArray('members', member);
   }
 
@@ -394,7 +581,72 @@ class Island extends DataManager<IslandData, IslandDatabase> {
    */
   public async removeMember(xuid: string): Promise<OperationResult> {
     if (!this.isMember(xuid)) return { success: true };
+    switch (this.getPlayerRole(xuid)) {
+      case "helper":
+        this._removeFromArrayByField('helpers', 'xuid', xuid);
+        break;
+      case "admin":
+        this._removeFromArrayByField('admins', 'xuid', xuid);
+        break;
+      case "coowner":
+        this._removeFromArrayByField('coowners', 'xuid', xuid);
+        break;
+    }
     return this._removeFromArrayByField('members', 'xuid', xuid);
+  }
+
+  /**
+   * Adds a new helper to the island.
+   * @param helper The helper object to add.
+   */
+  public async addHelper(helper: PlayerInfo): Promise<OperationResult> {
+    if (this.isHelper(helper.xuid)) return { success: false, reason: "Player is already a helper." };
+    return this._addToArray('helpers', helper)
+  }
+
+  /**
+   * Removes a helper from the island.
+   * @param xuid The XUID of the helper to add.
+   */
+  public async removeHelper(xuid: string): Promise<OperationResult> {
+    if (!this.isHelper(xuid)) return { success: true };
+    return this._removeFromArrayByField('helpers', 'xuid', xuid);
+  }
+
+  /**
+   * Adds a new admin to the island.
+   * @param member The member object to add.
+   */
+  public async addAdmin(member: PlayerInfo): Promise<OperationResult> {
+    if (this.isAdmin(member.xuid)) return { success: false, reason: "Player is already an admin." };
+    return this._addToArray('admins', member);
+  }
+
+  /**
+   * Removes an admin from the island.
+   * @param xuid The XUID of the admin to remove.
+   */
+  public async removeAdmin(xuid: string): Promise<OperationResult> {
+    if (!this.isAdmin(xuid)) return { success: true };
+    return this._removeFromArrayByField('admins', 'xuid', xuid);
+  }
+
+  /**
+   * Adds a new co-owner to the island.
+   * @param member The member object to add.
+   */
+  public async addCoOwner(member: PlayerInfo): Promise<OperationResult> {
+    if (this.data.coowners.some(c => c.xuid === member.xuid)) return { success: false, reason: "Player is already a co-owner." };
+    return this._addToArray('coowners', member);
+  }
+
+  /**
+   * Removes a co-owner from the island.
+   * @param xuid The XUID of the co-owner to remove.
+   */
+  public async removeCoOwner(xuid: string): Promise<OperationResult> {
+    if (!this.data.coowners.some(c => c.xuid === xuid)) return { success: true };
+    return this._removeFromArrayByField('coowners', 'xuid', xuid);
   }
 
   /**

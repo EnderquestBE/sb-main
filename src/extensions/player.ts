@@ -2,10 +2,12 @@
 import { Player } from "@serenityjs/core";
 import { PlayerSession } from "../Classes/Data/PlayerSession";
 import { PlayerDatabase } from "../Classes/Database/Collections/Player";
-import { OperationResult, PlayerData } from "../Types/types";
+import { OperationResult, PlayerData, RankInfo } from "../Types/types";
 import { ChatSource, DEFAULT_PLAYER_DATA, PERMISSION_INTEGER } from "../Configuration/config";
+import { PlayerRank, RANKS } from "../Configuration/Ranks/ranks";
 import { Island } from "../Classes/Data/Island";
 import { Setting } from "../Configuration/Settings/settings";
+import { PlayerInventory } from "./inventory";
 
 const sessionSymbol = Symbol("player-session");
 
@@ -22,13 +24,16 @@ declare module "@serenityjs/core" {
     getDataProperty(key: keyof PlayerData): any;
 
     // Chat
-    info(message: string, source?: ChatSource): void
-    warn(message: string, source?: ChatSource): void
-    error(message: string, source?: ChatSource): void
+    info(message: string, source?: keyof typeof ChatSource): void
+    warn(message: string, source?: keyof typeof ChatSource): void
+    error(message: string, source?: keyof typeof ChatSource): void
 
     // Permissions
     getPermission(): PERMISSION_INTEGER;
     setPermission(permission: PERMISSION_INTEGER): Promise<OperationResult>;
+
+    // Inventory
+    get inventory(): PlayerInventory
 
     // Balance
     getMoney(): number;
@@ -41,21 +46,23 @@ declare module "@serenityjs/core" {
     setXp(amount: number): Promise<OperationResult>;
 
     // Ranks & Customization
-    getRanks(): string[];
+    getRankIds(): string[];
     hasRank(rankId: string): boolean;
     addRank(rankId: string): Promise<OperationResult>;
     removeRank(rankId: string): Promise<OperationResult>;
-    getRank(): string;
+    getRank(): RankInfo;
     setRank(rankId: string): Promise<OperationResult>;
     getChatColor(): string;
     setChatColor(color: string): Promise<OperationResult>;
 
     // Island
-    getIsland(): Promise<Island | null>
+    getIsland(): Island | null;
+    getIslandAsync(): Promise<Island | null>
     getIslandName(): string;
     setIslandName(islandName: string): Promise<OperationResult>;
     isWorldIsland(): boolean;
-    getWorldIsland(): Promise<Island | null>
+    getWorldIsland(): Island | null;
+    getWorldIslandAsync(): Promise<Island | null>
 
     // Settings
     getSettings(): { [key in Setting]: string | boolean };
@@ -126,17 +133,24 @@ Player.prototype.getDataProperty = function (this: Player, key: keyof PlayerData
 }
 
 // Chat
-Player.prototype.info = function (this: Player, message: string, source: ChatSource = ChatSource.server): void {
-  this.sendMessage(`${source}§r ${message}`)
+Player.prototype.info = function (this: Player, message: string, source: keyof typeof ChatSource = "server"): void {
+  this.sendMessage(`${ChatSource[source]}§r ${message}`)
 }
 
-Player.prototype.warn = function (this: Player, message: string, source: ChatSource = ChatSource.server): void {
-  this.sendMessage(`${source}§r §e[Warning] §6${message}`)
+Player.prototype.warn = function (this: Player, message: string, source: keyof typeof ChatSource = "server"): void {
+  this.sendMessage(`${ChatSource[source]}§r §e[Warning] §6${message}`)
 }
 
-Player.prototype.error = function (this: Player, message: string, source: ChatSource = ChatSource.server): void {
-  this.sendMessage(`${source}§r §4[Error] §c${message}`)
+Player.prototype.error = function (this: Player, message: string, source: keyof typeof ChatSource = "server"): void {
+  this.sendMessage(`${ChatSource[source]}§r §4[Error] §c${message}`)
 }
+
+// Inventory
+Object.defineProperty(Player.prototype, "inventory", {
+  get: function (this: Player): PlayerInventory {
+    return new PlayerInventory(this);
+  },
+});
 
 // Permissions
 Player.prototype.getPermission = function (this: Player): PERMISSION_INTEGER {
@@ -186,7 +200,8 @@ Player.prototype.removeXp = async function (this: Player, amount: number): Promi
   if (!session) return PlayerExtension['NO_SESSION_RESULT'];
   if (amount <= 0) return { success: false, reason: "Amount must be a positive number." };
   if (this.getXp() < amount) return { success: false, reason: "Insufficient XP." };
-  this.setExperience(this.getExperience() - amount)
+  //@ts-ignore
+  this.removeExperience(amount)
   return session.removeXp(amount);
 }
 Player.prototype.setXp = async function (this: Player, amount: number): Promise<OperationResult> {
@@ -196,29 +211,29 @@ Player.prototype.setXp = async function (this: Player, amount: number): Promise<
 }
 
 // Ranks & Customization
-Player.prototype.getRanks = function (this: Player): string[] {
+Player.prototype.getRankIds = function (this: Player): string[] {
   const session = PlayerExtension.getSession(this);
-  return session ? session.getRanks() : [];
+  return session ? session.getRankIds() : [];
 }
-Player.prototype.hasRank = function (this: Player, rankId: string): boolean {
+Player.prototype.hasRank = function (this: Player, rankId: keyof typeof PlayerRank): boolean {
   const session = PlayerExtension.getSession(this);
   return session ? session.hasRank(rankId) : false;
 }
-Player.prototype.addRank = async function (this: Player, rankId: string): Promise<OperationResult> {
+Player.prototype.addRank = async function (this: Player, rankId: keyof typeof PlayerRank): Promise<OperationResult> {
   const session = PlayerExtension.getSession(this);
   if (!session) return PlayerExtension['NO_SESSION_RESULT'];
   return session.addRank(rankId);
 }
-Player.prototype.removeRank = async function (this: Player, rankId: string): Promise<OperationResult> {
+Player.prototype.removeRank = async function (this: Player, rankId: keyof typeof PlayerRank): Promise<OperationResult> {
   const session = PlayerExtension.getSession(this);
   if (!session) return PlayerExtension['NO_SESSION_RESULT'];
   return session.removeRank(rankId);
 }
-Player.prototype.getRank = function (this: Player): string {
+Player.prototype.getRank = function (this: Player): RankInfo {
   const session = PlayerExtension.getSession(this);
-  return session ? session.getRank() : "default";
+  return session ? session.getRank() : RANKS.get("GUEST")!;
 }
-Player.prototype.setRank = async function (this: Player, rankId: string): Promise<OperationResult> {
+Player.prototype.setRank = async function (this: Player, rankId: keyof typeof PlayerRank): Promise<OperationResult> {
   const session = PlayerExtension.getSession(this);
   if (!session) return PlayerExtension['NO_SESSION_RESULT'];
   return session.setRank(rankId);
@@ -234,9 +249,13 @@ Player.prototype.setChatColor = async function (this: Player, color: string): Pr
 }
 
 // Island
-Player.prototype.getIsland = async function (this: Player): Promise<Island | null> {
+Player.prototype.getIsland = function (this: Player): Island | null {
   const session = PlayerExtension.getSession(this)
-  return session ? await session.getIsland() : null
+  return session ? session.getIsland() : null
+}
+Player.prototype.getIslandAsync = async function (this: Player): Promise<Island | null> {
+  const session = PlayerExtension.getSession(this)
+  return session ? await session.getIslandAsync() : null
 }
 Player.prototype.getIslandName = function (this: Player): string {
   const session = PlayerExtension.getSession(this);
@@ -250,7 +269,12 @@ Player.prototype.setIslandName = async function (this: Player, islandName: strin
 Player.prototype.isWorldIsland = function (this: Player): boolean {
   return this.world.identifier.startsWith("sb_")
 }
-Player.prototype.getWorldIsland = function (this: Player): Promise<Island | null> {
+Player.prototype.getWorldIsland = function (this: Player): Island | null {
+  if (!this.isWorldIsland()) return null;
+  const islandName = this.world.identifier.substring(3);
+  return Island.loadSync(islandName);
+}
+Player.prototype.getWorldIslandAsync = function (this: Player): Promise<Island | null> {
   return Island.load(this.world.identifier.substring(3))
 }
 

@@ -1,8 +1,10 @@
-enum IslandRole {
-  Member = "MEMBER",
-  Helper = "HELPER",
-  Admin = "ADMIN",
-  CoOwner = "CO-OWNER"
-}
+type IslandRole = "helper" | "admin" | "owner" | "coowner"
 
-export { IslandRole }
+const IslandRoleHierarchy: Record<IslandRole, number> = {
+    helper: 0,
+    admin: 1,
+    coowner: 2,
+    owner: 3,
+};
+
+export { IslandRole, IslandRoleHierarchy }
