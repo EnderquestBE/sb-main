@@ -6,6 +6,7 @@ import { Scorebar } from "./Handlers/Scorebar/scorebar";
 import { Warp } from "./Classes/Warp/warp";
 import { BoundaryHandler } from "./Handlers/Boundary/handler";
 import { MainShop } from "./Configuration/Shop/Main/main";
+import { VendorDatabase } from "./Classes/Database/Collections/Vendor";
 
 class Server {
     public static readonly logger: Logger = new Logger("Enderquest", LoggerColors.LightPurple);
@@ -110,7 +111,8 @@ class Server {
     private static async registerDBService() {
         await this.database.connect();
         new PlayerDatabase(this.database);
-        new IslandDatabase(this.database)
+        new IslandDatabase(this.database);
+        new VendorDatabase(this.database);
     }
 }
 

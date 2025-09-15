@@ -11,6 +11,7 @@ import "./General/sellhandxp"
 import "./General/balance"
 import "./General/balancexp"
 import "./General/pay"
+import "./General/vendor"
 
 /** Island Commands */
 import "./Island/island"

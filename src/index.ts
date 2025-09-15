@@ -6,6 +6,10 @@ import { Scorebar } from "./Handlers/Scorebar/scorebar";
 import { ChatHandler } from "./Handlers/Chat/handler";
 import { PermissionsHandler } from "./Handlers/Permissions/handler";
 import { FlowingLiquidBlockTrait, LiquidInteractionBlockTrait, SourceLiquidBlockTrait } from "./BlockTraits/traits";
+import { NametagHandler } from "./Handlers/Nametag/handler";
+import { PointHandler } from "./Handlers/Point/handler";
+import { SignHandler } from "./Handlers/Sign/handler";
+import { PlayerEnum } from "./Classes/Command/Enums/player";
 import { Server } from "./server";
 
 class EnderquestPlugin extends Plugin implements PluginEvents {
@@ -13,7 +17,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
   private readonly blockTraits = [
     LiquidInteractionBlockTrait,
     SourceLiquidBlockTrait,
-    FlowingLiquidBlockTrait,
+    FlowingLiquidBlockTrait
   ];
 
   public constructor() {
@@ -116,6 +120,11 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
   public afterPlayerPlaceBlock(event: PlayerPlaceBlockSignal): void {
     PointHandler.onPlace(event)
   }
+
+  public afterPlayerInteractWithBlock(event: PlayerInteractWithBlockSignal): void {
+    SignHandler.onInteract(event)
+  }
+
 }
 
 export default new EnderquestPlugin();
@@ -126,7 +135,4 @@ export default new EnderquestPlugin();
 
 import "./Commands/commands"
 import "./BlockTraits/Liquid/liquidInteraction"
-import { NametagHandler } from "./Handlers/Nametag/handler";
-import { PointHandler } from "./Handlers/Point/handler";
-import { PlayerEnum } from "./Classes/Command/Enums/player";
 

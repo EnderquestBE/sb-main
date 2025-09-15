@@ -8,10 +8,14 @@ import {
 import { BlockPointValues } from "../../Configuration/Point/point";
 import { Utils } from "../../Utils/utils";
 import { Enchantment, Gamemode } from "@serenityjs/protocol";
+import { Logger, LoggerColors } from "@serenityjs/logger";
+import { BlockOverrideMap } from "../../Configuration/Block/overrides";
 
 type ValueOrRange = number | [number, number];
 
 class PointHandler {
+    private static readonly logger = new Logger("Break Handler", LoggerColors.MaterialRedstone)
+
     private static readonly INV_FULL = "§cYour inventory is full!";
     private static readonly fortunePool = new Map<number, number[]>();
 
@@ -44,10 +48,15 @@ class PointHandler {
         const info = BlockPointValues[block.identifier]?.break;
         if (!info) {
             if (player.gamemode === Gamemode.Survival) {
-                const item = new ItemStack(block.identifier, { stackSize: 1 });
-                const inventory = player.getTrait(EntityInventoryTrait);
-                if (!inventory.container.addItem(item)) {
-                    player.info(this.INV_FULL);
+                try {
+                    const id = BlockOverrideMap.get(block.identifier) ?? block.identifier
+                    const item = new ItemStack(id, { stackSize: 1 });
+                    const inventory = player.getTrait(EntityInventoryTrait);
+                    if (!inventory.container.addItem(item)) {
+                        player.info(this.INV_FULL);
+                    }
+                } catch (e: any) {
+                    this.logger.warn(`§cFailed to add item: §b${block.identifier}\n§cTo player: §e${player.username}\n§r${e.message}`)
                 }
             }
             return;
