@@ -4,9 +4,9 @@ import {
   BlockTrait,
   TraitOnTickDetails,
 } from "@serenityjs/core";
-import { Direction, LiquidType } from "../../Types/types";
-import { FlowingBlockMap, FlowSpeed, LiquidBlockMap } from "../../Configuration/Block/liquid";
-import { FlowingLiquidType } from "../../Types/Block/liquid";
+import { Direction, LiquidType } from "../../../Types/types";
+import { FlowingBlockMap, FlowSpeed, LiquidBlockMap } from "../../../Configuration/Block/liquid";
+import { FlowingLiquidType } from "../../../Types/Block/liquid";
 
 const directions: Direction[] = ["north", "west", "east", "south"];
 

@@ -4,9 +4,9 @@ import {
   BlockTrait,
   TraitOnTickDetails,
 } from "@serenityjs/core";
-import { Direction } from "../../Types/types";
-import { FlowSpeed, SourceBlockMap } from "../../Configuration/Block/liquid";
-import { FlowingLiquidType } from "../../Types/Block/liquid";
+import { Direction } from "../../../Types/types";
+import { FlowSpeed, SourceBlockMap } from "../../../Configuration/Block/liquid";
+import { FlowingLiquidType } from "../../../Types/Block/liquid";
 
 class FlowingLiquidBlockTrait extends BlockTrait {
   public static readonly identifier = "minecraft:flowing_liquid";

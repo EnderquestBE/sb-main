@@ -53,9 +53,8 @@ class Scorebar {
         }
         addScore(` §d➲ §aGT: §f${player.username}`);
         addScore(` §d➲ §ePlayers: §f${world.getPlayers().length}§7/§f${20}`);
-        //@ts-ignore
-        addScore(` §d➲ §3Ping: §f${player.connection.ping}ms`);
         addScore(` §d➲ §6Money: §f$${Utils.formatInt(player.getMoney())}`);
+        addScore(` §d➲ §cXP: §f${Utils.formatInt(player.getTotalXp())}`);
         if (player.isWorldIsland() && island) {
             addScore(`§b❖ Island Stats ❖`);
             addScore(` §b匚 §eIsland: §f${island.getName()}`);
@@ -68,6 +67,8 @@ class Scorebar {
             addScore(` §b匚 §dSize: §f${island.getSize()} Blocks`);
             addScore(`§d➤ §7Try using §6/is help§7.`);
         } else {
+            //@ts-ignore
+            addScore(` §d➲ §3Ping: §f${player.connection.ping}ms`);
             addScore(`§b❖ Your Stats ❖`);
             addScore(` §b匚 §aRank: ${player.getRank().displayName}`);
             if (island) {

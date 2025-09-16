@@ -4,11 +4,11 @@ import {
   BlockTrait,
   TraitOnTickDetails,
 } from "@serenityjs/core";
-import { WeightedSelector } from "../../Utils/weightedSelection";
-import { Direction } from "../../Types/types";
-import { SourceBlockMap } from "../../Configuration/Block/liquid";
-import { FlowingLiquidType } from "../../Types/Block/liquid";
-import { OreGeneratorDistribution } from "../../Configuration/Block/oreDistribution";
+import { WeightedSelector } from "../../../Utils/weightedSelection";
+import { Direction } from "../../../Types/types";
+import { SourceBlockMap } from "../../../Configuration/Block/liquid";
+import { FlowingLiquidType } from "../../../Types/Block/liquid";
+import { OreGeneratorDistribution } from "../../../Configuration/Block/oreDistribution";
 
 const OreSelector = new WeightedSelector<BlockIdentifier>(
   OreGeneratorDistribution

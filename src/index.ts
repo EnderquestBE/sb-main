@@ -5,7 +5,11 @@ import { IslandGenerator } from "./Classes/Island/generator";
 import { Scorebar } from "./Handlers/Scorebar/scorebar";
 import { ChatHandler } from "./Handlers/Chat/handler";
 import { PermissionsHandler } from "./Handlers/Permissions/handler";
-import { FlowingLiquidBlockTrait, LiquidInteractionBlockTrait, SourceLiquidBlockTrait } from "./BlockTraits/traits";
+import { FlowingLiquidBlockTrait, LiquidInteractionBlockTrait, SourceLiquidBlockTrait, BlockFurnaceTrait } from "./Traits/Block/traits";
+import { NametagHandler } from "./Handlers/Nametag/handler";
+import { PointHandler } from "./Handlers/Point/handler";
+import { SignHandler } from "./Handlers/Sign/handler";
+import { PlayerEnum } from "./Classes/Command/Enums/player";
 import { Server } from "./server";
 
 class EnderquestPlugin extends Plugin implements PluginEvents {
@@ -14,7 +18,11 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     LiquidInteractionBlockTrait,
     SourceLiquidBlockTrait,
     FlowingLiquidBlockTrait,
+    BlockFurnaceTrait
   ];
+
+  private readonly itemTraits = [
+  ]
 
   public constructor() {
     super("enderquest", "0.0.1+indev");
@@ -29,6 +37,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     // Register island world generator.
     this.serenity.registerGenerator(IslandGenerator)
     IslandGenerator.registerStructure(this.serenity.getWorld())
+    PointHandler.initialize()
     this.logger.info("§5Ender§dquest§r has started.");
   }
 
@@ -41,11 +50,14 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     Server.onPlayerJoin(player)
     ChatHandler.onJoin(player, this.serenity)
     NametagHandler.format(player)
+    PlayerEnum.options.push(player.username)
   }
 
   public onPlayerLeave({ player }: PlayerLeaveSignal): void {
     Server.onPlayerLeave(player)
     ChatHandler.onLeave(player, this.serenity)
+    if (PlayerEnum.options.some((x) => x === player.username))
+      PlayerEnum.options.splice(PlayerEnum.options.indexOf(player.username), 1)
   }
 
   public onWorldInitialize({ world }: WorldInitializeSignal): void {
@@ -54,17 +66,27 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
       for (let trait of this.blockTraits) {
         world.blockPalette.registerTrait(trait);
       }
+      for (let trait of this.itemTraits) {
+        world.itemPalette.registerTrait(trait)
+      }
     }
   }
 
-  public onEntityDimensionChange?({ entity, fromDimension, toDimension }: EntityDimensionChangeSignal): void {
-    if (!entity.isPlayer()) return
+  public beforeEntityDimensionChange({ entity, fromDimension }: EntityDimensionChangeSignal): boolean {
+    if (!entity.isPlayer()) return true
     if (entity.getSetting("hudMode") === "scoreboard") {
       const objective = fromDimension.world.scoreboard.getObjective(`sbs_${entity.xuid}`)
       if (objective) {
         fromDimension.world.scoreboard.removeObjective(objective)
         fromDimension.world.scoreboard.clearObjectiveAtDisplaySlot(DisplaySlotType.Sidebar, { player: entity, objective: objective, sortOrder: ObjectiveSortOrder.Ascending })
       }
+    }
+    return true
+  }
+
+  public afterEntityDimensionChange({ entity, toDimension }: EntityDimensionChangeSignal): void {
+    if (!entity.isPlayer()) return
+    if (entity.getSetting("hudMode") === "scoreboard") {
       Scorebar.initialize(entity, toDimension.world)
     }
   }
@@ -105,6 +127,11 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
   public afterPlayerPlaceBlock(event: PlayerPlaceBlockSignal): void {
     PointHandler.onPlace(event)
   }
+
+  public afterPlayerInteractWithBlock(event: PlayerInteractWithBlockSignal): void {
+    SignHandler.onInteract(event)
+  }
+
 }
 
 export default new EnderquestPlugin();
@@ -114,6 +141,4 @@ export default new EnderquestPlugin();
  */
 
 import "./Commands/commands"
-import "./BlockTraits/Liquid/liquidInteraction"
-import { NametagHandler } from "./Handlers/Nametag/handler";
-import { PointHandler } from "./Handlers/Point/handler";
+import "./Traits/Block/Liquid/liquidInteraction"

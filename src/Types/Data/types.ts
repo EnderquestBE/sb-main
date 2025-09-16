@@ -11,3 +11,6 @@ export * from "./operationResult"
 /* Player */
 export * from "./Player/player"
 export * from "./Player/info"
+
+/* Vendor */
+export * from "./Vendor/vendor"
