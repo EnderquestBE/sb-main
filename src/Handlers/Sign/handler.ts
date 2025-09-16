@@ -1,4 +1,4 @@
-import { Block, BlockSignTrait, ItemType, Player, PlayerInteractWithBlockSignal } from "@serenityjs/core";
+import { Block, BlockSignTrait, ItemType, Player, PlayerCommandExecutorTrait, PlayerInteractWithBlockSignal } from "@serenityjs/core";
 import { Vendor } from "../../Classes/Data/Vendor";
 import { ByteTag, CompoundTag, IntTag, StringTag } from "@serenityjs/nbt";
 import { Utils } from "../../Utils/utils";
@@ -10,20 +10,45 @@ class SignHandler {
     public static onInteract({ source, block }: PlayerInteractWithBlockSignal) {
         const sign = block.getTrait(BlockSignTrait);
         if (!sign) return false
-        const text = sign.getFrontText().split("\n")
+        const text = sign.getFrontText()
+        const parts = text.split("\n")
 
         const nbt = block.nbt
 
         // Sign is already initialized as a special type.
         if (nbt.get<ByteTag>("Locked")) {
+            const command = nbt.get<StringTag>("Command")
+            if (command) {
+                source.executeCommand(command.valueOf())
+            }
             if (nbt.get<CompoundTag>("Shop")) {
                 this.interactShop(source, block)
             }
             // Check if the sign should be initialized.
         } else {
-            switch (text[0]!.toLowerCase()) {
+            // Command sign functionality.
+            if (text.startsWith("/")) {
+                try {
+                    if (!source.getTrait(PlayerCommandExecutorTrait).hasCommand(text.split(" ")[0]!.slice(1))) {
+                        source.error("Unknown command executed. Please make sure the command exists, and that you have permission to use it.")
+                        return
+                    }
+                    source.executeCommand(text)
+                    block.nbt.set("Locked", new ByteTag(1, "Locked"));
+                    block.nbt.set("Command", new StringTag(text, "Command"))
+                    const frontText = block.nbt.get<CompoundTag>("FrontText")!;
+                    frontText.set("Text", new StringTag(`§a${text}`, "Text"));
+                    block.nbt.update()
+                    source.info("§eSign command created successfully!")
+                } catch (e) {
+                    source.error("Failed to create sign command.")
+                    return
+                }
+            }
+            // Other functionality.
+            else switch (parts[0]!.toLowerCase()) {
                 case "[shop]":
-                    this.initializeShop(source, block, text)
+                    this.initializeShop(source, block, parts)
                     break
             }
         }
