@@ -1,6 +1,5 @@
 import { Block, BlockSignTrait, ItemType, Player, PlayerInteractWithBlockSignal } from "@serenityjs/core";
 import { Vendor } from "../../Classes/Data/Vendor";
-import { Server } from "../../server";
 import { ByteTag, CompoundTag, IntTag, StringTag } from "@serenityjs/nbt";
 import { Utils } from "../../Utils/utils";
 import { PlayerDatabase, PlayerSession } from "../../Classes/classes";
@@ -90,16 +89,16 @@ class SignHandler {
             return
         }
 
-        player.sendMessage("Shop Owner: " + shopData.get<CompoundTag>("ShopOwner")!.get<StringTag>("Username"))
-        player.sendMessage("Shop Item: " + shopData.get<StringTag>("Item"))
-        player.sendMessage("Shop Amount: " + shopData.get<IntTag>("Amount"))
-        player.sendMessage("Shop Price: " + shopData.get<IntTag>("Price"))
-
         const vendorData = shopData.get<CompoundTag>("ShopOwner")!
         const vendorUser = { username: vendorData.get<StringTag>("Username")?.valueOf()!, xuid: vendorData.get<StringTag>("XUID")?.valueOf()! }
         const vendorItem = shopData.get<StringTag>("Item")?.valueOf()!
         const vendorAmount = shopData.get<IntTag>("Amount")?.valueOf()!
         const vendorPrice = shopData.get<IntTag>("Price")?.valueOf()!
+
+        if (vendorUser.xuid === player.xuid) {
+            player.error("You cannot buy from your own shop!")
+            return
+        }
 
         const confirmationKey = `${player.xuid}-${block.position.x}-${block.position.y}-${block.position.z}`;
         const lastPurchase = purchaseConfirmation.get(confirmationKey);

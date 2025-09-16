@@ -3,6 +3,10 @@ import { BlockIdentifier, ItemIdentifier } from "@serenityjs/core";
 const BlockOverrides: Map<BlockIdentifier[], ItemIdentifier> = new Map([[
     [BlockIdentifier.StandingSign, BlockIdentifier.WallSign],
     ItemIdentifier.OakSign
+],
+[
+    [BlockIdentifier.LitFurnace],
+    ItemIdentifier.Furnace
 ]])
 
 const BlockOverrideMap: Map<BlockIdentifier, ItemIdentifier> = new Map()

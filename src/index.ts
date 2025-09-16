@@ -5,7 +5,7 @@ import { IslandGenerator } from "./Classes/Island/generator";
 import { Scorebar } from "./Handlers/Scorebar/scorebar";
 import { ChatHandler } from "./Handlers/Chat/handler";
 import { PermissionsHandler } from "./Handlers/Permissions/handler";
-import { FlowingLiquidBlockTrait, LiquidInteractionBlockTrait, SourceLiquidBlockTrait } from "./BlockTraits/traits";
+import { FlowingLiquidBlockTrait, LiquidInteractionBlockTrait, SourceLiquidBlockTrait, BlockFurnaceTrait } from "./Traits/Block/traits";
 import { NametagHandler } from "./Handlers/Nametag/handler";
 import { PointHandler } from "./Handlers/Point/handler";
 import { SignHandler } from "./Handlers/Sign/handler";
@@ -17,8 +17,12 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
   private readonly blockTraits = [
     LiquidInteractionBlockTrait,
     SourceLiquidBlockTrait,
-    FlowingLiquidBlockTrait
+    FlowingLiquidBlockTrait,
+    BlockFurnaceTrait
   ];
+
+  private readonly itemTraits = [
+  ]
 
   public constructor() {
     super("enderquest", "0.0.1+indev");
@@ -61,6 +65,9 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     if (world.identifier.startsWith("sb_")) {
       for (let trait of this.blockTraits) {
         world.blockPalette.registerTrait(trait);
+      }
+      for (let trait of this.itemTraits) {
+        world.itemPalette.registerTrait(trait)
       }
     }
   }
@@ -134,5 +141,4 @@ export default new EnderquestPlugin();
  */
 
 import "./Commands/commands"
-import "./BlockTraits/Liquid/liquidInteraction"
-
+import "./Traits/Block/Liquid/liquidInteraction"
