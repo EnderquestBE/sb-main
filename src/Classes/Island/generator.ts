@@ -1,6 +1,7 @@
 import { BinaryStream } from "@serenityjs/binarystream";
-import { Chunk, Structure, TerrainGenerator, World } from "@serenityjs/core";
+import { Block, BlockIdentifier, BlockInventoryTrait, BlockPermutation, Chunk, ItemIdentifier, ItemStack, Structure, TerrainGenerator, World } from "@serenityjs/core";
 import { CompoundTag } from "@serenityjs/nbt";
+import { Vector3f } from "@serenityjs/protocol";
 import { readFileSync } from "fs";
 
 class IslandGenerator extends TerrainGenerator {
@@ -21,12 +22,32 @@ class IslandGenerator extends TerrainGenerator {
         const z = chunk.z
 
         // Create an island in the center chunk.
-        if (x === 3 && z === 3)
+        if (x === 3 && z === 3) {
             await this.dimension.placeStructure(
                 IslandGenerator.islandStructure,
                 { x: -5, y: 0, z: -1 },
                 { placeAirBlocks: false }
             );
+            this.starterChest()
+        }
+    }
+
+    public async starterChest() {
+        const chestBlock = this.dimension.getBlock(new Vector3f(-2, 3, 3))
+        chestBlock.setPermutation(BlockPermutation.resolve(BlockIdentifier.Chest))
+        chestBlock.setState("minecraft:cardinal_direction", "east")
+        const inv = (chestBlock.getTrait(BlockInventoryTrait) ?? chestBlock.addTrait(BlockInventoryTrait)).container
+        inv.addItem(new ItemStack("minecraft:water", { stackSize: 1 }))
+        inv.addItem(new ItemStack("minecraft:lava", { stackSize: 1 }))
+        inv.addItem(new ItemStack(ItemIdentifier.BeetrootSeeds, { stackSize: 2 }))
+        inv.addItem(new ItemStack(ItemIdentifier.WheatSeeds, { stackSize: 5 }))
+        inv.addItem(new ItemStack(ItemIdentifier.PumpkinSeeds, { stackSize: 1 }))
+        inv.addItem(new ItemStack(ItemIdentifier.Carrot, { stackSize: 1 }))
+        inv.addItem(new ItemStack(ItemIdentifier.Potato, { stackSize: 1 }))
+        inv.addItem(new ItemStack(ItemIdentifier.Cactus, { stackSize: 1 }))
+        inv.addItem(new ItemStack(ItemIdentifier.MelonBlock, { stackSize: 1 }))
+        inv.addItem(new ItemStack(ItemIdentifier.Bread, { stackSize: 9 }))
+        inv.addItem(new ItemStack(ItemIdentifier.Bone, { stackSize: 1 }))
     }
 
     public static registerStructure(world: World) {
