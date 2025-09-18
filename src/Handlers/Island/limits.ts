@@ -47,15 +47,27 @@ class IslandLimitUnlocks {
         return this.limits[limit]
     }
 
-    public static update(island: Island) {
+    public static update(island: Island, expansion: boolean = false) {
+        const level = island.getLevel()
+        if (level < island.getLevelCeil()) return
         const limits = Object.entries(this.limits)
-        for (const [key, limit] of limits) {
-            const level = island.getLevel()
-            if (level < island.getLevelCeil()) continue
-            if (limit.interval && level % limit.interval !== 0) continue
-            if (limit.maximum && island.getLimit(key as IslandLimitType).max >= limit.maximum) continue
-            island.increaseMaxLimit(key as IslandLimitType, limit.amount)
-        }
+        const changes: { [key in IslandLimitType]?: number } = {}
+        if (expansion)
+            for (const [key, limit] of limits) {
+                if (limit.interval) continue
+                if (limit.maximum && island.getLimit(key as IslandLimitType).max >= limit.maximum) continue
+                island.increaseMaxLimit(key as IslandLimitType, limit.amount)
+                changes[key as IslandLimitType] = limit.amount
+            }
+        else
+            for (const [key, limit] of limits) {
+                if (!limit.interval) continue
+                if (level % limit.interval !== 0) continue
+                if (limit.maximum && island.getLimit(key as IslandLimitType).max >= limit.maximum) continue
+                island.increaseMaxLimit(key as IslandLimitType, limit.amount)
+                changes[key as IslandLimitType] = limit.amount
+            }
+        return changes
     }
 }
 

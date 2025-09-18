@@ -7,6 +7,8 @@ import { BankLogEntry, IslandData, IslandHome, IslandLimit, IslandLimitType, Isl
 import { Server } from "../../server";
 import { Logger, LoggerColors } from "@serenityjs/logger";
 import { IslandLevel } from "../classes";
+import { IslandLimitUnlocks } from "../../Handlers/Island/limits";
+import { IslandPerkUnlocks } from "../../Handlers/Island/perks";
 
 /**
  * @name Island
@@ -389,7 +391,7 @@ class Island extends DataManager<IslandData, IslandDatabase> {
    */
   public async addCommandPermission(permission: string): Promise<OperationResult> {
     if (this.hasCommandPermission(permission)) return { success: false, reason: "Permission is already granted." };
-    return this._addToArray('permissions', permission);
+    return this._addToArray('commandPermissions', permission);
   }
 
   /**
@@ -398,7 +400,7 @@ class Island extends DataManager<IslandData, IslandDatabase> {
    */
   public async removeCommandPermissions(permission: string): Promise<OperationResult> {
     if (!this.hasCommandPermission(permission)) return { success: true };
-    return this._removeFromArrayByValue('permissions', permission);
+    return this._removeFromArrayByValue('commandPermissions', permission);
   }
 
   /**
@@ -406,7 +408,7 @@ class Island extends DataManager<IslandData, IslandDatabase> {
    * @param permission Permission string to check.
    */
   public hasCommandPermission(permission: string): boolean {
-    return this.data.permissions.includes(permission);
+    return this.data.commandPermissions.includes(permission);
   }
 
   /**
@@ -497,6 +499,31 @@ class Island extends DataManager<IslandData, IslandDatabase> {
   }
 
   /**
+ * Sets the size radius limit of the island.
+ * @param amount The amount to set the size to.
+ */
+  public async setSize(amount: number): Promise<OperationResult> {
+    return this.updateOne({ $set: { size: amount } });
+  }
+
+  /**
+   * Decreases the size radius limit of the island.
+   * @param amount The amount to decrease by.
+   */
+  public async decreaseSize(amount: number): Promise<OperationResult> {
+    const change = Math.min(amount, 10);
+    return this.updateOne({ $inc: { size: -change } });
+  }
+
+  /**
+ * Increases the size radius limit of the island.
+ * @param amount The amount to increase by.
+ */
+  public async increaseSize(amount: number): Promise<OperationResult> {
+    return this.updateOne({ $inc: { size: amount } });
+  }
+
+  /**
    * Adds points to the island's total.
    * @param amount The number of points to add.
    */
@@ -530,6 +557,8 @@ class Island extends DataManager<IslandData, IslandDatabase> {
         member.onScreenDisplay.updateSubtitle(`§6${level - 1} §a-> §e${level}`)
         member.onScreenDisplay.setTitle("§eIsland §aLevel Up!")
       }
+      IslandLimitUnlocks.update(this)
+      IslandPerkUnlocks.update(this)
     }
     return this.updateOne({ $set: { level: level } });
   }
@@ -547,8 +576,8 @@ class Island extends DataManager<IslandData, IslandDatabase> {
    * @param amount The amount to deposit.
    * @param message A message describing the transaction.
    */
-  public async depositToBank(amount: number, message: string): Promise<OperationResult> {
-    if (amount <= 0) return { success: false, reason: "Deposit amount must be positive." };
+  public async depositToBank(amount: number, message: string = "No reason provided."): Promise<OperationResult> {
+    if (amount <= 0) return { success: false, reason: "Invalid amount to deposit." };
     await this.logBankTransaction({ action: 'deposit', amount, message });
     return this.updateOne({ $inc: { bank: amount } });
   }
@@ -558,9 +587,9 @@ class Island extends DataManager<IslandData, IslandDatabase> {
    * @param amount The amount to withdraw.
    * @param message A message describing the transaction.
    */
-  public async withdrawFromBank(amount: number, message: string): Promise<OperationResult> {
-    if (amount <= 0) return { success: false, reason: "Withdrawal amount must be positive." };
-    if (this.data.bank < amount) return { success: false, reason: "Insufficient funds." };
+  public async withdrawFromBank(amount: number, message: string = "No reason provided."): Promise<OperationResult> {
+    if (amount <= 0) return { success: false, reason: "Invalid amount to withdraw." };
+    if (this.data.bank < amount) return { success: false, reason: "Insufficient funds to withdraw." };
     await this.logBankTransaction({ action: 'withdraw', amount, message });
     return this.updateOne({ $inc: { bank: -amount } });
   }
