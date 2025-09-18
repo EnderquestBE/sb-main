@@ -22,6 +22,14 @@ const BlockPointValues: { [key in BlockIdentifier]?: BlockBreak } = {
         break: { points: [0, 3], xp: [3, 7], item: ItemIdentifier.Emerald, applyFortune: true }
     },
 
+    /* Crops */
+    [BlockIdentifier.Pumpkin]: {
+        break: { points: 5 }
+    },
+    [BlockIdentifier.MelonBlock]: {
+        break: { points: 7, item: ItemIdentifier.MelonSlice, amount: [3, 7], applyFortune: true }
+    },
+
     /* Ore Blocks */
     [BlockIdentifier.CoalBlock]: {
         place: { points: 10 },
@@ -55,7 +63,6 @@ const BlockPointValues: { [key in BlockIdentifier]?: BlockBreak } = {
         place: { points: 18 },
         break: { points: 18 }
     }
-
 }
 
 export { BlockPointValues };

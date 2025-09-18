@@ -35,6 +35,25 @@ class PlayerInventory {
     }
   };
 
+  public readonly giveItems = (...items: [item: string, amount: number][]) => {
+    const { container } = this.player.getTrait(EntityInventoryTrait);
+    for (const [item, amount] of items as [string, number][]) {
+      const itemStack = new ItemStack(item)
+      let giveCount = amount;
+      while (giveCount > 0) {
+        if (giveCount > 64) {
+          itemStack.stackSize = 64;
+          container.addItem(itemStack);
+          giveCount -= 64;
+        } else {
+          itemStack.stackSize = giveCount;
+          container.addItem(itemStack);
+          break;
+        }
+      }
+    }
+  };
+
   public readonly addItem = (item: ItemStack) => {
     const { container } = this.player.getTrait(EntityInventoryTrait);
     container.addItem(item)

@@ -13,7 +13,7 @@ class SignHandler {
         const text = sign.getFrontText()
         const parts = text.split("\n")
 
-        const nbt = block.nbt
+        const nbt = block.getStorage()
 
         // Sign is already initialized as a special type.
         if (nbt.get<ByteTag>("Locked")) {
@@ -34,11 +34,11 @@ class SignHandler {
                         return
                     }
                     source.executeCommand(text)
-                    block.nbt.set("Locked", new ByteTag(1, "Locked"));
-                    block.nbt.set("Command", new StringTag(text, "Command"))
-                    const frontText = block.nbt.get<CompoundTag>("FrontText")!;
+                    block.getStorage().set("Locked", new ByteTag(1, "Locked"));
+                    block.getStorage().set("Command", new StringTag(text, "Command"))
+                    const frontText = block.getStorage().get<CompoundTag>("FrontText")!;
                     frontText.set("Text", new StringTag(`§a${text}`, "Text"));
-                    block.nbt.update()
+                    block.sendStorageUpdate()
                     source.info("§eSign command created successfully!")
                 } catch (e) {
                     source.error("Failed to create sign command.")
@@ -75,7 +75,7 @@ class SignHandler {
         }
 
         // Lock sign so it cannot be modified.
-        block.nbt.set("Locked", new ByteTag(1, "Locked"));
+        block.getStorage().set("Locked", new ByteTag(1, "Locked"));
 
         // Set shop NBT to sign.
         const shopTag = new CompoundTag("Shop")
@@ -90,7 +90,7 @@ class SignHandler {
         shopTag.push(new IntTag(price, "Price"))
 
         // Format sign text.
-        const frontText = block.nbt.get<CompoundTag>("FrontText")!;
+        const frontText = block.getStorage().get<CompoundTag>("FrontText")!;
         frontText.set("Text", new StringTag([
             `§b${player.username}`,
             `§ePrice: §6$${price}`,
@@ -98,17 +98,17 @@ class SignHandler {
             `§eAmount: §7x§c${amount}`
         ].join("\n"), "Text"));
 
-        block.nbt.set("Shop", shopTag)
+        block.getStorage().set("Shop", shopTag)
 
         // Update NBT.
-        block.nbt.update();
+        block.sendStorageUpdate()
 
         // Send success.
         player.info(`§eShop creation successful! Selling §a${Utils.formatString(itemId)} §7x§c${amount} for §6$${price}§e.`)
     }
 
     public static async interactShop(player: Player, block: Block) {
-        const shopData = block.nbt.get<CompoundTag>("Shop")
+        const shopData = block.getStorage().get<CompoundTag>("Shop")
         if (!shopData) {
             player.error("Failed to interact with shop.")
             return
