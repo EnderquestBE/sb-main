@@ -17,6 +17,7 @@ const IslandVisitCommand = new CommandOverload({
         if (!name.result) return player.error("Expected island name to teleport to.")
         const island = Island.loadSync(name.result)
         if (!island) return player.error("Island is offline or does not exist.")
+        if (island.isBanned(player.xuid)) return player.error("You are banned from this island.")
         if (island.getStatus() === false && !island.isMember(player.xuid)) return player.error("This island is locked to visitors.")
         island.teleport(player)
         player.info(

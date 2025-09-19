@@ -1,5 +1,5 @@
 import { CustomEnum, Entity, StringEnum } from "@serenityjs/core";
-import { CommandOverload, Island } from "../../Classes/classes";
+import { CommandOverload, Island, IslandLevel } from "../../Classes/classes";
 
 class IslandStatsEnum extends CustomEnum {
     public static readonly identifier = "islandStats";
@@ -27,11 +27,13 @@ const IslandStatsCommand = new CommandOverload({
                 else return player.error("No island was found that exists with that name.")
             }
             const { crops, spawners, hoppers, members, coowners, homes, bank } = island.getLimits()
+            const totalPoints = island.getPoints();
+            const currentLevel = IslandLevel.fromPoints(totalPoints);
             const values: string[] = [
                 `§fIsland: §e${island.getName()}`,
                 `§fOwner: §6${island.getOwner().username}   §fFounder: §d${island.getFounder().username}`,
                 `§fStatus: ${island.isOnline() ? (island.getStatus() ? "§aUnlocked" : "§cLocked") : "§cOffline"}`,
-                `§fLevel: §e${island.getLevel()} §fPoints: §a${0}§7/§2${150}`,
+                `§fLevel: §e${island.getLevel()} §fPoints: §a${totalPoints - IslandLevel.toPoints(currentLevel - 1)}§7/§2${150 * currentLevel}`,
                 `§fBank: §e$${island.getBankBalance()}§7/§6$${bank.max}`,
                 `§fCo-Owners§8[§6${island.getCoOwners().length}§7/§c${coowners.max}§8]§f: §9${island.getCoOwners().map(x => x.username).join(", ")}`,
                 `§fAdmins§8[§6${island.getAdmins().length}§8]§f: §c${island.getAdmins().map(x => x.username).join(", ")}`,

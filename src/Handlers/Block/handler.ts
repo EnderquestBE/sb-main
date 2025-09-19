@@ -1,4 +1,5 @@
 import {
+    BlockIdentifier,
     EntityInventoryTrait,
     ItemStack,
     ItemStackEnchantableTrait,
@@ -13,35 +14,28 @@ import { BlockOverrideMap } from "../../Configuration/Block/overrides";
 
 type ValueOrRange = number | [number, number];
 
-class PointHandler {
-    private static readonly logger = new Logger("Break Handler", LoggerColors.MaterialRedstone)
+class BlockHandler {
+    private static readonly logger = new Logger("Block Handler", LoggerColors.MaterialRedstone)
 
+    // These blocks are ignored by the block handler.
+    private static readonly exemptBlocks = new Set([
+        BlockIdentifier.Beetroot,
+        BlockIdentifier.Wheat,
+        BlockIdentifier.Carrots,
+        BlockIdentifier.Potatoes,
+        BlockIdentifier.OakLeaves
+    ])
+
+    // Message to show if the player's inventory is full.
     private static readonly INV_FULL = "§cYour inventory is full!";
+
+    // Cached fortune multiplier values.
     private static readonly fortunePool = new Map<number, number[]>();
 
-    private static _cacheFortunePool(level: number) {
-        const pool: number[] = [1, 1];
-        for (let i = 2; i <= level + 1; i++) {
-            pool.push(i);
-        }
-        this.fortunePool.set(level, pool);
-    }
+    public static onBreak({ player, block, itemStack }: PlayerBreakBlockSignal): void {
+        // If block has a custom implementation, return.
+        if (this.exemptBlocks.has(block.identifier)) return;
 
-    private static _processRange(value: ValueOrRange, addFunction: (amount: number) => void): number | null {
-        if (typeof value === "number") {
-            addFunction(value);
-            return value
-        } else {
-            const randomValue = Utils.randomInt(value[0], value[1]);
-            if (randomValue > 0) {
-                addFunction(randomValue);
-                return randomValue
-            }
-        }
-        return null
-    }
-
-    public static onBreak({ player, block }: PlayerBreakBlockSignal): void {
         const island = player.getWorldIsland();
         if (!island) return;
 
@@ -66,24 +60,24 @@ class PointHandler {
         let itemId = info.item ?? block.identifier;
         let itemCount = info.amount ? Utils.randomInt(info.amount[0], info.amount[1]) : 1;
 
-        // Handle point data.
+        // Handle island point data.
         if (info.points) {
             this._processRange(info.points, (val) => island.addPoints(val));
         }
+        // Give player XP.
         if (info.xp) {
             const value = (this._processRange(info.xp, (val) => player.addXp(val)))
             if (value && player.getSetting("showXpOverlay")) player.onScreenDisplay.setActionBar(`§l§e>> §aCollected §d${value} §6XP §e<<§r`)
         }
+        // Handle fortune enchantment if applicable.
         if (info.applyFortune) {
-            const heldItem = player.getHeldItem();
-            if (heldItem) {
-                const enchantable = heldItem.getTrait(ItemStackEnchantableTrait)
+            if (itemStack) {
+                const enchantable = itemStack.getTrait(ItemStackEnchantableTrait)
                 if (enchantable) {
                     const fortuneLevel = enchantable.getEnchantment(Enchantment.Fortune)
 
                     if (fortuneLevel && fortuneLevel > 0) {
-                        const pool = this.fortunePool.get(fortuneLevel)!
-                        const multiplier = pool[Utils.randomInt(0, pool.length - 1)]!
+                        const multiplier = this.calculateFortuneMultiplier(fortuneLevel);
                         itemCount *= multiplier;
                     }
                 }
@@ -111,6 +105,50 @@ class PointHandler {
         }
     }
 
+    /**
+     * @ HELPER FUNCTIONS
+     */
+
+    /**
+     * Cache fortune pool values.
+     */
+    private static _cacheFortunePool(level: number) {
+        const pool: number[] = [1, 1];
+        for (let i = 2; i <= level + 1; i++) {
+            pool.push(i);
+        }
+        this.fortunePool.set(level, pool);
+    }
+
+    /**
+     * Process array type number ranges.
+     */
+    private static _processRange(value: ValueOrRange, addFunction: (amount: number) => void): number | null {
+        if (typeof value === "number") {
+            addFunction(value);
+            return value
+        } else {
+            const randomValue = Utils.randomInt(value[0], value[1]);
+            if (randomValue > 0) {
+                addFunction(randomValue);
+                return randomValue
+            }
+        }
+        return null
+    }
+
+    /**
+     * Calculates item multiplier from fortune level.
+     */
+    public static calculateFortuneMultiplier(level: number) {
+        const pool = this.fortunePool.get(level)!
+        const multiplier = pool[Utils.randomInt(0, pool.length - 1)]!
+        return multiplier;
+    }
+
+    /**
+     * Run on server start to initialize values.
+     */
     public static initialize() {
         for (let i = 0; i < 10;) {
             this._cacheFortunePool(++i)
@@ -118,4 +156,4 @@ class PointHandler {
     }
 }
 
-export { PointHandler };
+export { BlockHandler };

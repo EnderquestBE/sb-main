@@ -1,10 +1,10 @@
+import { Player } from "@serenityjs/core"
 import { Island } from "../../Classes/classes"
 
 interface IslandPerkType {
     id: string, // The ID associated with the perk.
     name: string, // The display name for the perk.
     unlock: {
-        function?: (island: Island) => void // Callback to execute when the perk is unlocked.
         permissions?: string[] // Permission strings to grant when the perk is unlocked.
     },
     level: number // Level at which the perk is unlocked for the island.
@@ -12,29 +12,32 @@ interface IslandPerkType {
 
 class IslandPerkUnlocks {
     private static perks: {
-        fly: IslandPerkType
+        flight: IslandPerkType
     } = {
-            fly: {
+            flight: {
                 id: "flight",
                 name: "Flight",
                 unlock: {
-                    function: (island) => {
-                        island.addCommandPermission("enderquest.fly")
-                    }
+                    permissions: ["enderquest.fly"]
                 },
                 level: 100
             }
         }
 
-    private static onUnlock(island: Island, perk: IslandPerkType) {
-        if (perk.unlock.function) {
-            perk.unlock.function(island)
-        }
-        if (perk.unlock.permissions) {
-            for (let permission of perk.unlock.permissions) {
-                island.addCommandPermission(permission)
+    public static applyPermissions(player: Player, island: Island) {
+        const islandPerks = island.getPerks();
+        for (const perkId of islandPerks) {
+            const perk = this.perks[perkId as keyof typeof this.perks];
+            if (perk?.unlock.permissions) {
+                for (const permission of perk.unlock.permissions) {
+                    player.addPermission(permission);
+                }
             }
         }
+    }
+
+    public static getAll(): IslandPerkType[] {
+        return Object.values(this.perks)
     }
 
     public static get(id: keyof typeof IslandPerkUnlocks.perks): IslandPerkType | undefined {
@@ -42,14 +45,18 @@ class IslandPerkUnlocks {
     }
 
     public static update(island: Island) {
-        const perks = Object.values(this.perks)
-        for (const perk of perks) {
-            if (island.hasPerk(perk.id)) continue
-            const level = island.getLevel()
-            if (level >= perk.level) {
-                island.addPerk(perk.id)
+        const currentCeil = island.getLevelCeil();
+        for (const perk of Object.values(this.perks)) {
+            if (island.hasPerk(perk.id)) continue;
+
+            if (currentCeil >= perk.level) {
+                island.addPerk(perk.id).then(() => {
+                    const onlineOwners = island.getOnlineOwners();
+                    for (const owner of onlineOwners) {
+                        this.applyPermissions(owner, island);
+                    }
+                });
             }
-            this.onUnlock(island, perk)
         }
     }
 }

@@ -110,7 +110,7 @@ class BlockFurnaceTrait extends BlockTrait {
         if (!smeltingItem || !origin?.isPlayer()) return
         const player = origin
         const smeltedItem = ItemSmeltableMap.get(smeltingItem.item as ItemIdentifier)!
-        const finishedItems = Math.floor(((Date.now() / 1000) - smeltingItem.start) / 10)
+        const finishedItems = Math.min(Math.floor(((Date.now() / 1000) - smeltingItem.start) / 10), smeltingItem.amount)
         if (finishedItems > 0) player.inventory.giveItem(smeltedItem, finishedItems)
         const leftoverItems = smeltingItem.amount - finishedItems
         if (leftoverItems > 0) player.inventory.giveItem(smeltingItem.item, leftoverItems)
@@ -118,7 +118,7 @@ class BlockFurnaceTrait extends BlockTrait {
     }
 
     public getItemSmelting() {
-        const smeltTag = this.block.nbt.get<CompoundTag>("Smelt")
+        const smeltTag = this.block.getStorage().get<CompoundTag>("Smelt")
         if (smeltTag) {
             const itemTag = smeltTag.get<StringTag>("Item")
             const amountTag = smeltTag.get<IntTag>("Amount")
@@ -133,9 +133,9 @@ class BlockFurnaceTrait extends BlockTrait {
 
     public setItemSmelting(item: ItemStack) {
         this.transform(true)
-        const existingSmeltTag = this.block.nbt.get<CompoundTag>("Smelt")
+        const existingSmeltTag = this.block.getStorage().get<CompoundTag>("Smelt")
         if (existingSmeltTag) {
-            this.block.nbt.delete("Smelt")
+            this.block.getStorage().delete("Smelt")
         }
 
         const smeltTag = new CompoundTag()
@@ -147,13 +147,13 @@ class BlockFurnaceTrait extends BlockTrait {
         smeltTag.push(amountTag)
         smeltTag.push(startTag)
 
-        this.block.nbt.set("Smelt", smeltTag)
+        this.block.getStorage().set("Smelt", smeltTag)
 
-        this.block.nbt.update();
+        this.block.sendStorageUpdate()
     }
 
     public clearItemSmelting() {
-        this.block.nbt.clear()
+        this.block.getStorage().clear()
         this.transform(false)
     }
 

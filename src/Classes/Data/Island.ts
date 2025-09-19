@@ -6,7 +6,9 @@ import { IslandDatabase } from "../Database/Collections/Island";
 import { BankLogEntry, IslandData, IslandHome, IslandLimit, IslandLimitType, IslandRole, IslandRoleHierarchy, OperationResult, PlayerInfo } from "../../Types/types";
 import { Server } from "../../server";
 import { Logger, LoggerColors } from "@serenityjs/logger";
-import { IslandLevel } from "../classes";
+import { IslandLevel, PlayerDatabase } from "../classes";
+import { IslandLimitUnlocks } from "../../Handlers/Island/limits";
+import { IslandPerkUnlocks } from "../../Handlers/Island/perks";
 
 /**
  * @name Island
@@ -124,7 +126,7 @@ class Island extends DataManager<IslandData, IslandDatabase> {
   public getLevelCeil(): number { return this.data.ceil }
   public getSize(): number { return this.data.size; }
   public getHeight(): number { return this.data.height; }
-  public getSpawn(): Vector3f { return this.data.spawn; }
+  public getSpawn(): Vector3f { return new Vector3f(this.data.spawn.x, this.data.spawn.y, this.data.spawn.z); }
   public getWorldId(): string { return this.data.world; }
   public getWorld(): World | null { return Server.instance.getWorld(this.getWorldId()); }
   public getMembers(): PlayerInfo[] { return this.data.members; }
@@ -153,7 +155,7 @@ class Island extends DataManager<IslandData, IslandDatabase> {
 
   // Warp
   public teleport(player: Player) {
-    player.teleport(this.data.spawn, Server.instance.getWorld(this.getWorldId())!.getDimension())
+    player.teleport(this.getSpawn(), Server.instance.getWorld(this.getWorldId())!.getDimension())
   }
 
   /**
@@ -258,6 +260,18 @@ class Island extends DataManager<IslandData, IslandDatabase> {
     else if (this.data.admins.some(m => m.xuid === xuid)) return "admin"
     else if (this.data.coowners.some(m => m.xuid === xuid)) return "coowner"
     else if (this.data.owner.xuid === xuid) return "owner"
+    return undefined
+  }
+
+  /**
+   * Gets a rank-based permission level for comparing the abilities of island members.
+   * @param xuid The XUID of the member.
+   */
+  public getPlayerRoleLevel(xuid: string): number | undefined {
+    if (this.data.helpers.some(m => m.xuid === xuid)) return IslandRoleHierarchy.helper
+    else if (this.data.admins.some(m => m.xuid === xuid)) return IslandRoleHierarchy.admin
+    else if (this.data.coowners.some(m => m.xuid === xuid)) return IslandRoleHierarchy.coowner
+    else if (this.data.owner.xuid === xuid) return IslandRoleHierarchy.owner
     return undefined
   }
 
@@ -389,7 +403,7 @@ class Island extends DataManager<IslandData, IslandDatabase> {
    */
   public async addCommandPermission(permission: string): Promise<OperationResult> {
     if (this.hasCommandPermission(permission)) return { success: false, reason: "Permission is already granted." };
-    return this._addToArray('permissions', permission);
+    return this._addToArray('commandPermissions', permission);
   }
 
   /**
@@ -398,7 +412,7 @@ class Island extends DataManager<IslandData, IslandDatabase> {
    */
   public async removeCommandPermissions(permission: string): Promise<OperationResult> {
     if (!this.hasCommandPermission(permission)) return { success: true };
-    return this._removeFromArrayByValue('permissions', permission);
+    return this._removeFromArrayByValue('commandPermissions', permission);
   }
 
   /**
@@ -406,7 +420,7 @@ class Island extends DataManager<IslandData, IslandDatabase> {
    * @param permission Permission string to check.
    */
   public hasCommandPermission(permission: string): boolean {
-    return this.data.permissions.includes(permission);
+    return this.data.commandPermissions.includes(permission);
   }
 
   /**
@@ -472,15 +486,55 @@ class Island extends DataManager<IslandData, IslandDatabase> {
    * @tab Setter Methods
    */
   /**
-   * Sets a new name for the island.
-   * @param name The new name for the island.
-   */
+    * Sets a new name for the island.
+    * @param name The new name for the island.
+  */
   public async setName(name: string): Promise<OperationResult> {
     const oldName = this.getName();
-    const result = await this.updateOne({ $set: { name: name } });
+    const newWorldId = `sb_${name}`;
 
-    // Update cache
-    if (result.success && Island.cache.has(oldName)) {
+    // Double check to make sure the world doesn't already exist.
+    if (Server.instance.getWorld(newWorldId)) {
+      return { success: false, reason: "An island with a similar name already exists, causing a world conflict." };
+    }
+
+    // Change world identifier.
+    const world = Server.instance.getWorld(this.getWorldId())
+    if (!world) {
+      return { success: false, reason: "Could not find the island's world to rename." };
+    }
+
+    const result = await this.updateOne({ $set: { name: name, world: newWorldId } });
+    if (!result.success) {
+      return { success: false, reason: "Failed to update island name in the database." };
+    }
+
+    //@ts-ignore
+    world.identifier = newWorldId
+    world.properties.identifier = newWorldId
+    Server.instance.worlds.delete(oldName)
+    Server.instance.worlds.set(newWorldId, world)
+
+    // Update local data.
+    this.data.name = name;
+    this.data.world = newWorldId
+
+    // Update island name property for island owner player data.
+    const owners = [this.data.owner, ...this.data.coowners, ...this.data.admins, ...this.data.helpers, ...this.data.members];
+    for (const owner of owners) {
+      // Check if the player is online to update their live session data.
+      const player = Server.instance.getPlayerByXuid(owner.xuid);
+      if (player && player.session()) {
+        // Update online players using their session.
+        await player.setIslandName(name);
+      } else {
+        // Update offline players using database directly.
+        await PlayerDatabase.instance.updateOne(owner.xuid, { $set: { island: name } });
+      }
+    }
+
+    // Update island cache.
+    if (Island.cache.has(oldName)) {
       Island.cache.delete(oldName);
       Island.cache.set(name, this);
     }
@@ -493,7 +547,33 @@ class Island extends DataManager<IslandData, IslandDatabase> {
    * @param spawn The new spawn location.
    */
   public async setSpawn(spawn: Vector3f): Promise<OperationResult> {
-    return this.updateOne({ $set: { spawn: spawn } });
+    const location = { x: spawn.x, y: spawn.y, z: spawn.z }
+    return this.updateOne({ $set: { spawn: location } });
+  }
+
+  /**
+ * Sets the size radius limit of the island.
+ * @param amount The amount to set the size to.
+ */
+  public async setSize(amount: number): Promise<OperationResult> {
+    return this.updateOne({ $set: { size: amount } });
+  }
+
+  /**
+   * Decreases the size radius limit of the island.
+   * @param amount The amount to decrease by.
+   */
+  public async decreaseSize(amount: number): Promise<OperationResult> {
+    const change = Math.min(amount, 10);
+    return this.updateOne({ $inc: { size: -change } });
+  }
+
+  /**
+ * Increases the size radius limit of the island.
+ * @param amount The amount to increase by.
+ */
+  public async increaseSize(amount: number): Promise<OperationResult> {
+    return this.updateOne({ $inc: { size: amount } });
   }
 
   /**
@@ -521,17 +601,37 @@ class Island extends DataManager<IslandData, IslandDatabase> {
    * @param level The new level.
    */
   public async updateLevel(): Promise<OperationResult> {
-    const level = IslandLevel.fromPoints(this.data.points)
-    if (this.data.ceil < level) {
-      this.updateOne({ $set: { ceil: level } })
-      // Show level-up message.
-      const members = this.getMembersInWorld()
-      for (const member of members) {
-        member.onScreenDisplay.updateSubtitle(`§6${level - 1} §a-> §e${level}`)
-        member.onScreenDisplay.setTitle("§eIsland §aLevel Up!")
-      }
+    const newLevel = IslandLevel.fromPoints(this.data.points);
+    const oldCeil = this.data.ceil;
+
+    if (this.data.level === newLevel) {
+      return { success: true };
     }
-    return this.updateOne({ $set: { level: level } });
+
+    // If the island level has changed.
+
+    const levelUpdateResult = await this.updateOne({ $set: { level: newLevel } });
+    if (!levelUpdateResult.success) {
+      return levelUpdateResult;
+    }
+
+    // Show levelup message.
+    if (oldCeil < newLevel) {
+      const members = this.getMembersInWorld();
+      for (const member of members) {
+        member.onScreenDisplay.updateSubtitle(`§6${oldCeil} §a-> §e${newLevel}`);
+        member.onScreenDisplay.setTitle("§eIsland Level Up!");
+      }
+
+      // Process unlocks for the new levels gained.
+      IslandLimitUnlocks.update(this, false, oldCeil);
+      IslandPerkUnlocks.update(this);
+
+      // Finally, update the ceiling in the database. This happens after unlocks.
+      await this.updateOne({ $set: { ceil: newLevel } });
+    }
+
+    return levelUpdateResult;
   }
 
   /**
@@ -547,8 +647,8 @@ class Island extends DataManager<IslandData, IslandDatabase> {
    * @param amount The amount to deposit.
    * @param message A message describing the transaction.
    */
-  public async depositToBank(amount: number, message: string): Promise<OperationResult> {
-    if (amount <= 0) return { success: false, reason: "Deposit amount must be positive." };
+  public async depositToBank(amount: number, message: string = "No reason provided."): Promise<OperationResult> {
+    if (amount <= 0) return { success: false, reason: "Invalid amount to deposit." };
     await this.logBankTransaction({ action: 'deposit', amount, message });
     return this.updateOne({ $inc: { bank: amount } });
   }
@@ -558,9 +658,9 @@ class Island extends DataManager<IslandData, IslandDatabase> {
    * @param amount The amount to withdraw.
    * @param message A message describing the transaction.
    */
-  public async withdrawFromBank(amount: number, message: string): Promise<OperationResult> {
-    if (amount <= 0) return { success: false, reason: "Withdrawal amount must be positive." };
-    if (this.data.bank < amount) return { success: false, reason: "Insufficient funds." };
+  public async withdrawFromBank(amount: number, message: string = "No reason provided."): Promise<OperationResult> {
+    if (amount <= 0) return { success: false, reason: "Invalid amount to withdraw." };
+    if (this.data.bank < amount) return { success: false, reason: "Insufficient funds to withdraw." };
     await this.logBankTransaction({ action: 'withdraw', amount, message });
     return this.updateOne({ $inc: { bank: -amount } });
   }

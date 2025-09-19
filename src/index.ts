@@ -1,13 +1,14 @@
 import { Plugin, PluginEvents } from "@serenityjs/plugins";
-import { EntityDimensionChangeSignal, EntityHitSignal, PlayerBreakBlockSignal, PlayerChatSignal, PlayerContainerInteractionSignal, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerPlaceBlockSignal, WorldInitializeSignal } from "@serenityjs/core";
+import { EntityDimensionChangeSignal, EntityHitSignal, PlayerBreakBlockSignal, PlayerChatSignal, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerOpenedContainerSignal, PlayerPlaceBlockSignal, WorldInitializeSignal } from "@serenityjs/core";
 import { ContainerType, DisplaySlotType, ObjectiveSortOrder } from "@serenityjs/protocol";
 import { IslandGenerator } from "./Classes/Island/generator";
 import { Scorebar } from "./Handlers/Scorebar/scorebar";
 import { ChatHandler } from "./Handlers/Chat/handler";
 import { PermissionsHandler } from "./Handlers/Permissions/handler";
-import { FlowingLiquidBlockTrait, LiquidInteractionBlockTrait, SourceLiquidBlockTrait, BlockFurnaceTrait } from "./Traits/Block/traits";
+import { FlowingLiquidBlockTrait, LiquidInteractionBlockTrait, SourceLiquidBlockTrait, BlockFurnaceTrait, BlockCropTrait, BlockMultiBlockCropTrait, BlockStemCropTrait } from "./Traits/Block/traits";
+import { ItemSeedTrait, ItemHoeTrait } from "./Traits/Item/traits";
 import { NametagHandler } from "./Handlers/Nametag/handler";
-import { PointHandler } from "./Handlers/Point/handler";
+import { BlockHandler } from "./Handlers/Block/handler";
 import { SignHandler } from "./Handlers/Sign/handler";
 import { PlayerEnum } from "./Classes/Command/Enums/player";
 import { Server } from "./server";
@@ -18,10 +19,15 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     LiquidInteractionBlockTrait,
     SourceLiquidBlockTrait,
     FlowingLiquidBlockTrait,
-    BlockFurnaceTrait
+    BlockFurnaceTrait,
+    BlockCropTrait,
+    BlockMultiBlockCropTrait,
+    BlockStemCropTrait
   ];
 
   private readonly itemTraits = [
+    ItemSeedTrait,
+    ItemHoeTrait
   ]
 
   public constructor() {
@@ -37,7 +43,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     // Register island world generator.
     this.serenity.registerGenerator(IslandGenerator)
     IslandGenerator.registerStructure(this.serenity.getWorld())
-    PointHandler.initialize()
+    BlockHandler.initialize()
     this.logger.info("§5Ender§dquest§r has started.");
   }
 
@@ -109,8 +115,8 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     return PermissionsHandler.onInteract(event)
   }
 
-  public beforePlayerContainerInteraction(event: PlayerContainerInteractionSignal): boolean {
-    if (event.sourceContainer.type === ContainerType.Inventory) return true
+  public beforePlayerOpenedContainer(event: PlayerOpenedContainerSignal): boolean {
+    if (event.container.type === ContainerType.Inventory) return true
     return PermissionsHandler.onUseContainer(event)
   }
 
@@ -121,11 +127,11 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
   // Point events.
 
   public onPlayerBreakBlock(event: PlayerBreakBlockSignal): void {
-    PointHandler.onBreak(event)
+    BlockHandler.onBreak(event)
   }
 
   public afterPlayerPlaceBlock(event: PlayerPlaceBlockSignal): void {
-    PointHandler.onPlace(event)
+    BlockHandler.onPlace(event)
   }
 
   public afterPlayerInteractWithBlock(event: PlayerInteractWithBlockSignal): void {
@@ -142,3 +148,4 @@ export default new EnderquestPlugin();
 
 import "./Commands/commands"
 import "./Traits/Block/Liquid/liquidInteraction"
+
