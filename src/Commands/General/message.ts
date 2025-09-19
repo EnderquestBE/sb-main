@@ -18,9 +18,9 @@ new CommandBuilder("message", "Sends a private message to a player.")
                 return origin.error("Player is offline or does not exist.");
             }
 
-            /*if (target.xuid === origin.xuid) {
+            if (target.xuid === origin.xuid) {
                 return origin.error("You cannot message yourself.");
-            }*/
+            }
 
             ChatHandler.privateMessage(origin, target, message.result!);
         })

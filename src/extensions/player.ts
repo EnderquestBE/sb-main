@@ -52,6 +52,8 @@ declare module "@serenityjs/core" {
     removeRank(rankId: string): Promise<OperationResult>;
     getRank(): RankInfo;
     setRank(rankId: string): Promise<OperationResult>;
+    getChatSize(): boolean;
+    setChatSize(large: boolean): Promise<OperationResult>;
     getChatColor(): string;
     setChatColor(color: string): Promise<OperationResult>;
 
@@ -236,7 +238,35 @@ Player.prototype.getRank = function (this: Player): RankInfo {
 Player.prototype.setRank = async function (this: Player, rankId: keyof typeof PlayerRank): Promise<OperationResult> {
   const session = PlayerExtension.getSession(this);
   if (!session) return PlayerExtension['NO_SESSION_RESULT'];
-  return session.setRank(rankId);
+  return session.setRank(rankId).then((result) => {
+    const oldRankInfo = this.getRank()
+    const newRankInfo = RANKS.get(rankId)!
+
+    // Remove permissions from the old rank
+    if (oldRankInfo) {
+      for (const permission of oldRankInfo.permissions) {
+        this.removePermission(permission);
+      }
+    }
+
+    // Add permissions from the new rank
+    if (newRankInfo) {
+      this.setChatColor(newRankInfo.color)
+      for (const permission of newRankInfo.permissions) {
+        this.addPermission(permission);
+      }
+    }
+    return result
+  })
+}
+Player.prototype.getChatSize = function (this: Player): boolean {
+  const session = PlayerExtension.getSession(this);
+  return session ? session.getChatSize() : DEFAULT_PLAYER_DATA.chatSize
+}
+Player.prototype.setChatSize = async function (this: Player, large: boolean): Promise<OperationResult> {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return PlayerExtension['NO_SESSION_RESULT'];
+  return session.setChatSize(large);
 }
 Player.prototype.getChatColor = function (this: Player): string {
   const session = PlayerExtension.getSession(this);

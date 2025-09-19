@@ -34,6 +34,10 @@ interface PlayerData {
    */
   chatColor: string
   /**
+   * The size of the player's chat messages.
+   */
+  chatSize: boolean
+  /**
    * The island UUID the player currently belongs to.
    */
   island: string

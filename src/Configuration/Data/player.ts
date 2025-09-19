@@ -13,7 +13,8 @@ const DEFAULT_PLAYER_DATA: PlayerData = {
     },
     ranks: [PlayerRank.GUEST],
     rank: PlayerRank.GUEST,
-    chatColor: "white",
+    chatColor: "White",
+    chatSize: false,
     island: "",
     settings: {
         hudMode: "scoreboard",

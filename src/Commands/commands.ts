@@ -2,6 +2,7 @@
 import "./Admin/data"
 import "./Admin/resetdb"
 import "./Admin/cgive"
+import "./Admin/rank"
 
 /** General Commands */
 import "./General/settings"
@@ -20,3 +21,4 @@ import "./Island/island"
 
 /** Rank Commands */
 import "./Rank/fly"
+import "./Rank/chatsize"

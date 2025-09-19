@@ -70,6 +70,7 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
   public getXp(): number { return this.data.balance.xp; }
   public getRankIds(): string[] { return this.data.ranks; }
   public getRank(): RankInfo { return RANKS.get(this.data.rank as PlayerRank)!; }
+  public getChatSize(): boolean { return this.data.chatSize }
   public getChatColor(): string { return this.data.chatColor }
   public getIslandName(): string { return this.data.island; }
   public getIsland(): Island | null { return Island.loadSync(this.data.island) }
@@ -210,6 +211,14 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
   public async setRank(rankId: keyof typeof PlayerRank): Promise<OperationResult> {
     if (!this.hasRank(rankId)) return { success: false, reason: "Player does not own this rank." };
     return this.updateOne({ $set: { rank: rankId } });
+  }
+
+  /**
+   * Sets the player's chat size preference.
+   * @param large True for large chat, false for small chat.
+   */
+  public async setChatSize(large: boolean): Promise<OperationResult> {
+    return this.updateOne({ $set: { chatSize: large } });
   }
 
   /**

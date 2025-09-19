@@ -1,5 +1,6 @@
 import { Player, PlayerChatSignal, Serenity } from "@serenityjs/core";
 import { Filter, Island } from "../../Classes/classes";
+import { Color } from "../../Types/types";
 
 class ChatHandler {
     private static readonly lastConversationMap = new Map<string, string>();
@@ -49,7 +50,7 @@ class ChatHandler {
     }
 
     private static format(player: Player, island: Island | null, message: string) {
-        return `§f➙ ${island ? `§7~§f${island.getLevel()}§7~ §f*${island.getData().owner.xuid === player.xuid ? "*" : ""} §5${island.getName()} ` : ""}§7[${player.getRank().displayName}§7] §a${player.username} §7» §f${message}`
+        return `${player.getChatSize() ? "" : "§f➙ "}${island ? `§7~§f${island.getLevel()}§7~ §f*${island.getData().owner.xuid === player.xuid ? "*" : ""} §5${island.getName()} ` : ""}§7[${player.getRank().displayName}§7] §a${player.username} §7» ${Color[player.getChatColor() as keyof typeof Color]}${message}`
     }
 }
 
