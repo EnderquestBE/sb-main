@@ -47,27 +47,38 @@ class IslandLimitUnlocks {
         return this.limits[limit]
     }
 
-    public static update(island: Island, expansion: boolean = false) {
-        const level = island.getLevel()
-        if (level < island.getLevelCeil()) return
-        const limits = Object.entries(this.limits)
-        const changes: { [key in IslandLimitType]?: number } = {}
-        if (expansion)
+    public static update(island: Island, expansion: boolean = false, previousCeil?: number) {
+        const oldCeil = previousCeil ?? island.getLevelCeil();
+        const newLevel = island.getLevel();
+
+        const limits = Object.entries(this.limits);
+        const changes: { [key in IslandLimitType]?: number } = {};
+
+        if (expansion) {
             for (const [key, limit] of limits) {
-                if (limit.interval) continue
-                if (limit.maximum && island.getLimit(key as IslandLimitType).max >= limit.maximum) continue
-                island.increaseMaxLimit(key as IslandLimitType, limit.amount)
-                changes[key as IslandLimitType] = limit.amount
+                if (limit.interval) continue;
+                if (limit.maximum && island.getLimit(key as IslandLimitType).max >= limit.maximum) continue;
+                island.increaseMaxLimit(key as IslandLimitType, limit.amount);
+                changes[key as IslandLimitType] = limit.amount;
             }
-        else
-            for (const [key, limit] of limits) {
-                if (!limit.interval) continue
-                if (level % limit.interval !== 0) continue
-                if (limit.maximum && island.getLimit(key as IslandLimitType).max >= limit.maximum) continue
-                island.increaseMaxLimit(key as IslandLimitType, limit.amount)
-                changes[key as IslandLimitType] = limit.amount
+        } else {
+            // If the island level has changed.
+            if (newLevel <= oldCeil) return {};
+
+            for (let levelToCheck = oldCeil + 1; levelToCheck <= newLevel; levelToCheck++) {
+                for (const [key, limit] of limits) {
+                    if (!limit.interval) continue;
+                    if (levelToCheck % limit.interval === 0) {
+                        const limitType = key as IslandLimitType;
+                        if (limit.maximum && island.getLimit(limitType).max >= limit.maximum) continue;
+
+                        island.increaseMaxLimit(limitType, limit.amount);
+                        changes[limitType] = (changes[limitType] || 0) + limit.amount;
+                    }
+                }
             }
-        return changes
+        }
+        return changes;
     }
 }
 

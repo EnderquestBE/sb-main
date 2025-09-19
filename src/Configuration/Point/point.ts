@@ -62,6 +62,13 @@ const BlockPointValues: { [key in BlockIdentifier]?: BlockBreak } = {
     [BlockIdentifier.Bedrock]: {
         place: { points: 18 },
         break: { points: 18 }
+    },
+    [BlockIdentifier.LimeShulkerBox]: {
+        place: { points: 500 }
+    },
+    [BlockIdentifier.YellowShulkerBox]: {
+        place: { points: 50000 },
+        break: { points: -50000 }
     }
 }
 

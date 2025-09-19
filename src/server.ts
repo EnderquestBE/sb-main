@@ -7,6 +7,7 @@ import { Warp } from "./Classes/Warp/warp";
 import { BoundaryHandler } from "./Handlers/Boundary/handler";
 import { MainShop } from "./Configuration/Shop/Main/main";
 import { VendorDatabase } from "./Classes/Database/Collections/Vendor";
+import { IslandPerkUnlocks } from "./Handlers/Island/perks";
 
 class Server {
     public static readonly logger: Logger = new Logger("Enderquest", LoggerColors.LightPurple);
@@ -69,6 +70,7 @@ class Server {
                     LevelDBProvider.loadWorld(this.instance, island.getWorldId())
                 }
                 */
+                if (island.isOwner(player.xuid)) IslandPerkUnlocks.applyPermissions(player, island);
                 this.logger.info(`Loaded island §e${islandName}§r into cache for ${player.username}.`);
             } else {
                 this.logger.error(`§cFailed to load island data for ${player.username}.`)
@@ -93,7 +95,7 @@ class Server {
                         const players = world.getPlayers()
                         for (const survivor of players) {
                             Warp.to(survivor, "SPAWN")
-                            survivor.info(`§cThe island §e${island.getName()} §cis now offline.`)
+                            survivor.info(`§cYou have been kicked from §e${island.getName()}§c: Island has gone offline.`)
                         }
                         // Unload island from storage.
                         //this.instance.unregisterWorld(world)

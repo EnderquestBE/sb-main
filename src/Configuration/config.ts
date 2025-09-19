@@ -13,6 +13,7 @@ export * from "./Ranks/ranks"
 
 /* Island */
 export * from "./Island/limits"
+export * from "./Island/roleDisplay"
 
 /* Sellable */
 export * from "./Shop/sellable"

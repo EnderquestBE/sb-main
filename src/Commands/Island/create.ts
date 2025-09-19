@@ -2,7 +2,7 @@ import { CustomEnum, Entity, LevelDBProvider, ModalForm, StringEnum } from "@ser
 import { CommandOverload, Island, IslandDatabase } from "../../Classes/classes"
 import { validifyIslandName } from "../../Utils/utils"
 import { IslandGenerator } from "../../Classes/Island/generator"
-import { Gamemode, Vector3f } from "@serenityjs/protocol"
+import { Gamemode } from "@serenityjs/protocol"
 
 class IslandCreateEnum extends CustomEnum {
     public static readonly identifier = "islandCreate"

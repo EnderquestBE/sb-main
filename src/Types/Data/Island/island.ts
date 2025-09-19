@@ -42,7 +42,7 @@ interface IslandData extends Document {
   /**
    * The spawn location of the island.
    */
-  spawn: Vector3f
+  spawn: { x: number, y: number, z: number }
   /**
    * The world the island is located in.
    */

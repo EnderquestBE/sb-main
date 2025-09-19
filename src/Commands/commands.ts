@@ -12,6 +12,11 @@ import "./General/balance"
 import "./General/balancexp"
 import "./General/pay"
 import "./General/vendor"
+import "./General/message"
+import "./General/reply"
 
 /** Island Commands */
 import "./Island/island"
+
+/** Rank Commands */
+import "./Rank/fly"

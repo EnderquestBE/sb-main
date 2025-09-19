@@ -1,4 +1,4 @@
-import { BlockIdentifier, EntityHitSignal, PlayerBreakBlockSignal, PlayerContainerInteractionSignal, PlayerInteractWithBlockSignal, PlayerPlaceBlockSignal } from "@serenityjs/core";
+import { BlockIdentifier, EntityHitSignal, PlayerBreakBlockSignal, PlayerInteractWithBlockSignal, PlayerOpenedContainerSignal, PlayerPlaceBlockSignal } from "@serenityjs/core";
 import { Vector3f } from "@serenityjs/protocol";
 
 const MessageCooldown = new Map<string, number>()
@@ -79,16 +79,14 @@ class PermissionsHandler {
         return true
     }
 
-    public static onUseContainer({ player, sourceContainer }: PlayerContainerInteractionSignal) {
+    public static onUseContainer({ player }: PlayerOpenedContainerSignal) {
         if (!player.isWorldIsland()) {
             player.error("You do not have permission to use containers here.")
-            sourceContainer.close(player, true)
             return false
         }
         const island = player.getIsland()
         if (!island || !island.hasPermission(player.xuid, "admin")) {
             player.error("You must be an admin of this island to use containers.")
-            sourceContainer.close(player, true)
             return false
         }
         return true

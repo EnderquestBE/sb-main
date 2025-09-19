@@ -1,5 +1,5 @@
 import { Plugin, PluginEvents } from "@serenityjs/plugins";
-import { EntityDimensionChangeSignal, EntityHitSignal, PlayerBreakBlockSignal, PlayerChatSignal, PlayerContainerInteractionSignal, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerPlaceBlockSignal, WorldInitializeSignal } from "@serenityjs/core";
+import { EntityDimensionChangeSignal, EntityHitSignal, PlayerBreakBlockSignal, PlayerChatSignal, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerOpenedContainerSignal, PlayerPlaceBlockSignal, WorldInitializeSignal } from "@serenityjs/core";
 import { ContainerType, DisplaySlotType, ObjectiveSortOrder } from "@serenityjs/protocol";
 import { IslandGenerator } from "./Classes/Island/generator";
 import { Scorebar } from "./Handlers/Scorebar/scorebar";
@@ -115,8 +115,8 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     return PermissionsHandler.onInteract(event)
   }
 
-  public beforePlayerContainerInteraction(event: PlayerContainerInteractionSignal): boolean {
-    if (event.sourceContainer.type === ContainerType.Inventory) return true
+  public beforePlayerOpenedContainer(event: PlayerOpenedContainerSignal): boolean {
+    if (event.container.type === ContainerType.Inventory) return true
     return PermissionsHandler.onUseContainer(event)
   }
 

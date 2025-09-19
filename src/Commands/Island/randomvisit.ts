@@ -22,9 +22,17 @@ const IslandRandomVisitCommand = new CommandOverload({
             islandNames.push(name)
         }
         function chooseRandomIsland() {
-            const name = islandNames[Math.floor(Math.random() * islandNames.length)]!
+            if (islandNames.length === 0) {
+                player.error("There are no islands available to teleport to.")
+                return
+            }
+            const index = Math.floor(Math.random() * islandNames.length)
+            const name = islandNames[index]!
             const island = Island.loadSync(name)
-            if (!island || (island.getStatus() === false && !island.isMember(player.xuid))) return chooseRandomIsland()
+            if (!island || island.isBanned(player.xuid) || (island.getStatus() === false && !island.isMember(player.xuid))) {
+                islandNames.splice(index, 1)
+                return chooseRandomIsland()
+            }
             island.teleport(player)
             player.info(
                 `§eYou have been teleported to island §a${island.getName()}§e's spawn!`
