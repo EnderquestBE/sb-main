@@ -48,6 +48,8 @@ class IslandGenerator extends TerrainGenerator {
         inv.addItem(new ItemStack(ItemIdentifier.MelonBlock, { stackSize: 1 }))
         inv.addItem(new ItemStack(ItemIdentifier.Bread, { stackSize: 9 }))
         inv.addItem(new ItemStack(ItemIdentifier.Bone, { stackSize: 1 }))
+
+        chestBlock.update()
     }
 
     public static registerStructure(world: World) {

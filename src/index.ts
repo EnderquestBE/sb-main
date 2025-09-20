@@ -1,17 +1,20 @@
 import { Plugin, PluginEvents } from "@serenityjs/plugins";
-import { EntityDimensionChangeSignal, EntityHitSignal, PlayerBreakBlockSignal, PlayerChatSignal, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerOpenedContainerSignal, PlayerPlaceBlockSignal, WorldInitializeSignal } from "@serenityjs/core";
+import { BlockIdentifier, EntityDimensionChangeSignal, EntityHealthTrait, EntityHitSignal, EntityHurtSignal, PlayerBreakBlockSignal, PlayerChatSignal, PlayerCombatTrait, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerOpenedContainerSignal, PlayerPlaceBlockSignal, PlayerStartUsingItemSignal, WorldInitializeSignal } from "@serenityjs/core";
 import { ContainerType, DisplaySlotType, ObjectiveSortOrder } from "@serenityjs/protocol";
 import { IslandGenerator } from "./Classes/Island/generator";
 import { Scorebar } from "./Handlers/Scorebar/scorebar";
 import { ChatHandler } from "./Handlers/Chat/handler";
 import { PermissionsHandler } from "./Handlers/Permissions/handler";
-import { FlowingLiquidBlockTrait, LiquidInteractionBlockTrait, SourceLiquidBlockTrait, BlockFurnaceTrait, BlockCropTrait, BlockMultiBlockCropTrait, BlockStemCropTrait } from "./Traits/Block/traits";
-import { ItemSeedTrait, ItemHoeTrait } from "./Traits/Item/traits";
+import { FlowingLiquidBlockTrait, LiquidInteractionBlockTrait, SourceLiquidBlockTrait, BlockFurnaceTrait, BlockCropTrait, BlockMultiBlockCropTrait, BlockStemCropTrait, BlockSpawnerTrait } from "./Traits/Block/traits";
+import { EntityStackTrait, EntityPersistenceTrait, PlayerCommandCooldownTrait } from "./Traits/Entity/traits";
+import { ItemSeedTrait, ItemHoeTrait, ItemSpawnerTrait } from "./Traits/Item/traits";
 import { NametagHandler } from "./Handlers/Nametag/handler";
+import { SpawnerHandler } from "./Handlers/Spawner/spawner";
 import { BlockHandler } from "./Handlers/Block/handler";
 import { SignHandler } from "./Handlers/Sign/handler";
 import { PlayerEnum } from "./Classes/Command/Enums/player";
 import { Server } from "./server";
+import "./extensions/world"
 
 class EnderquestPlugin extends Plugin implements PluginEvents {
 
@@ -22,12 +25,20 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     BlockFurnaceTrait,
     BlockCropTrait,
     BlockMultiBlockCropTrait,
-    BlockStemCropTrait
+    BlockStemCropTrait,
+    BlockSpawnerTrait
   ];
 
   private readonly itemTraits = [
     ItemSeedTrait,
-    ItemHoeTrait
+    ItemHoeTrait,
+    ItemSpawnerTrait
+  ]
+
+  private readonly entityTraits = [
+    EntityStackTrait,
+    PlayerCommandCooldownTrait,
+    EntityPersistenceTrait
   ]
 
   public constructor() {
@@ -43,7 +54,9 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     // Register island world generator.
     this.serenity.registerGenerator(IslandGenerator)
     IslandGenerator.registerStructure(this.serenity.getWorld())
+    ServerTaskHandler.initialize(this.serenity)
     BlockHandler.initialize()
+    SpawnerHandler.initialize()
     this.logger.info("§5Ender§dquest§r has started.");
   }
 
@@ -69,11 +82,15 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
   public onWorldInitialize({ world }: WorldInitializeSignal): void {
     // Register island block traits.
     if (world.identifier.startsWith("sb_")) {
+      world.entityPalette.unregisterTrait(EntityHealthTrait)
       for (let trait of this.blockTraits) {
         world.blockPalette.registerTrait(trait);
       }
       for (let trait of this.itemTraits) {
         world.itemPalette.registerTrait(trait)
+      }
+      for (let trait of this.entityTraits) {
+        world.entityPalette.registerTrait(trait)
       }
     }
   }
@@ -138,6 +155,12 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     SignHandler.onInteract(event)
   }
 
+  public afterEntityHit(event: EntityHitSignal): void {
+    if (event.hitEntity.hasTrait(EntityStackTrait)) {
+      (event.hitEntity.getTrait(EntityStackTrait) as EntityStackTrait).onDamage(event.damagingEntity)
+    }
+  }
+
 }
 
 export default new EnderquestPlugin();
@@ -148,4 +171,6 @@ export default new EnderquestPlugin();
 
 import "./Commands/commands"
 import "./Traits/Block/Liquid/liquidInteraction"
+import "./Configuration/config"
+import { ServerTaskHandler } from "./Handlers/Server/handler";
 

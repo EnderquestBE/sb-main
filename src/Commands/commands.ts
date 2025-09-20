@@ -3,6 +3,7 @@ import "./Admin/data"
 import "./Admin/resetdb"
 import "./Admin/cgive"
 import "./Admin/rank"
+import "./Admin/spawnertest"
 
 /** General Commands */
 import "./General/settings"

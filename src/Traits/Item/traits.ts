@@ -3,3 +3,6 @@ export * from "./Seed/seed"
 
 /* Equipment */
 export * from "./Equipment/hoe"
+
+/* Spawner */
+export * from "./Spawner/spawner"

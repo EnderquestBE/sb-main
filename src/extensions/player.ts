@@ -78,7 +78,6 @@ class PlayerExtension {
 
   private static readonly NO_SESSION_RESULT: Promise<OperationResult> = Promise.resolve({ success: false, reason: "Player session not available." });
 
-
   public static setSession(player: Player, session: PlayerSession): void {
     player[sessionSymbol] = session;
   }

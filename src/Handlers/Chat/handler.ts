@@ -35,6 +35,13 @@ class ChatHandler {
         return false
     }
 
+    public static broadcast(message: string, serenity: Serenity) {
+        const recipients = serenity.getPlayers()
+        for (const recipient of recipients) {
+            recipient.info(message)
+        }
+    }
+
     public static onJoin(player: Player, serenity: Serenity) {
         const recipients = serenity.getPlayers()
         for (const recipient of recipients) {

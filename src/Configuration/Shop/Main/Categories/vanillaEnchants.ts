@@ -5,5 +5,10 @@ const ShopVanillaEnchantsCategory = new CategoryBuilder({ id: "vanillaEnchants",
     .addItem({ id: "Efficiency", price: 12000, transactionType: ShopVanillaEnchantTransactionPage })
     .addItem({ id: "Unbreaking", price: 12000, transactionType: ShopVanillaEnchantTransactionPage })
     .addItem({ id: "Fortune", price: 12000, transactionType: ShopVanillaEnchantTransactionPage })
+    .addItem({ id: "BaneOfArthropods", price: 12000, transactionType: ShopVanillaEnchantTransactionPage })
+    .addItem({ id: "FireAspect", price: 12000, transactionType: ShopVanillaEnchantTransactionPage })
+    .addItem({ id: "Looting", price: 12000, transactionType: ShopVanillaEnchantTransactionPage })
+    .addItem({ id: "Smite", price: 12000, transactionType: ShopVanillaEnchantTransactionPage })
+    .addItem({ id: "Sharpness", price: 12000, transactionType: ShopVanillaEnchantTransactionPage })
 
 export { ShopVanillaEnchantsCategory };

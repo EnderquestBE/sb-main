@@ -5,6 +5,7 @@ import { ShopEquipmentCategory } from "./Categories/equipment";
 import { ShopFarmingCategory } from "./Categories/farming";
 import { ShopFoodsCategory } from "./Categories/foods";
 import { ShopItemsCategory } from "./Categories/items";
+import { ShopSpawnersCategory } from "./Categories/spawners";
 import { ShopVanillaEnchantsCategory } from "./Categories/vanillaEnchants";
 
 const MainShop = new ShopBuilder("main", "Shop")
@@ -16,5 +17,6 @@ const MainShop = new ShopBuilder("main", "Shop")
     .addCategory(ShopFoodsCategory)
     .addCategory(ShopItemsCategory)
     .addCategory(ShopVanillaEnchantsCategory)
+    .addCategory(ShopSpawnersCategory)
 
 export { MainShop }

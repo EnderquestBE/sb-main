@@ -24,3 +24,6 @@ export * from "./EnchantmentSlot/slot"
 
 /* Crop */
 export * from "./Crop/unlocks"
+
+/* Spawner */
+import "./Entity/spawnerEntity"

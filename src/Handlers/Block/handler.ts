@@ -23,7 +23,8 @@ class BlockHandler {
         BlockIdentifier.Wheat,
         BlockIdentifier.Carrots,
         BlockIdentifier.Potatoes,
-        BlockIdentifier.OakLeaves
+        BlockIdentifier.OakLeaves,
+        BlockIdentifier.MobSpawner
     ])
 
     // Message to show if the player's inventory is full.
