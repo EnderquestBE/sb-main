@@ -12,7 +12,7 @@ const DEFAULT_PLAYER_DATA: PlayerData = {
         xp: 0
     },
     ranks: [PlayerRank.GUEST],
-    rank: PlayerRank.GUEST,
+    activeRanks: [PlayerRank.GUEST],
     chatColor: "White",
     chatSize: false,
     island: "",

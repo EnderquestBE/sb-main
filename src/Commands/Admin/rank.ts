@@ -1,3 +1,4 @@
+// src/Commands/Admin/rank.ts
 import { CustomEnum, Player } from "@serenityjs/core";
 import { CommandBuilder, CommandOverload } from "../../Classes/classes";
 import { PlayerEnum } from "../../Classes/Command/Enums/player";
@@ -7,7 +8,7 @@ import { PlayerRank, RANKS } from "../../Configuration/Ranks/ranks";
 // Enum for the rank command actions
 class RankActionEnum extends CustomEnum {
     public static readonly identifier = "rankAction";
-    public static options = ["set", "add", "remove"];
+    public static options = ["add", "remove", "push", "pop"];
 }
 
 // Enum for the available ranks
@@ -32,18 +33,22 @@ new CommandBuilder("rank", "Manages player ranks.")
             }
 
             const rankId = rank.result as keyof typeof PlayerRank;
+            if (action.result !== "pop" && !rankId) {
+                return origin.error("Invalid rank specified.");
+            }
+
             const rankInfo = RANKS.get(rankId);
 
-            if (!rankInfo) {
+            if (action.result !== "pop" && !rankInfo) {
                 return origin.error("Invalid rank specified.");
             }
 
             switch (action.result) {
                 case "add": {
-                    const result = target.addRank(rankId).then((result) => {
+                    target.addRank(rankId).then((result) => {
                         if (result.success) {
-                            origin.info(`§aSuccessfully added the ${rankInfo.displayName} §arank to §e${target.username}§a.`);
-                            target.info(`§aYou have been given the ${rankInfo.displayName} §arank!`);
+                            origin.info(`§aSuccessfully added the ${rankInfo!.displayName} §arank to §e${target.username}§a.`);
+                            target.info(`§aYou have been given the ${rankInfo!.displayName} §arank!`);
                         } else {
                             origin.error(result.reason ?? "Failed to add rank.");
                         }
@@ -51,23 +56,34 @@ new CommandBuilder("rank", "Manages player ranks.")
                     break;
                 }
                 case "remove": {
-                    const result = target.removeRank(rankId).then((result) => {
+                    target.removeRank(rankId).then((result) => {
                         if (result.success) {
-                            origin.info(`§aSuccessfully removed the ${rankInfo.displayName} §arank from §e${target.username}§a.`);
-                            target.info(`§cYour ${rankInfo.displayName} §crank has been removed.`);
+                            origin.info(`§aSuccessfully removed the ${rankInfo!.displayName} §arank from §e${target.username}§a.`);
+                            target.info(`§cYour ${rankInfo!.displayName} §crank has been removed.`);
                         } else {
                             origin.error(result.reason ?? "Failed to remove rank.");
                         }
                     })
                     break;
                 }
-                case "set": {
-                    const result = target.setRank(rankId).then((result) => {
+                case "push": {
+                    target.pushActiveRank(rankId).then((result) => {
                         if (result.success) {
-                            origin.info(`§aSuccessfully set §e${target.username}§a's active rank to ${rankInfo.displayName}§a.`);
-                            target.info(`§aYour active rank is now ${rankInfo.displayName}§a.`);
+                            origin.info(`§aSuccessfully pushed the ${rankInfo!.displayName} §arank to §e${target.username}§a's active ranks.`);
+                            target.info(`§aYour active ranks now include ${rankInfo!.displayName}§a.`);
                         } else {
-                            origin.error(result.reason ?? "Failed to set rank.");
+                            origin.error(result.reason ?? "Failed to push rank.");
+                        }
+                    })
+                    break;
+                }
+                case "pop": {
+                    target.popActiveRank().then((result) => {
+                        if (result.success) {
+                            origin.info(`§aSuccessfully popped a rank from §e${target.username}§a's active ranks.`);
+                            target.info(`§cOne of your active ranks has been removed.`);
+                        } else {
+                            origin.error(result.reason ?? "Failed to pop rank.");
                         }
                     })
                     break;

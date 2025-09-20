@@ -5,7 +5,7 @@ import { ChatHandler } from "../Chat/handler";
 class ServerTaskHandler {
     private static serenity: Serenity;
 
-    private static readonly clearEntitiesInterval = 1 * 60 * 1000; // 15 minutes
+    private static readonly clearEntitiesInterval = 15 * 60 * 1000; // 15 minutes
 
     public static clearEntitiesTask() {
         ChatHandler.broadcast("§c§lGround entities will be cleared in 1 minute...", this.serenity)

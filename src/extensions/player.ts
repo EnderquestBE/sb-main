@@ -50,8 +50,11 @@ declare module "@serenityjs/core" {
     hasRank(rankId: string): boolean;
     addRank(rankId: string): Promise<OperationResult>;
     removeRank(rankId: string): Promise<OperationResult>;
-    getRank(): RankInfo;
-    setRank(rankId: string): Promise<OperationResult>;
+    getPrimaryRank(): RankInfo;
+    getActiveRanks(): RankInfo[];
+    pushActiveRank(rankId: string): Promise<OperationResult>;
+    popActiveRank(): Promise<OperationResult>;
+    updateRanks(): void;
     getChatSize(): boolean;
     setChatSize(large: boolean): Promise<OperationResult>;
     getChatColor(): string;
@@ -230,25 +233,48 @@ Player.prototype.removeRank = async function (this: Player, rankId: keyof typeof
   if (!session) return PlayerExtension['NO_SESSION_RESULT'];
   return session.removeRank(rankId);
 }
-Player.prototype.getRank = function (this: Player): RankInfo {
+Player.prototype.getPrimaryRank = function (this: Player): RankInfo {
   const session = PlayerExtension.getSession(this);
-  return session ? session.getRank() : RANKS.get("GUEST")!;
+  return session ? session.getPrimaryRank() : RANKS.get("GUEST")!;
 }
-Player.prototype.setRank = async function (this: Player, rankId: keyof typeof PlayerRank): Promise<OperationResult> {
+Player.prototype.getActiveRanks = function (this: Player): RankInfo[] {
+  const session = PlayerExtension.getSession(this);
+  return session ? session.getActiveRanks() : [RANKS.get("GUEST")!];
+}
+Player.prototype.pushActiveRank = async function (this: Player, rankId: keyof typeof PlayerRank): Promise<OperationResult> {
   const session = PlayerExtension.getSession(this);
   if (!session) return PlayerExtension['NO_SESSION_RESULT'];
-  return session.setRank(rankId).then((result) => {
-    const newRankInfo = RANKS.get(rankId)!
-
-    // Update rank permissions.
-    const newPermissions = this.permissions.permissions.filter((x) => !x.startsWith("rank."))
-    newPermissions.push(...newRankInfo.permissions)
-    this.permissions.permissions = newPermissions
-
-    // Set chat color.
-    if (newRankInfo) this.setChatColor(newRankInfo.color)
-    return result
+  return session.pushActiveRank(rankId).then((result) => {
+    if (result.success) {
+      this.updateRanks();
+    }
+    return result;
+  });
+}
+Player.prototype.popActiveRank = async function (this: Player): Promise<OperationResult> {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return PlayerExtension['NO_SESSION_RESULT'];
+  return session.popActiveRank().then((result) => {
+    if (result.success) {
+      this.updateRanks();
+    }
+    return result;
   })
+}
+Player.prototype.updateRanks = function (this: Player): void {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return
+  const ranks = session.getActiveRanks()
+  if (ranks.length === 0) return;
+
+  // Update rank permissions.
+  const newPermissions = this.permissions.permissions.filter((x) => !x.startsWith("rank."))
+  for (const rank of ranks) {
+    newPermissions.push(...rank.permissions)
+  }
+  this.permissions.permissions = newPermissions
+  // Set chat color.
+  this.setChatColor(ranks[0]!.color)
 }
 Player.prototype.getChatSize = function (this: Player): boolean {
   const session = PlayerExtension.getSession(this);

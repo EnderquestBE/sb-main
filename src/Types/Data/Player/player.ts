@@ -26,9 +26,9 @@ interface PlayerData {
    */
   ranks: (keyof typeof PlayerRank)[]
   /**
-   * The rank the player is currently using.
+   * The ranks the player is currently using.
    */
-  rank: keyof typeof PlayerRank
+  activeRanks: (keyof typeof PlayerRank)[]
   /**
    * The chat color the player is currently using.
    */
