@@ -238,23 +238,15 @@ Player.prototype.setRank = async function (this: Player, rankId: keyof typeof Pl
   const session = PlayerExtension.getSession(this);
   if (!session) return PlayerExtension['NO_SESSION_RESULT'];
   return session.setRank(rankId).then((result) => {
-    const oldRankInfo = this.getRank()
     const newRankInfo = RANKS.get(rankId)!
 
-    // Remove permissions from the old rank
-    if (oldRankInfo) {
-      for (const permission of oldRankInfo.permissions) {
-        this.removePermission(permission);
-      }
-    }
+    // Update rank permissions.
+    const newPermissions = this.permissions.permissions.filter((x) => !x.startsWith("rank."))
+    newPermissions.push(...newRankInfo.permissions)
+    this.permissions.permissions = newPermissions
 
-    // Add permissions from the new rank
-    if (newRankInfo) {
-      this.setChatColor(newRankInfo.color)
-      for (const permission of newRankInfo.permissions) {
-        this.addPermission(permission);
-      }
-    }
+    // Set chat color.
+    if (newRankInfo) this.setChatColor(newRankInfo.color)
     return result
   })
 }

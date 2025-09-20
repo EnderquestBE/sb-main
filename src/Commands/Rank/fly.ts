@@ -1,8 +1,8 @@
 import { Entity } from "@serenityjs/core";
 import { CommandBuilder, CommandOverload } from "../../Classes/classes"
-import { AbilityIndex, ActorFlag } from "@serenityjs/protocol";
+import { AbilityIndex } from "@serenityjs/protocol";
 
-new CommandBuilder("fly", "Toggles flight on islands.").setPermissions(["enderquest.fly"]).addOverload(
+new CommandBuilder("fly", "Toggles flight on islands.").setPermissions(["island.fly", "rank.fly"]).addOverload(
     new CommandOverload({
     }).onCallback((origin) => {
         if (!(origin instanceof Entity) || !origin.isPlayer()) return;

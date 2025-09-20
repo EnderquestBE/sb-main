@@ -49,7 +49,7 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
             name: "Owner",
             displayName: "§6Owner",
             color: "Yellow",
-            permissions: ["enderquest.chatsize"],
+            permissions: ["rank.chatsize", "rank.fly"],
             kits: []
         }
     ]

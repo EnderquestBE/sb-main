@@ -1,7 +1,7 @@
 import { Entity } from "@serenityjs/core";
 import { CommandBuilder, CommandOverload } from "../../Classes/classes"
 
-new CommandBuilder("chatsize", "Changes the size of your chat messages.").setAliases(["cs"]).setPermissions(["enderquest.chatsize"]).addOverload(
+new CommandBuilder("chatsize", "Changes the size of your chat messages.").setAliases(["cs"]).setPermissions(["rank.chatsize"]).addOverload(
     new CommandOverload({
     }).onCallback((origin) => {
         if (!(origin instanceof Entity) || !origin.isPlayer()) return;
