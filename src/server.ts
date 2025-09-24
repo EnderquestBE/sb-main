@@ -9,6 +9,8 @@ import { MainShop } from "./Configuration/Shop/Main/main";
 import { VendorDatabase } from "./Classes/Database/Collections/Vendor";
 import { IslandPerkUnlocks } from "./Handlers/Island/perks";
 import { ServerTaskHandler } from "./Handlers/Server/handler";
+import { registerIslandHelpCommands } from "./Commands/Island/help";
+import { Utils } from "./Utils/utils";
 
 class Server {
     public static readonly logger: Logger = new Logger("Enderquest", LoggerColors.LightPurple);
@@ -26,6 +28,18 @@ class Server {
         Warp.registerAll()
         // Register commands.
         CommandBuilder.registerAll(this.instance.commandPalette);
+        // Register island command helper.
+        registerIslandHelpCommands(this.instance.commandPalette.commands.get("island")!.registry.overloads.keys().map((x) => {
+            const parameters = Object.keys(x)
+            return {
+                //@ts-ignore
+                name: x[parameters[0]!].identifier.substring(6).toLowerCase(), params: parameters.slice(1).map((p) => {
+                    const arg = x[p]!
+                    if (Array.isArray(arg)) return { type: arg[0].identifier, name: p, optional: arg[1] }
+                    else return { type: arg.identifier, name: Utils.formatString(p), optional: false }
+                })
+            }
+        }).toArray().sort((a, b) => a.name.localeCompare(b.name)));
         // Start Scorebar runtime.
         instance.on(WorldEvent.WorldTick, async (event) => {
             Scorebar.runtime(event)

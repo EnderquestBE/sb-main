@@ -16,7 +16,7 @@ class EnchantmentHandler {
     }
 
     public static getAllOfRarity(rarity: EnchantmentRarity): CustomEnchantment[] {
-        return this.enchantmentsByRarity.get(rarity)!;
+        return this.enchantmentsByRarity.get(rarity) ?? [];
     }
 
     public static register(enchantment: CustomEnchantment) {

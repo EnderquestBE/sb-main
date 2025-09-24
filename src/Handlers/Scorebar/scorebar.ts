@@ -53,7 +53,7 @@ class Scorebar {
         }
         addScore(` §d➲ §aGT: §f${player.username}`);
         addScore(` §d➲ §ePlayers: §f${world.getPlayers().length}§7/§f${20}`);
-        addScore(` §d➲ §6Money: §f$${Utils.formatInt(player.getMoney())}`);
+        addScore(` §d➲ §6Balance: §f$${Utils.formatInt(player.getMoney())}`);
         addScore(` §d➲ §cXP: §f${Utils.formatInt(player.getTotalXp())}`);
         if (player.isWorldIsland() && island) {
             addScore(`§b❖ Island Stats ❖`);

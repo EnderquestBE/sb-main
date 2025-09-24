@@ -89,6 +89,17 @@ class ShopBuilder {
         }
     }
 
+    public showCategory(
+        player: Player,
+        id: string
+    ) {
+        const category = this.data.categories.find(cat => cat.id === id);
+        if (!category) {
+            throw new Error(`Category with id '${id}' does not exist in shop '${this.id}'.`);
+        }
+        this.showPage(player, category, []);
+    }
+
     public showPage(
         player: Player,
         category: ShopCategory,
