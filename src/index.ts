@@ -5,7 +5,7 @@ import { IslandGenerator } from "./Classes/Island/generator";
 import { ChatHandler } from "./Handlers/Chat/handler";
 import { PermissionsHandler } from "./Handlers/Permissions/handler";
 import { FlowingLiquidBlockTrait, LiquidInteractionBlockTrait, SourceLiquidBlockTrait, BlockFurnaceTrait, BlockCropTrait, BlockMultiBlockCropTrait, BlockStemCropTrait, BlockSpawnerTrait } from "./Traits/Block/traits";
-import { EntityStackTrait, EntityPersistenceTrait, PlayerCommandCooldownTrait } from "./Traits/Entity/traits";
+import { EntityStackTrait, EntityPersistenceTrait, PlayerCommandCooldownTrait, PlayerListCustomTrait } from "./Traits/Entity/traits";
 import { ItemSeedTrait, ItemHoeTrait, ItemSpawnerTrait, SealedTomeTrait } from "./Traits/Item/traits";
 import { NametagHandler } from "./Handlers/Nametag/handler";
 import { SpawnerHandler } from "./Handlers/Spawner/spawner";
@@ -62,6 +62,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
   private readonly entityTraits = [
     EntityStackTrait,
     PlayerCommandCooldownTrait,
+    PlayerListCustomTrait,
     EntityPersistenceTrait
   ]
 
