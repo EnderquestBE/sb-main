@@ -1,4 +1,4 @@
-import { Scorebar } from "../../Handlers/Scorebar/scorebar"
+import { Scorebar } from "../../Handlers/Hud"
 import { UserSetting } from "../../Types/types"
 
 enum Setting {
@@ -15,10 +15,7 @@ const USERSETTINGS = new Map<keyof typeof Setting, UserSetting>([
             options: ["scoreboard", "tooltip", "off"],
             function(player, newValue) {
                 if (newValue !== "scoreboard") {
-                    Scorebar.removeScoreboard(player, player.world)
-                }
-                if (newValue !== "tooltip") {
-                    Scorebar.removeTooltip(player)
+                    Scorebar.clear(player)
                 }
             }
         }

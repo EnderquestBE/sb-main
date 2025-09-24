@@ -1,6 +1,5 @@
 import { Player, StringEnum } from "@serenityjs/core";
 import { CommandBuilder, CommandOverload, IslandDatabase, PlayerDatabase } from "../../Classes";
-import { Server } from "../../server";
 
 new CommandBuilder("resetdb", "Clears all data from a specified database.")
     .setPermissions(["serenity.operator"])
@@ -19,12 +18,12 @@ new CommandBuilder("resetdb", "Clears all data from a specified database.")
                 if (dbType === "player") {
                     PlayerDatabase.instance.clear().then((result) => {
                         player.info(`Successfully cleared the player database. Documents deleted: ${result.deletedCount}`)
-                        Server.logger.info(`${player.username} cleared the player database (${result.deletedCount} documents).`)
+                        console.log(`${player.username} cleared the player database (${result.deletedCount} documents).`)
                     })
                 } else if (dbType === "island") {
                     IslandDatabase.instance.clear().then((result) => {
                         player.info(`Successfully cleared the island database. Documents deleted: ${result.deletedCount}`)
-                        Server.logger.info(`${player.username} cleared the island database (${result.deletedCount} documents).`)
+                        console.log(`${player.username} cleared the island database (${result.deletedCount} documents).`)
                     })
                 }
             } catch (error) {

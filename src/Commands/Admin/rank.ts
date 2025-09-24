@@ -1,7 +1,6 @@
 // src/Commands/Admin/rank.ts
 import { CustomEnum, Player } from "@serenityjs/core";
 import { CommandBuilder, CommandOverload, PlayerEnum } from "../../Classes";
-import { Server } from "../../server";
 import { PlayerRank, RANKS } from "../../Configuration/Ranks/ranks";
 
 // Enum for the rank command actions
@@ -26,7 +25,7 @@ new CommandBuilder("rank", "Manages player ranks.")
         }).onCallback((origin, { action, player, rank }) => {
             if (!(origin instanceof Player)) return;
 
-            const target = Server.instance.getPlayerByUsername(player.result as string);
+            const target = origin.world.serenity.getPlayerByUsername(player.result as string);
             if (!target) {
                 return origin.error("Player not found.");
             }

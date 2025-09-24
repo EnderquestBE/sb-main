@@ -1,8 +1,7 @@
 import { Plugin, PluginEvents } from "@serenityjs/plugins";
-import { EntityDimensionChangeSignal, EntityHealthTrait, EntityHitSignal, PlayerBreakBlockSignal, PlayerChatSignal, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerOpenedContainerSignal, PlayerPlaceBlockSignal, WorldInitializeSignal } from "@serenityjs/core";
-import { ContainerType, DisplaySlotType, ObjectiveSortOrder } from "@serenityjs/protocol";
+import { EntityHealthTrait, EntityHitSignal, PlayerBreakBlockSignal, PlayerChatSignal, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerListTrait, PlayerOpenedContainerSignal, PlayerPlaceBlockSignal, WorldEvent, WorldInitializeSignal } from "@serenityjs/core";
+import { ContainerType } from "@serenityjs/protocol";
 import { IslandGenerator } from "./Classes/Island/generator";
-import { Scorebar } from "./Handlers/Scorebar/scorebar";
 import { ChatHandler } from "./Handlers/Chat/handler";
 import { PermissionsHandler } from "./Handlers/Permissions/handler";
 import { FlowingLiquidBlockTrait, LiquidInteractionBlockTrait, SourceLiquidBlockTrait, BlockFurnaceTrait, BlockCropTrait, BlockMultiBlockCropTrait, BlockStemCropTrait, BlockSpawnerTrait } from "./Traits/Block/traits";
@@ -13,6 +12,15 @@ import { SpawnerHandler } from "./Handlers/Spawner/spawner";
 import { BlockHandler } from "./Handlers/Block/handler";
 import { SignHandler } from "./Handlers/Sign/handler";
 import { PlayerEnum } from "./Classes/Command/Enums/player";
+import { ServerTaskHandler } from "./Handlers/Server/handler";
+import { PlayerExtension } from "./extensions/player";
+import { CommandBuilder, DatabaseService, Island, IslandDatabase, PlayerDatabase, VendorDatabase, Warp } from "./Classes";
+import { IslandPerkUnlocks } from "./Handlers/Island/perks";
+import { Utils } from "./Utils/utils";
+import { PlayerHud } from "./Handlers/Hud";
+import { BoundaryHandler } from "./Handlers/Boundary/handler";
+import { MainShop } from "./Configuration/Shop/Main/main";
+import { registerIslandHelpCommands } from "./Commands/Island/help";
 import { Server } from "./server";
 
 /**
@@ -30,8 +38,6 @@ import "./CustomEnchantments/enchantments"
 
 import "./Commands/commands"
 import "./Traits/Block/Liquid/liquidInteraction"
-import { ServerTaskHandler } from "./Handlers/Server/handler";
-
 
 class EnderquestPlugin extends Plugin implements PluginEvents {
 
@@ -59,38 +65,114 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     EntityPersistenceTrait
   ]
 
+  private database!: DatabaseService;
+
   public constructor() {
     super("enderquest", "0.0.1+indev");
   }
 
   public onInitialize(): void {
-    Server.initialize(this.serenity)
+    this.database = new DatabaseService()
+    // Register database.
+    this.registerDBService()
+    // Register warp locations and commands.
+    Warp.registerAll()
+    // Register commands.
+    CommandBuilder.registerAll(this.serenity.commandPalette);
+    // Register island command helper.
+    registerIslandHelpCommands(this.serenity.commandPalette.commands.get("island")!.registry.overloads.keys().map((x) => {
+      const parameters = Object.keys(x)
+      return {
+        //@ts-ignore
+        name: x[parameters[0]!].identifier.substring(6).toLowerCase(), params: parameters.slice(1).map((p) => {
+          const arg = x[p]!
+          if (Array.isArray(arg)) return { type: arg[0].identifier, name: p, optional: arg[1] }
+          else return { type: arg.identifier, name: Utils.formatString(p), optional: false }
+        })
+      }
+    }).toArray().sort((a, b) => a.name.localeCompare(b.name)));
+    // Start hud runtime.
+    this.serenity.on(WorldEvent.WorldTick, async (event) => {
+      PlayerHud.runtime(event)
+      BoundaryHandler.runtime(event)
+    })
+    // Initialize shop instances.
+    MainShop.initialize()
+  }
+
+  private async registerDBService() {
+    await this.database.connect();
+    new PlayerDatabase(this.database);
+    new IslandDatabase(this.database);
+    new VendorDatabase(this.database);
   }
 
   public onStartUp(): void {
-    Server.onStartUp()
+    // Set server serenity instance.
+    Server.initialize(this.serenity);
     // Register island world generator.
     this.serenity.registerGenerator(IslandGenerator)
     IslandGenerator.registerStructure(this.serenity.getWorld())
+    // Start server tasks.
     ServerTaskHandler.initialize(this.serenity)
+    // Initialize handlers.
     BlockHandler.initialize()
     SpawnerHandler.initialize()
+    // Mark server as started.
     this.logger.info("§5Ender§dquest§r has started.");
   }
 
-  public onShutDown(): void {
-    Server.onShutDown()
+  public async onShutDown(): Promise<void> {
+    // Disconnect database.
+    await this.database.disconnect();
+    ServerTaskHandler.clearAllTasks();
+    // Execute leave event.
+    for (let player of this.serenity.getPlayers()) {
+      this.onPlayerLeave({ player } as PlayerLeaveSignal)
+    }
+    // Mark server as stopped.
     this.logger.info("§5Ender§dquest§r has stopped safely.");
   }
 
-  public onPlayerJoin({ player }: PlayerJoinSignal): void {
-    Server.onPlayerJoin(player)
+  public async onPlayerJoin({ player }: PlayerJoinSignal): Promise<void> {
+    // Load player data.
+    const session = await PlayerExtension.loadSession(player);
+    if (!session) {
+      await PlayerExtension.createSession(player);
+      this.logger.info(`Created new session for player ${player.username}.`);
+    } else {
+      this.logger.info(`Loaded session for player ${player.username}.`);
+    }
+
+    // Load island into cache
+    const islandName = player.getIslandName();
+    if (islandName) {
+      // Load island
+      const island = await Island.load(islandName);
+      if (island) {
+        // Load island world from storage.
+        /*
+        if (island.getOnlineOwners().length <= 1) {
+            LevelDBProvider.loadWorld(this.instance, island.getWorldId())
+        }
+        */
+        if (island.isOwner(player.xuid)) IslandPerkUnlocks.applyPermissions(player, island);
+        this.logger.info(`Loaded island §e${islandName}§r into cache for ${player.username}.`);
+      } else {
+        this.logger.error(`§cFailed to load island data for ${player.username}.`)
+      }
+    }
+    // Show chat join message.
     ChatHandler.onJoin(player, this.serenity)
+    // Update nametag.
     NametagHandler.format(player)
+    // Add username to player enum.
     PlayerEnum.options.push(player.username)
+    // Increment player count.
+    Server.incrementPlayerCount();
   }
 
-  public onPlayerLeave({ player }: PlayerLeaveSignal): void {
+  public async onPlayerLeave({ player }: PlayerLeaveSignal): Promise<void> {
     // Stop whileOnEquipped check
     for (const key of Object.keys(player.whileEquippedCheck) as unknown[] as (keyof typeof player.whileEquippedCheck)[]) {
       if (player.whileEquippedCheck[key]) {
@@ -98,15 +180,46 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
         player.whileEquippedCheck[key] = null;
       }
     }
-    Server.onPlayerLeave(player)
+    // Unload island if no owners are online.
+    const islandName = player.getIslandName();
+    if (islandName) {
+      const island = await Island.load(islandName);
+      if (island) {
+        if (island.getOnlineOwners().length === 0) {
+          // Unload island.
+          Island.unload(islandName)
+          const world = this.serenity.getWorld(island.getWorldId())
+          if (world) {
+            // Kick players still in the world, such as island visitors.
+            const players = world.getPlayers()
+            for (const survivor of players) {
+              Warp.to(survivor, "SPAWN")
+              survivor.info(`§cYou have been kicked from §e${island.getName()}§c: Island has gone offline.`)
+            }
+            // Unload island from storage.
+            //this.instance.unregisterWorld(world)
+          }
+        }
+        this.logger.info(`Unloaded island §e${islandName}§r from cache.`)
+      }
+    }
+    // Uncache player data.
+    player.setTimePlayed(player.getTimePlayed())
+    PlayerExtension.removeSession(player);
+    this.logger.info(`Removed session for player ${player.username}.`);
+    // Show chat leave message.
     ChatHandler.onLeave(player, this.serenity)
+    // Remove username from player enum.
     if (PlayerEnum.options.some((x) => x === player.username))
       PlayerEnum.options.splice(PlayerEnum.options.indexOf(player.username), 1)
+    // Decrement player count.
+    Server.decrementPlayerCount();
   }
 
   public onWorldInitialize({ world }: WorldInitializeSignal): void {
     // Register island block traits.
     if (world.identifier.startsWith("sb_")) {
+      world.entityPalette.unregisterTrait(PlayerListTrait)
       world.entityPalette.unregisterTrait(EntityHealthTrait)
       for (let trait of this.blockTraits) {
         world.blockPalette.registerTrait(trait);
@@ -117,25 +230,6 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
       for (let trait of this.entityTraits) {
         world.entityPalette.registerTrait(trait)
       }
-    }
-  }
-
-  public beforeEntityDimensionChange({ entity, fromDimension }: EntityDimensionChangeSignal): boolean {
-    if (!entity.isPlayer()) return true
-    if (entity.getSetting("hudMode") === "scoreboard") {
-      const objective = fromDimension.world.scoreboard.getObjective(`sbs_${entity.xuid}`)
-      if (objective) {
-        fromDimension.world.scoreboard.removeObjective(objective)
-        fromDimension.world.scoreboard.clearObjectiveAtDisplaySlot(DisplaySlotType.Sidebar, { player: entity, objective: objective, sortOrder: ObjectiveSortOrder.Ascending })
-      }
-    }
-    return true
-  }
-
-  public afterEntityDimensionChange({ entity, toDimension }: EntityDimensionChangeSignal): void {
-    if (!entity.isPlayer()) return
-    if (entity.getSetting("hudMode") === "scoreboard") {
-      Scorebar.initialize(entity, toDimension.world)
     }
   }
 
