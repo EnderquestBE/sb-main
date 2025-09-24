@@ -1,5 +1,5 @@
 import { Player, StringEnum } from "@serenityjs/core";
-import { CommandBuilder, CommandOverload, IslandDatabase, PlayerDatabase } from "../../Classes/classes";
+import { CommandBuilder, CommandOverload, IslandDatabase, PlayerDatabase } from "../../Classes";
 import { Server } from "../../server";
 
 new CommandBuilder("resetdb", "Clears all data from a specified database.")

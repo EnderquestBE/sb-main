@@ -4,7 +4,7 @@ import {
     BlockPlacementOptions,
     BlockTrait,
 } from "@serenityjs/core";
-import { Island } from "../../../Classes/classes";
+import { Island } from "../../../Classes";
 import { CropLevelRequirement } from "../../../Configuration/config";
 class BlockMultiBlockCropTrait extends BlockTrait {
     public static readonly identifier: string = "minecraft:multiblock_crop";

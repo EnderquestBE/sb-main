@@ -1,7 +1,6 @@
 // src/Commands/Admin/rank.ts
 import { CustomEnum, Player } from "@serenityjs/core";
-import { CommandBuilder, CommandOverload } from "../../Classes/classes";
-import { PlayerEnum } from "../../Classes/Command/Enums/player";
+import { CommandBuilder, CommandOverload, PlayerEnum } from "../../Classes";
 import { Server } from "../../server";
 import { PlayerRank, RANKS } from "../../Configuration/Ranks/ranks";
 

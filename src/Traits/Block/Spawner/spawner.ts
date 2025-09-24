@@ -10,7 +10,7 @@ import {
     BlockPermutation,
     BlockPlacementOptions,
 } from "@serenityjs/core";
-import { Island } from "../../../Classes/classes";
+import { Island } from "../../../Classes";
 import { Vector3f } from "@serenityjs/protocol";
 import { Utils } from "../../../Utils/utils";
 import { ShortTag } from "@serenityjs/nbt";

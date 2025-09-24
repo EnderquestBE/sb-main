@@ -11,7 +11,7 @@ import {
 import { Utils } from "../../../Utils/utils";
 import { Enchantment } from "@serenityjs/protocol";
 import { BlockHandler } from "../../../Handlers/Block/handler";
-import { Island } from "../../../Classes/classes";
+import { Island } from "../../../Classes";
 class BlockCropTrait extends BlockTrait {
     public static readonly identifier: string = "minecraft:crop";
     public static readonly types: Array<BlockIdentifier> = [

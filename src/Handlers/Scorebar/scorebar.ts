@@ -1,6 +1,6 @@
 import { Player, World, WorldTickSignal } from "@serenityjs/core";
 import { DisplaySlotType, ObjectiveSortOrder } from "@serenityjs/protocol";
-import { Island, IslandLevel } from "../../Classes/classes";
+import { Island, IslandLevel } from "../../Classes";
 import { Server } from "../../server";
 import { Utils } from "../../Utils/utils";
 

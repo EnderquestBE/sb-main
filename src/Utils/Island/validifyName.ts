@@ -1,4 +1,4 @@
-import { Filter, IslandDatabase } from "../../Classes/classes";
+import { Filter, IslandDatabase } from "../../Classes";
 
 async function validifyIslandName(name: string, db: IslandDatabase): Promise<{ success: boolean, message?: string }> {
   if (await db.get(name)) {

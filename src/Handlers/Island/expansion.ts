@@ -1,5 +1,6 @@
-import { Island } from "../../Classes/classes";
+import { Island } from "../../Classes";
 import { Utils } from "../../Utils/utils";
+import { ServerTaskHandler } from "../Server/handler";
 import { IslandLimitUnlocks } from "./limits";
 
 export class Expansion {
@@ -42,12 +43,12 @@ export class Expansion {
 
         // Show expansion message.
         for (const owner of owners) {
-            setTimeout(() => {
+            ServerTaskHandler.queueTask(() => {
                 owner.info(`§eYour island's size has been increased for §6$${Utils.formatInt(this.getUpgradeCost(size))}§e! §6New Size - §d${island.getSize()}`)
-                setTimeout(() => {
+                ServerTaskHandler.queueTask(() => {
                     let i = 0;
                     for (const key in changes) {
-                        setTimeout(() => {
+                        ServerTaskHandler.queueTask(() => {
                             //@ts-ignore
                             owner.info(`§7» §b${key}§e limit has been increased to §d${changes[key]}§e.`)
                         }, i)

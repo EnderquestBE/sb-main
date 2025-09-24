@@ -1,5 +1,5 @@
 import { Entity } from "@serenityjs/core";
-import { CommandBuilder, CommandOverload } from "../../Classes/classes"
+import { CommandBuilder, CommandOverload } from "../../Classes"
 import { AbilityIndex } from "@serenityjs/protocol";
 
 new CommandBuilder("fly", "Toggles flight on islands.").setPermissions(["island.fly", "rank.fly"]).addOverload(

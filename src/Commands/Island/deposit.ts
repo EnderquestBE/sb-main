@@ -1,5 +1,5 @@
 import { CustomEnum, Entity, IntegerEnum, StringEnum } from "@serenityjs/core";
-import { CommandOverload, Island } from "../../Classes/classes";
+import { CommandOverload, Island } from "../../Classes";
 import { Utils } from "../../Utils/utils";
 
 class IslandDepositEnum extends CustomEnum {

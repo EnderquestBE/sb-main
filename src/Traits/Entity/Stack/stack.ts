@@ -3,6 +3,7 @@ import { ByteTag, ShortTag } from "@serenityjs/nbt";
 import { Utils } from "../../../Utils/utils";
 import { ActorDamageCause, ActorEvent, ActorEventPacket, AnimateId, AnimatePacket, AttributeName, Enchantment } from "@serenityjs/protocol";
 import { SpawnerEntity } from "../../../Handlers/Entity/spawnerEntity";
+import { EnchantmentHandler } from "../../../Handlers/Enchantment/handler";
 
 class EntityStackTrait extends EntityAttributeTrait {
     public static readonly identifier = "stack";
@@ -98,6 +99,9 @@ class EntityStackTrait extends EntityAttributeTrait {
             this.aliveState = false;
             this.onKill(damager)
         }
+
+        // Handle custom enchantments on entity hit.
+        EnchantmentHandler.onEntityHurt(damager, this.entity, amount);
     }
 
     public onSpawn(details: EntitySpawnOptions): void {

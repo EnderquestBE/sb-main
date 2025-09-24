@@ -1,0 +1,24 @@
+import { ItemIdentifier } from "@serenityjs/core";
+import { Scroll } from "./base";
+import { ScrollIdentifier } from "../../../Types/types";
+
+class RefinementScroll extends Scroll {
+    public static readonly identifier = ItemIdentifier.GusterBannerPattern;
+    public static readonly scrollType = ScrollIdentifier.Refinement;
+
+    constructor(amount: number = 1) {
+        super(
+            RefinementScroll.identifier,
+            RefinementScroll.scrollType,
+            "Refinement Scroll",
+            [
+                "§r§bIncreases the level of a CE",
+                "§r§bon an item up to level 6.",
+                "§r§dUse /refine on equipment."
+            ],
+        );
+        this.stackSize = amount;
+    }
+}
+
+export { RefinementScroll };

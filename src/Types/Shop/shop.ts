@@ -1,4 +1,4 @@
-import { ActionFormImage, ItemStack, Player } from "@serenityjs/core";
+import { ActionFormImage, ItemStack } from "@serenityjs/core";
 import { ShopTransactionPage } from "../../Classes/Shop/Pages/Form/transaction";
 
 /**

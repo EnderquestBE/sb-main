@@ -1,5 +1,5 @@
 import { EntityEnum, EntityIdentifier, IntegerEnum, Player } from "@serenityjs/core";
-import { CommandBuilder, CommandOverload } from "../../Classes/classes";
+import { CommandBuilder, CommandOverload } from "../../Classes";
 import { SpawnerHandler } from "../../Handlers/Spawner/spawner";
 
 new CommandBuilder("spawner", "Gives the player a spawner.")

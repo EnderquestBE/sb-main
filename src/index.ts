@@ -1,5 +1,5 @@
 import { Plugin, PluginEvents } from "@serenityjs/plugins";
-import { BlockIdentifier, EntityDimensionChangeSignal, EntityHealthTrait, EntityHitSignal, EntityHurtSignal, PlayerBreakBlockSignal, PlayerChatSignal, PlayerCombatTrait, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerOpenedContainerSignal, PlayerPlaceBlockSignal, PlayerStartUsingItemSignal, WorldInitializeSignal } from "@serenityjs/core";
+import { EntityDimensionChangeSignal, EntityHealthTrait, EntityHitSignal, PlayerBreakBlockSignal, PlayerChatSignal, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerOpenedContainerSignal, PlayerPlaceBlockSignal, WorldInitializeSignal } from "@serenityjs/core";
 import { ContainerType, DisplaySlotType, ObjectiveSortOrder } from "@serenityjs/protocol";
 import { IslandGenerator } from "./Classes/Island/generator";
 import { Scorebar } from "./Handlers/Scorebar/scorebar";
@@ -7,14 +7,31 @@ import { ChatHandler } from "./Handlers/Chat/handler";
 import { PermissionsHandler } from "./Handlers/Permissions/handler";
 import { FlowingLiquidBlockTrait, LiquidInteractionBlockTrait, SourceLiquidBlockTrait, BlockFurnaceTrait, BlockCropTrait, BlockMultiBlockCropTrait, BlockStemCropTrait, BlockSpawnerTrait } from "./Traits/Block/traits";
 import { EntityStackTrait, EntityPersistenceTrait, PlayerCommandCooldownTrait } from "./Traits/Entity/traits";
-import { ItemSeedTrait, ItemHoeTrait, ItemSpawnerTrait } from "./Traits/Item/traits";
+import { ItemSeedTrait, ItemHoeTrait, ItemSpawnerTrait, SealedTomeTrait } from "./Traits/Item/traits";
 import { NametagHandler } from "./Handlers/Nametag/handler";
 import { SpawnerHandler } from "./Handlers/Spawner/spawner";
 import { BlockHandler } from "./Handlers/Block/handler";
 import { SignHandler } from "./Handlers/Sign/handler";
 import { PlayerEnum } from "./Classes/Command/Enums/player";
 import { Server } from "./server";
+
+/**
+ * @IMPORTS
+ */
+import "./Handlers/Enchantment/handler"
+import "./extensions/itemStack"
+import "./extensions/equipment"
+import "./extensions/player"
 import "./extensions/world"
+import "./extensions/inventory"
+
+import "./Configuration/config"
+import "./CustomEnchantments/enchantments"
+
+import "./Commands/commands"
+import "./Traits/Block/Liquid/liquidInteraction"
+import { ServerTaskHandler } from "./Handlers/Server/handler";
+
 
 class EnderquestPlugin extends Plugin implements PluginEvents {
 
@@ -32,7 +49,8 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
   private readonly itemTraits = [
     ItemSeedTrait,
     ItemHoeTrait,
-    ItemSpawnerTrait
+    ItemSpawnerTrait,
+    SealedTomeTrait
   ]
 
   private readonly entityTraits = [
@@ -73,6 +91,13 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
   }
 
   public onPlayerLeave({ player }: PlayerLeaveSignal): void {
+    // Stop whileOnEquipped check
+    for (const key of Object.keys(player.whileEquippedCheck) as unknown[] as (keyof typeof player.whileEquippedCheck)[]) {
+      if (player.whileEquippedCheck[key]) {
+        clearTimeout(player.whileEquippedCheck[key]!);
+        player.whileEquippedCheck[key] = null;
+      }
+    }
     Server.onPlayerLeave(player)
     ChatHandler.onLeave(player, this.serenity)
     if (PlayerEnum.options.some((x) => x === player.username))
@@ -164,13 +189,3 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
 }
 
 export default new EnderquestPlugin();
-
-/**
- * @IMPORTS
- */
-
-import "./Commands/commands"
-import "./Traits/Block/Liquid/liquidInteraction"
-import "./Configuration/config"
-import { ServerTaskHandler } from "./Handlers/Server/handler";
-

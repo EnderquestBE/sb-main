@@ -1,13 +1,12 @@
 
 import { Player } from "@serenityjs/core";
-import { PlayerSession } from "../Classes/Data/PlayerSession";
-import { PlayerDatabase } from "../Classes/Database/Collections/Player";
+import { Island, PlayerDatabase, PlayerSession } from "../Classes";
 import { OperationResult, PlayerData, RankInfo } from "../Types/types";
 import { ChatSource, DEFAULT_PLAYER_DATA, PERMISSION_INTEGER } from "../Configuration/config";
 import { PlayerRank, RANKS } from "../Configuration/Ranks/ranks";
-import { Island } from "../Classes/Data/Island";
 import { Setting } from "../Configuration/Settings/settings";
 import { PlayerInventory } from "./inventory";
+import { EquipmentSlot } from "@serenityjs/protocol";
 
 const sessionSymbol = Symbol("player-session");
 
@@ -74,6 +73,9 @@ declare module "@serenityjs/core" {
     getSetting(key: keyof typeof Setting): string | boolean | undefined
     setSetting(key: keyof typeof Setting, value: string | boolean): Promise<OperationResult>;
     hasSetting(key: string): boolean;
+
+    // While Equipped Check
+    whileEquippedCheck: { [key in EquipmentSlot]: NodeJS.Timeout | null }
   }
 }
 
@@ -107,6 +109,8 @@ class PlayerExtension {
     return session;
   }
 }
+
+
 
 Player.prototype.session = function (this: Player): PlayerSession | null {
   return PlayerExtension.getSession(this);
@@ -343,5 +347,25 @@ Player.prototype.hasSetting = function (this: Player, key: string): boolean {
   const session = PlayerExtension.getSession(this);
   return session ? session.hasSetting(key) : false;
 }
+
+// While Equipped Check
+const whileEquippedCheckSymbol = Symbol("whileEquippedCheck");
+
+Object.defineProperty(Player.prototype, "whileEquippedCheck", {
+  get: function (this: Player & { [whileEquippedCheckSymbol]?: any }) {
+    if (!this[whileEquippedCheckSymbol]) {
+      this[whileEquippedCheckSymbol] = {
+        [EquipmentSlot.Head]: null,
+        [EquipmentSlot.Chest]: null,
+        [EquipmentSlot.Legs]: null,
+        [EquipmentSlot.Feet]: null,
+      }
+    }
+    return this[whileEquippedCheckSymbol];
+  },
+  set: function (this: Player & { [whileEquippedCheckSymbol]?: any }, value) {
+    this[whileEquippedCheckSymbol] = value;
+  }
+});
 
 export { PlayerExtension };

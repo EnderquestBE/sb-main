@@ -1,5 +1,5 @@
 import { CustomEnum, Entity, StringEnum } from "@serenityjs/core";
-import { CommandOverload, Island } from "../../Classes/classes";
+import { CommandOverload, Island } from "../../Classes";
 import { Vector3f } from "@serenityjs/protocol";
 
 class IslandHomeEnum extends CustomEnum {

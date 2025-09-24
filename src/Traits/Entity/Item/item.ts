@@ -1,6 +1,6 @@
 import { Entity, EntityIdentifier, EntityTrait, TraitOnTickDetails } from "@serenityjs/core";
 import { ByteTag } from "@serenityjs/nbt";
-import { Island } from "../../../Classes/classes";
+import { Island } from "../../../Classes";
 import { Vector3f } from "@serenityjs/protocol";
 import { SpawnerEntity } from "../../../Handlers/Entity/spawnerEntity";
 

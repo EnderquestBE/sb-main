@@ -1,14 +1,26 @@
 import { ItemIdentifier } from "@serenityjs/core";
 
-enum VanillaEnchantmentSlot {
+enum EnchantmentSlotType {
+    Sword = "Sword",
     Pickaxe = "Pickaxe",
     Axe = "Axe",
     Shovel = "Shovel",
     Hoe = "Hoe",
-    Tool = "Tool"
+    Tool = "Tool",
+    Helmet = "Helmet",
+    Chestplate = "Chestplate",
+    Leggings = "Leggings",
+    Boots = "Boots",
 }
 
-const EnchantmentSlot: { [key in VanillaEnchantmentSlot]: Set<ItemIdentifier> } = {
+const EnchantmentSlot: { [key in EnchantmentSlotType]: Set<ItemIdentifier> } = {
+    Sword: new Set([
+        ItemIdentifier.WoodenSword,
+        ItemIdentifier.StoneSword,
+        ItemIdentifier.IronSword,
+        ItemIdentifier.GoldenSword,
+        ItemIdentifier.DiamondSword
+    ]),
     Pickaxe: new Set([
         ItemIdentifier.WoodenPickaxe,
         ItemIdentifier.StonePickaxe,
@@ -47,13 +59,36 @@ const EnchantmentSlot: { [key in VanillaEnchantmentSlot]: Set<ItemIdentifier> } 
         ItemIdentifier.StoneAxe,
         ItemIdentifier.IronAxe,
         ItemIdentifier.GoldenAxe,
-        ItemIdentifier.DiamondAxe,
-        ItemIdentifier.WoodenShovel,
-        ItemIdentifier.StoneShovel,
-        ItemIdentifier.IronShovel,
-        ItemIdentifier.GoldenShovel,
-        ItemIdentifier.DiamondShovel
+        ItemIdentifier.DiamondAxe
+    ]),
+    Helmet: new Set([
+        ItemIdentifier.LeatherHelmet,
+        ItemIdentifier.ChainmailHelmet,
+        ItemIdentifier.IronHelmet,
+        ItemIdentifier.GoldenHelmet,
+        ItemIdentifier.DiamondHelmet
+    ]),
+    Chestplate: new Set([
+        ItemIdentifier.LeatherChestplate,
+        ItemIdentifier.ChainmailChestplate,
+        ItemIdentifier.IronChestplate,
+        ItemIdentifier.GoldenChestplate,
+        ItemIdentifier.DiamondChestplate
+    ]),
+    Leggings: new Set([
+        ItemIdentifier.LeatherLeggings,
+        ItemIdentifier.ChainmailLeggings,
+        ItemIdentifier.IronLeggings,
+        ItemIdentifier.GoldenLeggings,
+        ItemIdentifier.DiamondLeggings
+    ]),
+    Boots: new Set([
+        ItemIdentifier.LeatherBoots,
+        ItemIdentifier.ChainmailBoots,
+        ItemIdentifier.IronBoots,
+        ItemIdentifier.GoldenBoots,
+        ItemIdentifier.DiamondBoots
     ])
 }
 
-export { EnchantmentSlot, VanillaEnchantmentSlot }
+export { EnchantmentSlot, EnchantmentSlotType }

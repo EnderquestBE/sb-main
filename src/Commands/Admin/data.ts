@@ -1,5 +1,5 @@
 import { Player } from "@serenityjs/core"
-import { CommandBuilder, CommandOverload } from "../../Classes/classes"
+import { CommandBuilder, CommandOverload } from "../../Classes"
 import { PlayerExtension } from "../../extensions/player"
 
 new CommandBuilder("data", "Data-related admin commands.").setPermissions(["serenity.operator"]).addOverload(

@@ -1,6 +1,6 @@
 import { Player, Serenity, WorldEvent } from "@serenityjs/core";
 import { Logger, LoggerColors } from "@serenityjs/logger";
-import { CommandBuilder, DatabaseService, Island, IslandDatabase, PlayerDatabase } from "./Classes/classes";
+import { CommandBuilder, DatabaseService, Island, IslandDatabase, PlayerDatabase } from "./Classes";
 import { PlayerExtension } from "./extensions/player";
 import { Scorebar } from "./Handlers/Scorebar/scorebar";
 import { Warp } from "./Classes/Warp/warp";
@@ -8,6 +8,7 @@ import { BoundaryHandler } from "./Handlers/Boundary/handler";
 import { MainShop } from "./Configuration/Shop/Main/main";
 import { VendorDatabase } from "./Classes/Database/Collections/Vendor";
 import { IslandPerkUnlocks } from "./Handlers/Island/perks";
+import { ServerTaskHandler } from "./Handlers/Server/handler";
 
 class Server {
     public static readonly logger: Logger = new Logger("Enderquest", LoggerColors.LightPurple);
@@ -32,7 +33,7 @@ class Server {
         })
         // Initialize shop instances.
         MainShop.initialize()
-        setTimeout(() => {
+        ServerTaskHandler.queueTask(() => {
             for (let player of this.instance.getPlayers()) {
                 this.onPlayerJoin(player)
             }
@@ -43,6 +44,7 @@ class Server {
 
     public static async onShutDown() {
         await this.database.disconnect();
+        ServerTaskHandler.clearAllTasks();
         for (let player of this.instance.getPlayers()) {
             this.onPlayerLeave(player)
         }

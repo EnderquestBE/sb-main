@@ -1,6 +1,5 @@
-import { CustomEnum, IntegerEnum, ItemEnum, ItemType, Player, StringEnum } from "@serenityjs/core";
-import { CommandBuilder, CommandOverload } from "../../Classes/classes";
-import { Vendor } from "../../Classes/Data/Vendor";
+import { CustomEnum, IntegerEnum, ItemEnum, ItemType, Player } from "@serenityjs/core";
+import { CommandBuilder, CommandOverload, Vendor } from "../../Classes";
 import { Utils } from "../../Utils/utils";
 
 class VendorActionEnum extends CustomEnum {

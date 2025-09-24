@@ -1,6 +1,6 @@
 import { EntityIdentifier } from "@serenityjs/core";
-import { CategoryBuilder } from "../../../../Classes/Shop/CategoryBuilder";
 import { SpawnerHandler } from "../../../../Handlers/Spawner/spawner";
+import { CategoryBuilder } from "../../../../Classes/Shop/CategoryBuilder";
 
 const ShopSpawnersCategory = new CategoryBuilder({ id: "spawners", display: { name: "Spawners" } })
     .addItem({ id: "zombie_spawner", price: 3500000, item: SpawnerHandler.createItem(EntityIdentifier.Zombie), transactionSound: "block.mob_spawner.break" })

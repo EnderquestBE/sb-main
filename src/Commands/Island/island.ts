@@ -1,4 +1,4 @@
-import { CommandBuilder } from "../../Classes/classes";
+import { CommandBuilder } from "../../Classes";
 import { IslandAcceptCommand } from "./accept";
 import { IslandBanCommand } from "./ban";
 import { IslandBankCommand } from "./bank";

@@ -1,8 +1,8 @@
 import { Block, BlockSignTrait, ItemType, Player, PlayerCommandExecutorTrait, PlayerInteractWithBlockSignal } from "@serenityjs/core";
-import { Vendor } from "../../Classes/Data/Vendor";
+import { Vendor } from "../../Classes";
 import { ByteTag, CompoundTag, IntTag, StringTag } from "@serenityjs/nbt";
 import { Utils } from "../../Utils/utils";
-import { PlayerDatabase, PlayerSession } from "../../Classes/classes";
+import { PlayerDatabase, PlayerSession } from "../../Classes";
 
 const purchaseConfirmation = new Map<string, { timestamp: number }>();
 

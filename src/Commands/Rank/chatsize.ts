@@ -1,5 +1,5 @@
 import { Entity } from "@serenityjs/core";
-import { CommandBuilder, CommandOverload } from "../../Classes/classes"
+import { CommandBuilder, CommandOverload } from "../../Classes"
 
 new CommandBuilder("chatsize", "Changes the size of your chat messages.").setAliases(["cs"]).setPermissions(["rank.chatsize"]).addOverload(
     new CommandOverload({

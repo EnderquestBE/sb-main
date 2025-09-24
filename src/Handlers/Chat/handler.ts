@@ -1,5 +1,5 @@
 import { Player, PlayerChatSignal, Serenity } from "@serenityjs/core";
-import { Filter, Island } from "../../Classes/classes";
+import { Filter, Island } from "../../Classes";
 import { Color } from "../../Types/types";
 
 class ChatHandler {

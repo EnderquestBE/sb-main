@@ -1,5 +1,5 @@
 import { BinaryStream } from "@serenityjs/binarystream";
-import { Block, BlockIdentifier, BlockInventoryTrait, BlockPermutation, Chunk, ItemIdentifier, ItemStack, Structure, TerrainGenerator, World } from "@serenityjs/core";
+import { BlockIdentifier, BlockInventoryTrait, BlockPermutation, Chunk, ItemIdentifier, ItemStack, Structure, TerrainGenerator, World } from "@serenityjs/core";
 import { CompoundTag } from "@serenityjs/nbt";
 import { Vector3f } from "@serenityjs/protocol";
 import { readFileSync } from "fs";

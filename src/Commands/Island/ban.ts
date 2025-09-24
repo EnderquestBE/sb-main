@@ -1,8 +1,6 @@
 import { CustomEnum, Entity } from "@serenityjs/core";
-import { CommandOverload, Island } from "../../Classes/classes";
+import { CommandOverload, Island, PlayerEnum, Warp } from "../../Classes";
 import { Server } from "../../server";
-import { Warp } from "../../Classes/Warp/warp";
-import { PlayerEnum } from "../../Classes/Command/Enums/player";
 
 class IslandBanEnum extends CustomEnum {
     public static readonly identifier = "islandBan";

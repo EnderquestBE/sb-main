@@ -1,5 +1,5 @@
 import { Player } from "@serenityjs/core"
-import { Island } from "../../Classes/classes"
+import { Island } from "../.."
 
 interface IslandPerkType {
     id: string, // The ID associated with the perk.

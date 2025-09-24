@@ -1,5 +1,5 @@
 import { StringEnum, Player } from "@serenityjs/core";
-import { CommandBuilder, CommandOverload } from "../../Classes/classes";
+import { CommandBuilder, CommandOverload } from "../../Classes";
 import { Server } from "../../server";
 import { ChatHandler } from "../../Handlers/Chat/handler"; // Updated import
 

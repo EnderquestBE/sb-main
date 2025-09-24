@@ -4,6 +4,9 @@ import "./Admin/resetdb"
 import "./Admin/cgive"
 import "./Admin/rank"
 import "./Admin/spawnertest"
+import "./Admin/ce"
+import "./Admin/tome"
+import "./Admin/scroll"
 
 /** General Commands */
 import "./General/settings"
@@ -23,3 +26,12 @@ import "./Island/island"
 /** Rank Commands */
 import "./Rank/fly"
 import "./Rank/chatsize"
+
+/** Enchantment Commands */
+import "./Enchantment/merge"
+import "./Enchantment/binding"
+import "./Enchantment/refine"
+import "./Enchantment/master"
+import "./Enchantment/expel"
+import "./Enchantment/temper"
+import "./Enchantment/restore"

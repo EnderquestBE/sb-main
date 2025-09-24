@@ -7,20 +7,22 @@ class ServerTaskHandler {
 
     private static readonly clearEntitiesInterval = 15 * 60 * 1000; // 15 minutes
 
+    private static readonly tasks: NodeJS.Timeout[] = [];
+
     public static clearEntitiesTask() {
         ChatHandler.broadcast("§c§lGround entities will be cleared in 1 minute...", this.serenity)
-        this.queueTask(50000, () => {
+        this.queueTask(() => {
             ChatHandler.broadcast("§c§lGround entities will be cleared in 10 seconds...", this.serenity)
-            this.queueTask(7000, () => {
+            this.queueTask(() => {
                 ChatHandler.broadcast("§c§lGround entities will be cleared in 3 seconds....", this.serenity)
-            })
-            this.queueTask(8000, () => {
+            }, 7000)
+            this.queueTask(() => {
                 ChatHandler.broadcast("§c§lGround entities will be cleared in 2 seconds...", this.serenity)
-            })
-            this.queueTask(9000, () => {
+            }, 8000)
+            this.queueTask(() => {
                 ChatHandler.broadcast("§c§lGround entities will be cleared in 1 second...", this.serenity)
-            })
-            this.queueTask(10000, () => {
+            }, 9000)
+            this.queueTask(() => {
                 for (const dimension of this.serenity.getWorlds().filter((x) => x.identifier.startsWith("sb_")).map((x) => x.getDimension())) {
                     const entities = dimension.getEntities().filter((x) => x.hasTrait(EntityPersistenceTrait))
                     for (const entity of entities) {
@@ -28,21 +30,29 @@ class ServerTaskHandler {
                     }
                 }
                 ChatHandler.broadcast("§c§lGround entities have been cleared.", this.serenity)
-            })
-        })
+            }, 10000)
+        }, 50000)
     }
 
-    public static queueTask(runAfter: number, task: () => void) {
-        setTimeout(() => {
+    public static queueTask(task: () => any, runAfter: number) {
+        const timeout = setTimeout(() => {
             task();
-        }, runAfter);
+        }, runAfter)
+        this.tasks.push(timeout)
+        return timeout
     }
 
     public static initialize(serenity: Serenity) {
         this.serenity = serenity;
-        this.queueTask(this.clearEntitiesInterval, () => {
+        this.queueTask(() => {
             this.clearEntitiesTask();
-        })
+        }, this.clearEntitiesInterval)
+    }
+
+    public static clearAllTasks() {
+        for (const task of this.tasks) {
+            clearTimeout(task);
+        }
     }
 }
 

@@ -14,6 +14,7 @@ import {
 import { CompoundTag, IntTag, StringTag } from "@serenityjs/nbt";
 import { Utils } from "../../../Utils/utils";
 import { ItemSmeltableMap } from "../../../Configuration/Smelting/smelting";
+import { ServerTaskHandler } from "../../../Handlers/Server/handler";
 
 class BlockFurnaceTrait extends BlockTrait {
     public static readonly identifier: string = "minecraft:furnace";
@@ -46,7 +47,7 @@ class BlockFurnaceTrait extends BlockTrait {
                 if (finishedItems === smeltingItem.amount) form.buttons[0] = { text: `${Utils.formatString(smeltingItem.item)} x§6${finishedItems}` }
                 else form.buttons[0] = { text: `${Utils.formatString(smeltingItem.item)} x§c${smeltingItem.amount - finishedItems}§r - x§6${finishedItems}` }
                 form.update(player)
-                if (timeRemaining > 0) setTimeout(updateSmeltingData, 1000)
+                if (timeRemaining > 0) ServerTaskHandler.queueTask(updateSmeltingData, 1000)
             }
             updateSmeltingData()
         }
