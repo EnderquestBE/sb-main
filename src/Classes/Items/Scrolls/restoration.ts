@@ -1,9 +1,12 @@
-import { ItemIdentifier } from "@serenityjs/core";
+import { CustomItemType, ItemIdentifier } from "@serenityjs/core";
 import { Scroll } from "./base";
 import { ScrollIdentifier } from "../../../Types/types";
 
+const RestorationScrollType = new CustomItemType("scroll:restoration", { isComponentBased: true })
+RestorationScrollType.components.setIcon({ default: "piglin_banner_pattern" })
+
 class RestorationScroll extends Scroll {
-    public static readonly identifier = ItemIdentifier.PiglinBannerPattern;
+    public static readonly identifier = RestorationScrollType.identifier as ItemIdentifier;
     public static readonly scrollType = ScrollIdentifier.Restoration;
 
     constructor(amount: number = 1) {
@@ -20,4 +23,4 @@ class RestorationScroll extends Scroll {
     }
 }
 
-export { RestorationScroll };
+export { RestorationScroll, RestorationScrollType };

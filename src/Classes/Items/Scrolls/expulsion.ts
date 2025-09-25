@@ -1,9 +1,12 @@
-import { ItemIdentifier } from "@serenityjs/core";
+import { CustomItemType, ItemIdentifier } from "@serenityjs/core";
 import { Scroll } from "./base";
 import { ScrollIdentifier } from "../../../Types/types";
 
+const ExpulsionScrollType = new CustomItemType("scroll:expulsion", { isComponentBased: true })
+ExpulsionScrollType.components.setIcon({ default: "skull_banner_pattern" })
+
 class ExpulsionScroll extends Scroll {
-    public static readonly identifier = ItemIdentifier.SkullBannerPattern;
+    public static readonly identifier = ExpulsionScrollType.identifier as ItemIdentifier;
     public static readonly scrollType = ScrollIdentifier.Expulsion;
 
     constructor(amount: number = 1) {
@@ -21,4 +24,4 @@ class ExpulsionScroll extends Scroll {
     }
 }
 
-export { ExpulsionScroll };
+export { ExpulsionScroll, ExpulsionScrollType };

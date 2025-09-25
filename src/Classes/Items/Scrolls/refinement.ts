@@ -1,9 +1,12 @@
-import { ItemIdentifier } from "@serenityjs/core";
+import { CustomItemType, ItemIdentifier } from "@serenityjs/core";
 import { Scroll } from "./base";
 import { ScrollIdentifier } from "../../../Types/types";
 
+const RefinementScrollType = new CustomItemType("scroll:refinement", { isComponentBased: true })
+RefinementScrollType.components.setIcon({ default: "guster_banner_pattern" })
+
 class RefinementScroll extends Scroll {
-    public static readonly identifier = ItemIdentifier.GusterBannerPattern;
+    public static readonly identifier = RefinementScrollType.identifier as ItemIdentifier;
     public static readonly scrollType = ScrollIdentifier.Refinement;
 
     constructor(amount: number = 1) {
@@ -21,4 +24,4 @@ class RefinementScroll extends Scroll {
     }
 }
 
-export { RefinementScroll };
+export { RefinementScroll, RefinementScrollType };

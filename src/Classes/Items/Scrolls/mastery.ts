@@ -1,9 +1,12 @@
-import { ItemIdentifier } from "@serenityjs/core";
+import { CustomItemType, ItemIdentifier } from "@serenityjs/core";
 import { Scroll } from "./base";
 import { ScrollIdentifier } from "../../../Types/types";
 
+const MasteryScrollType = new CustomItemType("scroll:mastery", { isComponentBased: true })
+MasteryScrollType.components.setIcon({ default: "flower_banner_pattern" })
+
 class MasteryScroll extends Scroll {
-    public static readonly identifier = ItemIdentifier.FlowerBannerPattern;
+    public static readonly identifier = "scroll:mastery" as ItemIdentifier;
     public static readonly scrollType = ScrollIdentifier.Mastery;
 
     constructor(amount: number = 1) {
@@ -21,4 +24,4 @@ class MasteryScroll extends Scroll {
     }
 }
 
-export { MasteryScroll };
+export { MasteryScroll, MasteryScrollType };

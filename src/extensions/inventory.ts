@@ -14,7 +14,7 @@ class PlayerInventory {
   public readonly getItemCount = (itemId: string) => {
     const { container } = this.player.getTrait(EntityInventoryTrait);
     return container.storage.reduce((sum, item) => {
-      return sum + (item?.identifier === itemId ? item?.stackSize : 0);
+      return sum + (item?.identifier === itemId && item.getDisplayName() === "" && item.maxStackSize === 64 ? item?.stackSize : 0);
     }, 0);
   };
 

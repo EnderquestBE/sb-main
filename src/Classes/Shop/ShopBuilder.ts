@@ -89,6 +89,20 @@ class ShopBuilder {
         }
     }
 
+    public updateCategory(category: CategoryBuilder) {
+        const categoryInfo = category.info;
+        this._processCategory(categoryInfo, this.data.info.currency);
+        const existingIndex = this.data.categories.findIndex(cat => cat.id === categoryInfo.id);
+        if (existingIndex !== -1) {
+            this.data.categories[existingIndex] = categoryInfo;
+        } else {
+            this.data.categories.push(categoryInfo);
+        }
+        this.pages.set(categoryInfo, new ShopFormPage(this, categoryInfo));
+        this.setSubCategoryPages(categoryInfo);
+        return this;
+    }
+
     public showCategory(
         player: Player,
         id: string

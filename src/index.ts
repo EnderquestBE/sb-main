@@ -1,5 +1,5 @@
 import { Plugin, PluginEvents } from "@serenityjs/plugins";
-import { CustomEntityType, EntityCollisionTrait, EntityGravityTrait, EntityHealthTrait, EntityHitSignal, Player, PlayerBreakBlockSignal, PlayerChatSignal, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerListTrait, PlayerOpenedContainerSignal, PlayerPlaceBlockSignal, WorldEvent, WorldInitializeSignal } from "@serenityjs/core";
+import { CustomEntityType, EntityHealthTrait, EntityHitSignal, Player, PlayerBreakBlockSignal, PlayerChatSignal, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerListTrait, PlayerOpenedContainerSignal, PlayerPlaceBlockSignal, WorldEvent, WorldInitializeSignal } from "@serenityjs/core";
 import { ContainerType } from "@serenityjs/protocol";
 import { IslandGenerator } from "./Classes/Island/generator";
 import { ChatHandler } from "./Handlers/Chat/handler";
@@ -14,12 +14,11 @@ import { SignHandler } from "./Handlers/Sign/handler";
 import { PlayerEnum } from "./Classes/Command/Enums/player";
 import { ServerTaskHandler } from "./Handlers/Server/handler";
 import { PlayerExtension } from "./extensions/player";
-import { CommandBuilder, DatabaseService, Island, IslandDatabase, PlayerDatabase, Slapper, VendorDatabase, Warp } from "./Classes";
+import { CommandBuilder, CustomItemRegistry, DatabaseService, Island, IslandDatabase, PlayerDatabase, Slapper, VendorDatabase, Warp } from "./Classes";
 import { IslandPerkUnlocks } from "./Handlers/Island/perks";
 import { Utils } from "./Utils/utils";
 import { PlayerHud } from "./Handlers/Hud";
 import { BoundaryHandler } from "./Handlers/Boundary/handler";
-import { MainShop } from "./Configuration/Shop/Main/main";
 import { registerIslandHelpCommands } from "./Commands/Island/help";
 import { Server } from "./server";
 
@@ -101,8 +100,6 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
       PlayerHud.runtime(event)
       BoundaryHandler.runtime(event)
     })
-    // Initialize shop instances.
-    MainShop.initialize()
   }
 
   private async registerDBService() {
@@ -237,6 +234,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
       for (let trait of this.entityTraits) {
         world.entityPalette.registerTrait(trait)
       }
+      CustomItemRegistry.registerAll(world);
     }
     // Initialize hub slappers.
     if (world.identifier === "default") {
