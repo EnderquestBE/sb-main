@@ -7,6 +7,9 @@ import "./Admin/spawnertest"
 import "./Admin/ce"
 import "./Admin/tome"
 import "./Admin/scroll"
+import "./Admin/skin"
+import "./Admin/rot"
+import "./Admin/morph"
 
 /** General Commands */
 import "./General/settings"

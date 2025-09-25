@@ -30,6 +30,10 @@ class ServerTaskHandler {
                     }
                 }
                 ChatHandler.broadcast("§c§lGround entities have been cleared.", this.serenity)
+                // Queue next clear.
+                this.queueTask(() => {
+                    this.clearEntitiesTask();
+                }, this.clearEntitiesInterval)
             }, 10000)
         }, 50000)
     }

@@ -1,4 +1,4 @@
-import { CustomEnum, Entity, StringEnum } from "@serenityjs/core";
+import { ActionForm, CustomEnum, Entity, Player, StringEnum } from "@serenityjs/core";
 import { CommandOverload, Island } from "../../Classes";
 
 class IslandVisitEnum extends CustomEnum {
@@ -6,15 +6,54 @@ class IslandVisitEnum extends CustomEnum {
     public static options = ["visit", "teleport", "tp"];
 }
 
+function islandVisitForm(player: Player) {
+    const form = new ActionForm("Visit Islands");
+    form.content = "Select an option.";
+    form.button("Select Island");
+    form.button("Random Island");
+
+    form.show(player, (result, error) => {
+        if (result === null || error) return;
+        if (result === 0) {
+            // Select Island
+            const form2 = new ActionForm("Select Island");
+            form2.content = "Select an island to visit.";
+            const players = player.world.serenity.getPlayers()
+            const islands = new Map<string, Island>()
+            for (const player of players) {
+                const island = player.getIsland()
+                if (island && !islands.has(island.getName())) {
+                    islands.set(island.getName(), island)
+                }
+            }
+            for (const [name, island] of islands) {
+                form2.button(`${name}\nOwner: ${island.getOwner().username}`)
+            }
+            form2.show(player, (result2, error2) => {
+                if (result2 === null || error2) return;
+                const islandName = Array.from(islands.keys())[result2]
+                player.executeCommand(`is visit ${islandName}`)
+            })
+        } else if (result === 1) {
+            player.executeCommand("is randomvisit")
+        }
+    })
+}
+
 const IslandVisitCommand = new CommandOverload({
     visit: IslandVisitEnum,
-    name: StringEnum
+    name: [StringEnum, true]
 }).onCallback((origin, { name }) => {
     if (!(origin instanceof Entity) || !origin.isPlayer()) return;
     const player = origin;
     try {
-        if (!name.result) return player.error("Expected island name to teleport to.")
-        const island = Island.loadSync(name.result)
+        //@ts-ignore
+        const nameResult = name.result as string;
+        if (!nameResult) {
+            // Show form version.
+            return islandVisitForm(player)
+        }
+        const island = Island.loadSync(nameResult)
         if (!island) return player.error("Island is offline or does not exist.")
         if (island.isBanned(player.xuid)) return player.error("You are banned from this island.")
         if (island.getStatus() === false && !island.isMember(player.xuid)) return player.error("This island is locked to visitors.")

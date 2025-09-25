@@ -1,5 +1,5 @@
 import { Plugin, PluginEvents } from "@serenityjs/plugins";
-import { EntityHealthTrait, EntityHitSignal, PlayerBreakBlockSignal, PlayerChatSignal, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerListTrait, PlayerOpenedContainerSignal, PlayerPlaceBlockSignal, WorldEvent, WorldInitializeSignal } from "@serenityjs/core";
+import { CustomEntityType, EntityCollisionTrait, EntityGravityTrait, EntityHealthTrait, EntityHitSignal, Player, PlayerBreakBlockSignal, PlayerChatSignal, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerListTrait, PlayerOpenedContainerSignal, PlayerPlaceBlockSignal, WorldEvent, WorldInitializeSignal } from "@serenityjs/core";
 import { ContainerType } from "@serenityjs/protocol";
 import { IslandGenerator } from "./Classes/Island/generator";
 import { ChatHandler } from "./Handlers/Chat/handler";
@@ -14,7 +14,7 @@ import { SignHandler } from "./Handlers/Sign/handler";
 import { PlayerEnum } from "./Classes/Command/Enums/player";
 import { ServerTaskHandler } from "./Handlers/Server/handler";
 import { PlayerExtension } from "./extensions/player";
-import { CommandBuilder, DatabaseService, Island, IslandDatabase, PlayerDatabase, VendorDatabase, Warp } from "./Classes";
+import { CommandBuilder, DatabaseService, Island, IslandDatabase, PlayerDatabase, Slapper, VendorDatabase, Warp } from "./Classes";
 import { IslandPerkUnlocks } from "./Handlers/Island/perks";
 import { Utils } from "./Utils/utils";
 import { PlayerHud } from "./Handlers/Hud";
@@ -34,10 +34,14 @@ import "./extensions/world"
 import "./extensions/inventory"
 
 import "./Configuration/config"
+import "./Configuration/Slapper/slapper"
+import "./Configuration/Morph/morph"
 import "./CustomEnchantments/enchantments"
 
 import "./Commands/commands"
 import "./Traits/Block/Liquid/liquidInteraction"
+import { EntitySlapperTrait } from "./Traits/Entity/Slapper/slapper";
+import { MorphManager } from "./Classes/Morph";
 
 class EnderquestPlugin extends Plugin implements PluginEvents {
 
@@ -171,6 +175,8 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     PlayerEnum.options.push(player.username)
     // Increment player count.
     Server.incrementPlayerCount();
+    // Custom palm model.
+    if (player.username === "The Palm Healer") MorphManager.morph(player, "palm")
   }
 
   public async onPlayerLeave({ player }: PlayerLeaveSignal): Promise<void> {
@@ -232,6 +238,25 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
         world.entityPalette.registerTrait(trait)
       }
     }
+    // Initialize hub slappers.
+    if (world.identifier === "default") {
+      setTimeout(() => {
+        const slappers = Slapper.getAll()
+        for (const slapper of slappers) {
+          // Register type.
+          const type = new CustomEntityType(slapper.identifier)
+          world.entityPalette.registerType(type)
+          // Spawn entity.
+          const dimension = world.getDimension()
+          const entity = dimension.spawnEntity(type, slapper.position)
+          if (slapper.rotation) {
+            entity.setRotation(slapper.rotation)
+          }
+          entity.setGravityForce(0)
+          entity.addTrait(EntitySlapperTrait)
+        }
+      }, 3000);
+    }
   }
 
   public beforePlayerChat(event: PlayerChatSignal): boolean {
@@ -258,7 +283,10 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
   }
 
   public beforeEntityHit(event: EntityHitSignal): boolean {
-    return PermissionsHandler.onEntityHit(event)
+    if (event.hitEntity.hasTrait(EntitySlapperTrait)) {
+      event.hitEntity.getTrait(EntitySlapperTrait)!.slapperInteract(event.damagingEntity as Player)
+      return false
+    } else return PermissionsHandler.onEntityHit(event)
   }
 
   // Point events.

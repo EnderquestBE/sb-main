@@ -9,3 +9,5 @@ export * from "./Rank";
 export * from "./Settings";
 export * from "./Shop";
 export * from "./Warp";
+export * from "./Slapper";
+export * from "./Skin"
