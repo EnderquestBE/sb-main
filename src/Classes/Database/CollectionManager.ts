@@ -4,7 +4,7 @@ import { Collection, DeleteResult, Document, Filter, OptionalUnlessRequiredId, U
  * Handles collections for different data types, like player or island.
  */
 abstract class CollectionManager<T extends Document> {
-  protected collection: Collection<T>;
+  public collection: Collection<T>;
   public readonly key: string;
 
   constructor(collection: Collection<T>, key: string) {

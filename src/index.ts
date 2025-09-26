@@ -38,6 +38,7 @@ import "./Configuration/Morph/morph"
 
 import "./Commands/commands"
 import "./Traits/Block/Liquid/liquidInteraction"
+import { LeaderboardHandler } from "./Handlers/Leaderboard/handler";
 
 class EnderquestPlugin extends Plugin implements PluginEvents {
 
@@ -104,6 +105,8 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     new PlayerDatabase(this.database);
     new IslandDatabase(this.database);
     new VendorDatabase(this.database);
+    // Initialize leaderboards.
+    LeaderboardHandler.initialize(this.serenity.getWorld());
   }
 
   public onStartUp(): void {
@@ -236,6 +239,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     // Initialize hub slappers.
     if (world.identifier === "default") {
       setTimeout(() => {
+        // Initialize slappers.
         const slappers = Slapper.getAll()
         for (const slapper of slappers) {
           // Register type.
