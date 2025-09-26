@@ -80,7 +80,7 @@ class BlockSpawnerTrait extends BlockTrait {
         if (Number(details.currentTick) % this.speedInTicks !== 0) return
         // Get nearest matching spawner entity.
         const { x, y, z } = this.block.position
-        const entities = this.dimension.getEntities({ position: new Vector3f(x, y, z), maxDistance: 16 }).filter(x => x.identifier === this.ENTITY)
+        const entities = this.dimension.getEntities().filter(x => x.identifier === this.ENTITY)
 
         // Spawn a new entity if it doesn't exist.
         if (entities.length === 0) {

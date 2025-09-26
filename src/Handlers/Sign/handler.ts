@@ -55,9 +55,9 @@ class SignHandler {
     }
 
     public static initializeShop(player: Player, block: Block, text: string[]) {
-        const price = parseInt(text[1] ?? "")
-        const itemRaw = (text[2] ?? "")
-        const amount = parseInt(text[3] ?? "1")
+        const itemRaw = (text[1] ?? "")
+        const amount = parseInt(text[2] ?? "1")
+        const price = parseInt(text[3] ?? "")
         if (isNaN(price) || !itemRaw || isNaN(amount)) {
             player.error("Invalid shop sign format.\n§b[shop]\n§eItem ID\nItem Amount\nPrice");
             return
