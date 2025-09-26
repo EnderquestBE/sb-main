@@ -21,26 +21,23 @@ import { PlayerHud } from "./Handlers/Hud";
 import { BoundaryHandler } from "./Handlers/Boundary/handler";
 import { registerIslandHelpCommands } from "./Commands/Island/help";
 import { Server } from "./server";
+import { EntitySlapperTrait } from "./Traits/Entity/Slapper/slapper";
+import { MorphManager } from "./Classes/Morph";
 
 /**
  * @IMPORTS
  */
+import "./CustomEnchantments/enchantments"
 import "./Handlers/Enchantment/handler"
 import "./extensions/itemStack"
-import "./extensions/equipment"
-import "./extensions/player"
-import "./extensions/world"
-import "./extensions/inventory"
+import "./extensions"
 
 import "./Configuration/config"
 import "./Configuration/Slapper/slapper"
 import "./Configuration/Morph/morph"
-import "./CustomEnchantments/enchantments"
 
 import "./Commands/commands"
 import "./Traits/Block/Liquid/liquidInteraction"
-import { EntitySlapperTrait } from "./Traits/Entity/Slapper/slapper";
-import { MorphManager } from "./Classes/Morph";
 
 class EnderquestPlugin extends Plugin implements PluginEvents {
 
@@ -289,8 +286,8 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
 
   // Point events.
 
-  public onPlayerBreakBlock(event: PlayerBreakBlockSignal): void {
-    BlockHandler.onBreak(event)
+  public onPlayerBreakBlock({ player, block, itemStack }: PlayerBreakBlockSignal): void {
+    BlockHandler.onBreak(player, itemStack, block)
   }
 
   public afterPlayerPlaceBlock(event: PlayerPlaceBlockSignal): void {

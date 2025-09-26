@@ -32,3 +32,6 @@ import "./Entity/spawnerEntity"
 /* Custom Enchantment */
 export * from "./CustomEnchantment/customEnchantment"
 export * from "./CustomEnchantment/sealedTome"
+
+/* Stash */
+export * from "./Stash"

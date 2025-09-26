@@ -15,6 +15,7 @@ enum EnchantmentSlotDisplay {
     Chestplate = "§cChestplate",
     Leggings = "§aLeggings",
     Boots = "§eBoots",
+    Armor = "§6Armor",
 }
 
 class EnchantmentTome extends ItemStack {

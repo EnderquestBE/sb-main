@@ -32,16 +32,32 @@ class SpawnerEntity {
 
         // Get loot data.
         const { loot } = data
+        let additionalXp = 0;
 
-        // Check if the player has looting.
         const item = player.getHeldItem()
         if (item) {
+            // Check applicable VEs.
             const enchantable = item.getTrait(ItemStackEnchantableTrait)
             if (enchantable) {
+                // Looting
                 const lootingLevel = enchantable.getEnchantment(Enchantment.Looting)
                 if (lootingLevel) looting = lootingLevel;
+                // Fire Aspect
                 const fireAspectLevel = enchantable.getEnchantment(Enchantment.FireAspect)
                 if (fireAspectLevel) fire = true;
+            }
+            // Check applicable CEs.
+            if (item.isCustomEnchanted()) {
+                const enchantments = item.getCustomEnchantments();
+                if (!enchantments) return;
+                for (const { id, info, level } of enchantments) {
+                    // Scholar
+                    if (id === "scholar") {
+                        const chance = info.activationChance;
+                        const effectiveChance = Math.max(chance.base - (level * chance.perLevel), chance.minimum);
+                        if (Math.random() * effectiveChance <= 1) additionalXp += Math.floor(Math.random() * Math.ceil(level / 2)) + 1;
+                    }
+                }
             }
         }
 
@@ -52,8 +68,10 @@ class SpawnerEntity {
             }
         }
         if (data.xp) {
-            const xpAmount = this._processRange(data.xp, looting);
+            let xpAmount = this._processRange(data.xp, looting);
+            if (additionalXp > 0) xpAmount += additionalXp;
             player.addXp(xpAmount);
+            if (xpAmount && player.getSetting("showXpOverlay")) player.onScreenDisplay.setActionBar(`§l§e>> §aCollected §d${xpAmount} §6XP §e<<§r`);
         }
     }
 

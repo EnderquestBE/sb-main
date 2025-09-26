@@ -11,6 +11,7 @@ enum EnchantmentSlotType {
     Chestplate = "Chestplate",
     Leggings = "Leggings",
     Boots = "Boots",
+    Armor = "Armor"
 }
 
 const EnchantmentSlot: { [key in EnchantmentSlotType]: Set<ItemIdentifier> } = {
@@ -83,6 +84,28 @@ const EnchantmentSlot: { [key in EnchantmentSlotType]: Set<ItemIdentifier> } = {
         ItemIdentifier.DiamondLeggings
     ]),
     Boots: new Set([
+        ItemIdentifier.LeatherBoots,
+        ItemIdentifier.ChainmailBoots,
+        ItemIdentifier.IronBoots,
+        ItemIdentifier.GoldenBoots,
+        ItemIdentifier.DiamondBoots
+    ]),
+    Armor: new Set([
+        ItemIdentifier.LeatherHelmet,
+        ItemIdentifier.ChainmailHelmet,
+        ItemIdentifier.IronHelmet,
+        ItemIdentifier.GoldenHelmet,
+        ItemIdentifier.DiamondHelmet,
+        ItemIdentifier.LeatherChestplate,
+        ItemIdentifier.ChainmailChestplate,
+        ItemIdentifier.IronChestplate,
+        ItemIdentifier.GoldenChestplate,
+        ItemIdentifier.DiamondChestplate,
+        ItemIdentifier.LeatherLeggings,
+        ItemIdentifier.ChainmailLeggings,
+        ItemIdentifier.IronLeggings,
+        ItemIdentifier.GoldenLeggings,
+        ItemIdentifier.DiamondLeggings,
         ItemIdentifier.LeatherBoots,
         ItemIdentifier.ChainmailBoots,
         ItemIdentifier.IronBoots,

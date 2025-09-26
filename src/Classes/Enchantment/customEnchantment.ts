@@ -1,3 +1,4 @@
+import { PlayerTrait } from "@serenityjs/core";
 import { EnchantmentSlotType } from "../../Configuration/config";
 import { EnchantmentHandler } from "../../Handlers/Enchantment/handler";
 import { BlockBreakEnchantmentEvent, CustomEnchantmentProperties, EnchantmentActivationChance, EnchantmentRarity, EntityHurtEnchantmentEvent, WhileEquippedEnchantmentEvent } from "../../Types/types";

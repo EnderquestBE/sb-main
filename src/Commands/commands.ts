@@ -10,6 +10,11 @@ import "./Admin/scroll"
 import "./Admin/skin"
 import "./Admin/rot"
 import "./Admin/morph"
+import "./Admin/stash"
+import "./Admin/playeradmin"
+import "./Admin/islandadmin"
+import "./Admin/money"
+import "./Admin/xp"
 
 /** General Commands */
 import "./General/settings"
@@ -29,6 +34,8 @@ import "./Island/island"
 /** Rank Commands */
 import "./Rank/fly"
 import "./Rank/chatsize"
+import "./Rank/sellall"
+import "./Rank/sellallxp"
 
 /** Enchantment Commands */
 import "./Enchantment/merge"

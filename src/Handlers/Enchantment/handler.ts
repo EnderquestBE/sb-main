@@ -1,7 +1,7 @@
 import { Block, Entity, ItemStack, Player } from "@serenityjs/core";
 import { CustomEnchantment } from "../../Classes/Enchantment/customEnchantment";
 import { EnchantmentRarity } from "../../Types/types";
-
+import { CustomEnchantEnum } from "../../Classes";
 
 class EnchantmentHandler {
     private static enchantmentsById: Map<string, CustomEnchantment> = new Map();
@@ -21,6 +21,7 @@ class EnchantmentHandler {
 
     public static register(enchantment: CustomEnchantment) {
         this.enchantmentsById.set(enchantment.id, enchantment);
+        CustomEnchantEnum.options.push(enchantment.id);
         const rarityEnchants = this.enchantmentsByRarity.get(enchantment.rarity) ?? [];
         rarityEnchants.push(enchantment)
         this.enchantmentsByRarity.set(enchantment.rarity, rarityEnchants);

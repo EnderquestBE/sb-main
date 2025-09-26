@@ -10,6 +10,7 @@ import { MainShop } from "../Shop/Main/main";
 /* LEFT SIDE */
 
 // Quests
+/*
 Slapper.registerSlapper({
     identifier: "slapper:quests",
     name: "§l§5Quests§r",
@@ -20,8 +21,10 @@ Slapper.registerSlapper({
         player.info("§7This feature is coming soon!")
     }
 })
+*/
 
 // Auction House
+/*
 Slapper.registerSlapper({
     identifier: "slapper:auctionhouse",
     name: "§l§cAuction House§r",
@@ -32,6 +35,7 @@ Slapper.registerSlapper({
         player.info("§7This feature is coming soon!")
     }
 })
+*/
 
 // Shop
 Slapper.registerSlapper({
@@ -84,6 +88,7 @@ Slapper.registerSlapper({
 })
 
 // PvP Arena
+/*
 Slapper.registerSlapper({
     identifier: "slapper:pvp",
     name: "§l§4PvP Arena§r",
@@ -95,8 +100,10 @@ Slapper.registerSlapper({
         player.info("§7This feature is coming soon!")
     }
 })
+*/
 
 // Kits
+/*
 Slapper.registerSlapper({
     identifier: "slapper:kits",
     name: "§l§6Kits§r",
@@ -108,3 +115,4 @@ Slapper.registerSlapper({
         player.info("§7This feature is coming soon!")
     }
 })
+*/

@@ -6,7 +6,7 @@ import { ChatSource, DEFAULT_PLAYER_DATA, PERMISSION_INTEGER } from "../Configur
 import { PlayerRank, RANKS } from "../Configuration/Ranks/ranks";
 import { Setting } from "../Configuration/Settings/settings";
 import { PlayerInventory } from "./inventory";
-import { EquipmentSlot } from "@serenityjs/protocol";
+import { DeviceOS, EquipmentSlot } from "@serenityjs/protocol";
 
 const sessionSymbol = Symbol("player-session");
 
@@ -14,6 +14,8 @@ declare module "@serenityjs/core" {
   interface Player {
     [sessionSymbol]?: PlayerSession;
     session(): PlayerSession | null;
+
+    getDevice(): string;
 
     getTimePlayed(): number
     setTimePlayed(value: number): Promise<OperationResult>
@@ -110,11 +112,14 @@ class PlayerExtension {
   }
 }
 
-
-
 Player.prototype.session = function (this: Player): PlayerSession | null {
   return PlayerExtension.getSession(this);
 };
+
+Player.prototype.getDevice = function (this: Player): string {
+  const device = DeviceOS[this.clientSystemInfo.os];
+  return device;
+}
 
 Player.prototype.getTimePlayed = function (this: Player): number {
   const session = PlayerExtension.getSession(this);
@@ -215,6 +220,7 @@ Player.prototype.removeXp = async function (this: Player, amount: number): Promi
 Player.prototype.setXp = async function (this: Player, amount: number): Promise<OperationResult> {
   const session = PlayerExtension.getSession(this);
   if (!session) return PlayerExtension['NO_SESSION_RESULT'];
+  this.setExperience(amount);
   return session.setXp(amount);
 }
 
@@ -230,12 +236,22 @@ Player.prototype.hasRank = function (this: Player, rankId: keyof typeof PlayerRa
 Player.prototype.addRank = async function (this: Player, rankId: keyof typeof PlayerRank): Promise<OperationResult> {
   const session = PlayerExtension.getSession(this);
   if (!session) return PlayerExtension['NO_SESSION_RESULT'];
-  return session.addRank(rankId);
+  return session.addRank(rankId).then((result) => {
+    if (result.success) {
+      this.updateRanks();
+    }
+    return result;
+  });
 }
 Player.prototype.removeRank = async function (this: Player, rankId: keyof typeof PlayerRank): Promise<OperationResult> {
   const session = PlayerExtension.getSession(this);
   if (!session) return PlayerExtension['NO_SESSION_RESULT'];
-  return session.removeRank(rankId);
+  return session.removeRank(rankId).then((result) => {
+    if (result.success) {
+      this.updateRanks();
+    }
+    return result;
+  });
 }
 Player.prototype.getPrimaryRank = function (this: Player): RankInfo {
   const session = PlayerExtension.getSession(this);

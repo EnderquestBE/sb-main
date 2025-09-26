@@ -1,10 +1,14 @@
 import { World } from "@serenityjs/core";
 import * as Scrolls from "./Scrolls"
+import * as Stashes from "./Stashes"
 import { ShopScrollCategory, ShopXPCategory } from "../../Configuration/Shop/Main/Categories/xp";
 import { MainShop } from "../../Configuration/Shop/Main/main";
 
+const ScrollTypes = [Scrolls.BindingScrollType, Scrolls.ExpulsionScrollType, Scrolls.MasteryScrollType, Scrolls.RefinementScrollType, Scrolls.RestorationScrollType, Scrolls.TemperamentScrollType];
+const StashTypes = [Stashes.CommonStashType, Stashes.RareStashType, Stashes.EpicStashType, Stashes.LegendaryStashType, Stashes.DivineStashType];
+
 class CustomItemRegistry {
-    public static readonly types = [Scrolls.BindingScrollType, Scrolls.ExpulsionScrollType, Scrolls.MasteryScrollType, Scrolls.RefinementScrollType, Scrolls.RestorationScrollType, Scrolls.TemperamentScrollType];
+    public static readonly types = [...ScrollTypes, ...StashTypes];
 
     public static registerAll(world: World) {
         world.itemPalette.registerType(...this.types);

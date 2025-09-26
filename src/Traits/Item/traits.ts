@@ -9,3 +9,6 @@ export * from "./Spawner/spawner"
 
 /* Enchantments */
 export * from "./Enchantment/sealedTome"
+
+/* Stash */
+export * from "./Stash/stash"

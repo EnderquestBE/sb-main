@@ -6,10 +6,8 @@ import { ServerTaskHandler } from "../Handlers/Server/handler";
 function checkWhileEquipped(this: EntityEquipmentTrait, item: ItemStack, slot: EquipmentSlot) {
     if (this.entity.isPlayer()) {
         const enchantments = item.getCustomEnchantments();
-        console.log(enchantments?.map((x) => x.id).join(", "))
         if (enchantments) {
             for (const { level, info } of enchantments) {
-                console.log(level, JSON.stringify(info))
                 if (!info) return;
                 const chance = info.activationChance;
                 if (!info.whileEquipped) continue;
