@@ -46,7 +46,7 @@ class IslandGenerator extends TerrainGenerator {
         inv.addItem(new ItemStack(ItemIdentifier.Potato, { stackSize: 1 }))
         inv.addItem(new ItemStack(ItemIdentifier.Cactus, { stackSize: 1 }))
         inv.addItem(new ItemStack(ItemIdentifier.MelonBlock, { stackSize: 1 }))
-        inv.addItem(new ItemStack(ItemIdentifier.Bread, { stackSize: 9 }))
+        inv.addItem(new ItemStack(ItemIdentifier.Apple, { stackSize: 8 }))
         inv.addItem(new ItemStack(ItemIdentifier.Bone, { stackSize: 1 }))
 
         chestBlock.update()

@@ -3,6 +3,7 @@ import { Slapper, SlapperInfo } from "../../../Classes";
 import { ByteTag } from "@serenityjs/nbt";
 import { AddPlayerPacket, Color, CommandPermissionLevel, Gamemode, NetworkItemStackDescriptor, PermissionLevel, PlayerListAction, PlayerListPacket, SkinImage } from "@serenityjs/protocol";
 import { v4 as uuid } from 'uuid';
+import { ServerTaskHandler } from "../../../Handlers/Server/handler";
 
 class EntitySlapperTrait extends EntityTrait {
     public static readonly identifier = "slapper";
@@ -34,7 +35,7 @@ class EntitySlapperTrait extends EntityTrait {
             uniqueId: this.entity.uniqueId,
             uuid: entityUuid,
             xuid: "1",
-            username: "Test",
+            username: "NPC",
             skin: skin,
             platformBuild: null,
             platformChatIdentifier: "",
@@ -48,7 +49,7 @@ class EntitySlapperTrait extends EntityTrait {
 
         const playerPacket = new AddPlayerPacket();
         playerPacket.uuid = entityUuid;
-        playerPacket.username = "Test";
+        playerPacket.username = "NPC";
         playerPacket.runtimeId = this.entity.runtimeId;
         playerPacket.platformChatId = String();
         playerPacket.position = this.entity.position;
@@ -70,23 +71,25 @@ class EntitySlapperTrait extends EntityTrait {
 
         player.send(playerPacket)
 
-        const list2 = new PlayerListPacket();
-        list2.action = PlayerListAction.Remove;
-        list2.records = [{
-            uniqueId: this.entity.uniqueId,
-            uuid: entityUuid,
-            xuid: "1",
-            username: "Test",
-            skin: skin,
-            platformBuild: null,
-            platformChatIdentifier: "",
-            isHost: false,
-            isVisitor: false,
-            isTeacher: false,
-            locatorColor: new Color(0, 0, 0, 0)
-        }]
+        ServerTaskHandler.queueTask(() => {
+            const list2 = new PlayerListPacket();
+            list2.action = PlayerListAction.Remove;
+            list2.records = [{
+                uniqueId: this.entity.uniqueId,
+                uuid: entityUuid,
+                xuid: "1",
+                username: "NPC",
+                skin: skin,
+                platformBuild: null,
+                platformChatIdentifier: "",
+                isHost: false,
+                isVisitor: false,
+                isTeacher: false,
+                locatorColor: new Color(0, 0, 0, 0)
+            }]
 
-        player.send(list2)
+            player.send(list2)
+        }, 250)
     }
 
     public onInteract(player: Player): void {
