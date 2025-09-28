@@ -16,6 +16,8 @@ class ShopBuilder {
 
     public readonly pages: Map<ShopCategory, ShopPage> = new Map();
 
+    public readonly items: Map<string, ShopItem> = new Map();
+
     public constructor(id: string, name: string) {
         this.id = id;
         this.data = { info: { id, name, currency: "money" }, categories: [], items: [] }
@@ -31,6 +33,7 @@ class ShopBuilder {
             item.currency ??= defaultCurrency;
             item.display ??= { name: Utils.formatString(item.id), price: CurrencyInfo[item.currency].prefix + Utils.formatInt(item.price) + CurrencyInfo[item.currency].suffix };
             item.slider ??= { step: 1, max: 64 };
+            this.items.set(item.id, item);
         }
 
         for (const subCategory of category.categories) {
@@ -59,6 +62,7 @@ class ShopBuilder {
             currency: currency,
             slider: item.slider ?? { step: 1, max: 64 },
         });
+        this.items.set(item.id, item);
         return this;
     }
 

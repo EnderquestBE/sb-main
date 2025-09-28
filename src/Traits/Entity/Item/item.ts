@@ -1,4 +1,4 @@
-import { Entity, EntityIdentifier, EntityTrait, TraitOnTickDetails } from "@serenityjs/core";
+import { BlockIdentifier, Entity, EntityIdentifier, EntityTrait, TraitOnTickDetails } from "@serenityjs/core";
 import { ByteTag } from "@serenityjs/nbt";
 import { Island } from "../../../Classes";
 import { Vector3f } from "@serenityjs/protocol";
@@ -21,6 +21,10 @@ class EntityPersistenceTrait extends EntityTrait {
             if (island) {
                 const spawn = island.getSpawn();
                 if (spawn) this.entity.teleport(new Vector3f(spawn.x + 0.5, spawn.y + 1, spawn.z + 0.5), this.dimension);
+            }
+        } else if (this.entity.identifier === EntityIdentifier.Item) {
+            if (this.dimension.getBlock(this.entity.position).identifier === BlockIdentifier.Lava) {
+                this.entity.despawn();
             }
         }
     }

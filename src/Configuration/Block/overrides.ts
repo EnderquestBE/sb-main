@@ -16,6 +16,10 @@ const BlockOverrides: Map<BlockIdentifier[], ItemIdentifier> = new Map([[
     [BlockIdentifier.MelonStem],
     ItemIdentifier.MelonSeeds
 ],
+[
+    [BlockIdentifier.Farmland],
+    ItemIdentifier.Dirt
+]
 ])
 
 const BlockOverrideMap: Map<BlockIdentifier, ItemIdentifier> = new Map()

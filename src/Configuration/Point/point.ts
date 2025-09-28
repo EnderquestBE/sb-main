@@ -16,7 +16,7 @@ const BlockPointValues: { [key in BlockIdentifier]?: BlockBreak } = {
         break: { points: [0, 2], stashChance: 1 }
     },
     [BlockIdentifier.LapisOre]: {
-        break: { points: [0, 3], xp: [2, 5], item: ItemIdentifier.LapisLazuli, amount: [1, 4], applyFortune: true, stashChance: 1 }
+        break: { points: [0, 3], xp: [2, 5], item: ItemIdentifier.LapisLazuli, amount: [4, 4], applyFortune: true, stashChance: 1 }
     },
     [BlockIdentifier.DiamondOre]: {
         break: { points: [0, 3], xp: [2, 6], item: ItemIdentifier.Diamond, applyFortune: true, stashChance: 1 }

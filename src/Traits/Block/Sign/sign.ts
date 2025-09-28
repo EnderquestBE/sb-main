@@ -1,60 +1,82 @@
-import { Block, BlockSignTrait, ItemType, Player, PlayerCommandExecutorTrait, PlayerInteractWithBlockSignal } from "@serenityjs/core";
-import { Vendor } from "../../Classes";
+import {
+    Block,
+    BlockIdentifier,
+    BlockInteractionOptions,
+    BlockSignTrait,
+    BlockTrait,
+    ItemType,
+    ItemTypeBlockPlacerComponent,
+    Player,
+    PlayerCommandExecutorTrait,
+} from "@serenityjs/core";
 import { ByteTag, CompoundTag, IntTag, StringTag } from "@serenityjs/nbt";
-import { Utils } from "../../Utils/utils";
-import { PlayerDatabase, PlayerSession } from "../../Classes";
+import { Utils } from "../../../Utils/utils";
+import { PlayerDatabase, PlayerSession, Vendor } from "../../../Classes";
 
 const purchaseConfirmation = new Map<string, { timestamp: number }>();
 
-class SignHandler {
-    public static onInteract({ source, block }: PlayerInteractWithBlockSignal) {
-        const sign = block.getTrait(BlockSignTrait);
+class BlockSpecialSignTrait extends BlockTrait {
+    public static readonly identifier: string = "special_sign";
+    public static readonly types: Array<BlockIdentifier> = [
+        BlockIdentifier.StandingSign,
+        BlockIdentifier.WallSign
+    ];
+
+    public constructor(block: Block) {
+        super(block);
+    }
+
+    public onInteract({ origin: player, }: BlockInteractionOptions): boolean {
+        if (!player) return false;
+        if (player.isSneaking && player.getHeldItem()?.hasComponent(ItemTypeBlockPlacerComponent)) return true;
+        const sign = this.block.getTrait(BlockSignTrait);
         if (!sign) return false
         const text = sign.getFrontText()
         const parts = text.split("\n")
 
-        const nbt = block.getStorage()
+        const nbt = this.block.getStorage()
 
         // Sign is already initialized as a special type.
         if (nbt.get<ByteTag>("Locked")) {
             const command = nbt.get<StringTag>("Command")
             if (command) {
-                source.executeCommand(command.valueOf())
+                player.executeCommand(command.valueOf())
             }
             if (nbt.get<CompoundTag>("Shop")) {
-                this.interactShop(source, block)
+                BlockSpecialSignTrait.interactShop(player, this.block)
             }
             // Check if the sign should be initialized.
         } else {
             // Command sign functionality.
             if (text.startsWith("/")) {
                 try {
-                    if (!source.getTrait(PlayerCommandExecutorTrait).hasCommand(text.split(" ")[0]!.slice(1))) {
-                        source.error("Unknown command executed. Please make sure the command exists, and that you have permission to use it.")
-                        return
+                    if (!player.getTrait(PlayerCommandExecutorTrait).hasCommand(text.split(" ")[0]!.slice(1))) {
+                        player.error("Unknown command executed. Please make sure the command exists, and that you have permission to use it.")
+                        return false;
                     }
-                    source.executeCommand(text)
-                    block.getStorage().set("Locked", new ByteTag(1, "Locked"));
-                    block.getStorage().set("Command", new StringTag(text, "Command"))
-                    const frontText = block.getStorage().get<CompoundTag>("FrontText")!;
+                    player.executeCommand(text)
+                    this.block.getStorage().set("Locked", new ByteTag(1, "Locked"));
+                    this.block.getStorage().set("Command", new StringTag(text, "Command"))
+                    const frontText = this.block.getStorage().get<CompoundTag>("FrontText")!;
                     frontText.set("Text", new StringTag(`§a${text}`, "Text"));
-                    block.sendStorageUpdate()
-                    source.info("§eSign command created successfully!")
+                    this.block.sendStorageUpdate()
+                    player.info("§eSign command created successfully!")
                 } catch (e) {
-                    source.error("Failed to create sign command.")
-                    return
+                    player.error("Failed to create sign command.")
+                    return false;
                 }
             }
             // Other functionality.
             else switch (parts[0]!.toLowerCase()) {
                 case "[shop]":
-                    this.initializeShop(source, block, parts)
+                    BlockSpecialSignTrait.initializeShop(player, this.block, parts)
                     break
             }
         }
+        return false;
     }
 
-    public static initializeShop(player: Player, block: Block, text: string[]) {
+    private static initializeShop(player: Player, block: Block, text: string[]) {
         const itemRaw = (text[1] ?? "")
         const amount = parseInt(text[2] ?? "1")
         const price = parseInt(text[3] ?? "")
@@ -107,7 +129,7 @@ class SignHandler {
         player.info(`§eShop creation successful! Selling §a${Utils.formatString(itemId)} §7x§c${amount} for §6$${price}§e.`)
     }
 
-    public static async interactShop(player: Player, block: Block) {
+    private static async interactShop(player: Player, block: Block) {
         const shopData = block.getStorage().get<CompoundTag>("Shop")
         if (!shopData) {
             player.error("Failed to interact with shop.")
@@ -176,4 +198,4 @@ class SignHandler {
     }
 }
 
-export { SignHandler };
+export { BlockSpecialSignTrait };

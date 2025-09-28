@@ -10,7 +10,6 @@ import { ItemSeedTrait, ItemHoeTrait, ItemSpawnerTrait, SealedTomeTrait } from "
 import { NametagHandler } from "./Handlers/Nametag/handler";
 import { SpawnerHandler } from "./Handlers/Spawner/spawner";
 import { BlockHandler } from "./Handlers/Block/handler";
-import { SignHandler } from "./Handlers/Sign/handler";
 import { PlayerEnum } from "./Classes/Command/Enums/player";
 import { ServerTaskHandler } from "./Handlers/Server/handler";
 import { PlayerExtension } from "./extensions/player";
@@ -23,6 +22,8 @@ import { registerIslandHelpCommands } from "./Commands/Island/help";
 import { Server } from "./server";
 import { EntitySlapperTrait } from "./Traits/Entity/Slapper/slapper";
 import { MorphManager } from "./Classes/Morph";
+import { LeaderboardHandler } from "./Handlers/Leaderboard/handler";
+import { BlockSpecialSignTrait } from "./Traits/Block/Sign/sign";
 
 /**
  * @IMPORTS
@@ -38,7 +39,6 @@ import "./Configuration/Morph/morph"
 
 import "./Commands/commands"
 import "./Traits/Block/Liquid/liquidInteraction"
-import { LeaderboardHandler } from "./Handlers/Leaderboard/handler";
 
 class EnderquestPlugin extends Plugin implements PluginEvents {
 
@@ -50,7 +50,8 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     BlockCropTrait,
     BlockMultiBlockCropTrait,
     BlockStemCropTrait,
-    BlockSpawnerTrait
+    BlockSpawnerTrait,
+    BlockSpecialSignTrait
   ];
 
   private readonly itemTraits = [
@@ -296,10 +297,6 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
 
   public afterPlayerPlaceBlock(event: PlayerPlaceBlockSignal): void {
     BlockHandler.onPlace(event)
-  }
-
-  public afterPlayerInteractWithBlock(event: PlayerInteractWithBlockSignal): void {
-    SignHandler.onInteract(event)
   }
 
   public afterEntityHit(event: EntityHitSignal): void {

@@ -1,26 +1,15 @@
 import { SerializedSkin, SkinImage } from "@serenityjs/protocol";
 import { v4 as uuid } from 'uuid';
-import sharp from "sharp";
+import { Jimp } from "jimp";
 
 async function getRawPixelData(imageUrl: string): Promise<Buffer> {
     try {
-        const response = await fetch(imageUrl);
-
-        if (!response.ok) {
-            throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
-        }
-
-        const arrayBuffer = await response.arrayBuffer();
-        const imageBuffer = Buffer.from(arrayBuffer);
-        const rawPixelBuffer = await sharp(imageBuffer)
-            .ensureAlpha()
-            .raw()
-            .toBuffer();
-
-        return rawPixelBuffer;
+        const image = await Jimp.read(imageUrl);
+        return image.bitmap.data;
     } catch (error) {
         //@ts-ignore
-        throw new Error(`Error processing image from URL ${imageUrl}: ${error}`);
+        console.error(`Error processing image from URL ${imageUrl}: ${error.message}`);
+        return Buffer.alloc(0);
     }
 }
 

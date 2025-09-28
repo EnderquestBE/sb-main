@@ -6,7 +6,7 @@ import { Server } from "../../server";
 
 class Scorebar {
     public static TITLE = "§l§dEnder§eQuest §bSB";
-    private static readonly S_GT = " §d➲ §aGT: §f";
+    private static readonly S_GT = " §d➲ §bGT: §f";
     private static readonly S_PLAYERS = " §d➲ §ePlayers: §f";
     private static readonly S_BALANCE = " §d➲ §6Balance: §f$";
     private static readonly S_XP = " §d➲ §cXP: §f";
