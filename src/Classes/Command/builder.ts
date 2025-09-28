@@ -19,7 +19,7 @@ class CommandBuilder {
   private name: string;
   private aliases: string[] = [];
   private description: string;
-  private overloads: CommandOverload<any>[] = [];
+  public overloads: CommandOverload<any>[] = [];
   private permissions: string[] = [];
   private debug: boolean = false;
 

@@ -1,9 +1,13 @@
 import {
+    Block,
     BlockIdentifier,
     EntityInventoryTrait,
+    ItemIdentifier,
     ItemStack,
     ItemStackEnchantableTrait,
+    Player,
     PlayerBreakBlockSignal,
+    PlayerHungerTrait,
     PlayerPlaceBlockSignal,
 } from "@serenityjs/core";
 import { BlockPointValues } from "../../Configuration/Point/point";
@@ -11,6 +15,7 @@ import { Utils } from "../../Utils/utils";
 import { Enchantment, Gamemode } from "@serenityjs/protocol";
 import { Logger, LoggerColors } from "@serenityjs/logger";
 import { BlockOverrideMap } from "../../Configuration/Block/overrides";
+import { StashHandler } from "../Stash/handler";
 
 type ValueOrRange = number | [number, number];
 
@@ -23,7 +28,13 @@ class BlockHandler {
         BlockIdentifier.Wheat,
         BlockIdentifier.Carrots,
         BlockIdentifier.Potatoes,
-        BlockIdentifier.OakLeaves
+        BlockIdentifier.OakLeaves,
+        BlockIdentifier.MobSpawner
+    ])
+
+    private static readonly smelted = new Map<string, ItemIdentifier>([
+        [BlockIdentifier.IronOre, ItemIdentifier.IronIngot],
+        [BlockIdentifier.GoldOre, ItemIdentifier.GoldIngot]
     ])
 
     // Message to show if the player's inventory is full.
@@ -32,66 +43,79 @@ class BlockHandler {
     // Cached fortune multiplier values.
     private static readonly fortunePool = new Map<number, number[]>();
 
-    public static onBreak({ player, block, itemStack }: PlayerBreakBlockSignal): void {
-        // If block has a custom implementation, return.
-        if (this.exemptBlocks.has(block.identifier)) return;
-
+    public static onBreak(player: Player, itemStack: ItemStack | null, ...blocks: Block[]): void {
         const island = player.getWorldIsland();
         if (!island) return;
 
-        const info = BlockPointValues[block.identifier]?.break;
-        if (!info) {
-            if (player.gamemode === Gamemode.Survival) {
-                try {
-                    const id = BlockOverrideMap.get(block.identifier) ?? block.identifier
-                    const item = new ItemStack(id, { stackSize: 1 });
-                    const inventory = player.getTrait(EntityInventoryTrait);
-                    if (!inventory.container.addItem(item)) {
-                        player.info(this.INV_FULL);
+        for (const block of blocks) {
+            // If block has a custom implementation, return.
+            if (this.exemptBlocks.has(block.identifier)) continue;
+
+            // Handle exhaustion.
+            const hunger = player.getTrait(PlayerHungerTrait)
+            if (hunger) hunger.exhaustion += 0.05;
+
+            const info = BlockPointValues[block.identifier]?.break;
+            if (!info) {
+                if (player.gamemode === Gamemode.Survival) {
+                    try {
+                        const id = BlockOverrideMap.get(block.identifier) ?? block.identifier
+                        const item = new ItemStack(id, { stackSize: 1 });
+                        const inventory = player.getTrait(EntityInventoryTrait);
+                        if (!inventory.container.addItem(item)) {
+                            player.info(this.INV_FULL);
+                        }
+                    } catch (e: any) {
+                        this.logger.warn(`§cFailed to add item: §b${block.identifier}\n§cTo player: §e${player.username}\n§r${e.message}`)
                     }
-                } catch (e: any) {
-                    this.logger.warn(`§cFailed to add item: §b${block.identifier}\n§cTo player: §e${player.username}\n§r${e.message}`)
                 }
+                continue;
             }
-            return;
-        }
 
-        // Get item info.
-        let itemId = info.item ?? block.identifier;
-        let itemCount = info.amount ? Utils.randomInt(info.amount[0], info.amount[1]) : 1;
+            // Get item info.
+            let itemId = info.item ?? block.identifier;
+            let itemCount = info.amount ? Utils.randomInt(info.amount[0], info.amount[1]) : 1;
 
-        // Handle island point data.
-        if (info.points) {
-            this._processRange(info.points, (val) => island.addPoints(val));
-        }
-        // Give player XP.
-        if (info.xp) {
-            const value = (this._processRange(info.xp, (val) => player.addXp(val)))
-            if (value && player.getSetting("showXpOverlay")) player.onScreenDisplay.setActionBar(`§l§e>> §aCollected §d${value} §6XP §e<<§r`)
-        }
-        // Handle fortune enchantment if applicable.
-        if (info.applyFortune) {
+            // Handle island point data.
+            if (info.points) {
+                this._processRange(info.points, (val) => island.addPoints(val));
+            }
+            // Give player XP.
+            if (info.xp) {
+                const value = (this._processRange(info.xp, (val) => player.addXp(val)))
+                if (value && player.getSetting("showXpOverlay")) player.onScreenDisplay.setActionBar(`§l§e>> §aCollected §d${value} §6XP §e<<§r`)
+            }
+
+            let stashChance = info.stashChance ?? 1;
+
+            // Handle fortune enchantment if applicable.
             if (itemStack) {
-                const enchantable = itemStack.getTrait(ItemStackEnchantableTrait)
-                if (enchantable) {
-                    const fortuneLevel = enchantable.getEnchantment(Enchantment.Fortune)
+                const enchantmentResults = this.handleEnchantments(itemStack, block, itemId, itemCount, stashChance);
+                itemId = enchantmentResults.itemId;
+                itemCount = enchantmentResults.count;
+                stashChance = enchantmentResults.stashChance;
 
+                // Handle vanilla fortune
+                if (info.applyFortune) {
+                    const enchantable = itemStack.getTrait(ItemStackEnchantableTrait);
+                    const fortuneLevel = enchantable?.getEnchantment(Enchantment.Fortune);
                     if (fortuneLevel && fortuneLevel > 0) {
-                        const multiplier = this.calculateFortuneMultiplier(fortuneLevel);
-                        itemCount *= multiplier;
+                        itemCount *= this.calculateFortuneMultiplier(fortuneLevel);
                     }
                 }
             }
-        }
 
-        if (player.gamemode !== Gamemode.Survival) return
+            if (info.stashChance) StashHandler.handleStashChance(player, stashChance)
 
-        if (itemCount <= 0) return;
-        const item = new ItemStack(itemId, { stackSize: itemCount });
-        const inventory = player.getTrait(EntityInventoryTrait);
+            if (player.gamemode !== Gamemode.Survival) return;
 
-        if (!inventory.container.addItem(item)) {
-            player.info(this.INV_FULL);
+            if (itemCount <= 0) continue;
+            const item = new ItemStack(itemId, { stackSize: itemCount });
+            const inventory = player.getTrait(EntityInventoryTrait);
+
+            if (!inventory.container.addItem(item)) {
+                player.info(this.INV_FULL);
+            }
         }
     }
 
@@ -144,6 +168,58 @@ class BlockHandler {
         const pool = this.fortunePool.get(level)!
         const multiplier = pool[Utils.randomInt(0, pool.length - 1)]!
         return multiplier;
+    }
+
+    /**
+     * Handles custom enchantments that affect blocks.
+     */
+    private static handleEnchantments(
+        itemStack: ItemStack,
+        block: Block,
+        initialItemId: string,
+        initialCount: number,
+        initialStashChance: number
+    ): { itemId: string, count: number, stashChance: number } {
+        let itemId = initialItemId;
+        let count = initialCount;
+        let stashChance = initialStashChance;
+
+        if (!itemStack.isCustomEnchanted()) return { itemId, count, stashChance };
+
+        const enchantments = itemStack.getCustomEnchantments() ?? [];
+
+        for (const enchantment of enchantments) {
+            const { id, level, info } = enchantment;
+            const chance = info.activationChance;
+            const effectiveChance = Math.max(chance.base - (level * chance.perLevel), chance.minimum);
+
+            switch (id) {
+                case "prospect":
+                    stashChance *= (level * 0.09) + 1;
+                    break;
+
+                case "midas":
+                    if (block.identifier === BlockIdentifier.Cobblestone && Math.random() * effectiveChance <= 1) {
+                        itemId = ItemIdentifier.GoldOre;
+                    }
+                    break;
+
+                case "molten":
+                    if (this.smelted.has(itemId) && Math.random() * effectiveChance <= 1) {
+                        itemId = this.smelted.get(itemId)!;
+                    }
+                    break;
+
+                case "precious":
+                    if (block.identifier === BlockIdentifier.MelonBlock && Math.random() * effectiveChance <= 1) {
+                        itemId = ItemIdentifier.MelonBlock;
+                        count = 1;
+                    }
+                    break;
+            }
+        }
+
+        return { itemId, count, stashChance };
     }
 
     /**

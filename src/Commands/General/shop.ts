@@ -1,5 +1,5 @@
 import { Entity } from "@serenityjs/core";
-import { CommandBuilder, CommandOverload } from "../../Classes/classes"
+import { CommandBuilder, CommandOverload } from "../../Classes"
 import { MainShop } from "../../Configuration/Shop/Main/main";
 
 new CommandBuilder("shop", "Opens the server shop.").addOverload(

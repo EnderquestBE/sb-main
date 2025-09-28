@@ -30,7 +30,11 @@ class ShopItemTransactionPage extends ShopTransactionPage {
         const inventory = player.inventory
         try {
             // Give item.
-            if (this.item.item) inventory.addItem(this.item.item)
+            if (this.item.item) {
+                const item = this.item.item
+                item.stackSize = amount
+                inventory.addItem(item)
+            }
             else inventory.giveItem(this.item.id, amount);
         } catch (e) {
             return player.error("Transaction failed. Try again later.")

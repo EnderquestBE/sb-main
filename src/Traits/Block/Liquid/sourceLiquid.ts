@@ -7,6 +7,7 @@ import {
 import { Direction, LiquidType } from "../../../Types/types";
 import { FlowingBlockMap, FlowSpeed, LiquidBlockMap } from "../../../Configuration/Block/liquid";
 import { FlowingLiquidType } from "../../../Types/Block/liquid";
+import { ServerTaskHandler } from "../../../Handlers/Server/handler";
 
 const directions: Direction[] = ["north", "west", "east", "south"];
 
@@ -41,7 +42,7 @@ class SourceLiquidBlockTrait extends BlockTrait {
   public flowDownward(flowingBlockType: BlockIdentifier, flowSpeed: number) {
     const fallBlock = this.block.below(1);
     if (fallBlock.identifier !== BlockIdentifier.Air) return;
-    setTimeout(() => {
+    ServerTaskHandler.queueTask(() => {
       fallBlock.setPermutation(
         BlockPermutation.resolve(flowingBlockType, {
           liquid_depth: 8,

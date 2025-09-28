@@ -16,6 +16,8 @@ class ShopBuilder {
 
     public readonly pages: Map<ShopCategory, ShopPage> = new Map();
 
+    public readonly items: Map<string, ShopItem> = new Map();
+
     public constructor(id: string, name: string) {
         this.id = id;
         this.data = { info: { id, name, currency: "money" }, categories: [], items: [] }
@@ -31,6 +33,7 @@ class ShopBuilder {
             item.currency ??= defaultCurrency;
             item.display ??= { name: Utils.formatString(item.id), price: CurrencyInfo[item.currency].prefix + Utils.formatInt(item.price) + CurrencyInfo[item.currency].suffix };
             item.slider ??= { step: 1, max: 64 };
+            this.items.set(item.id, item);
         }
 
         for (const subCategory of category.categories) {
@@ -59,6 +62,7 @@ class ShopBuilder {
             currency: currency,
             slider: item.slider ?? { step: 1, max: 64 },
         });
+        this.items.set(item.id, item);
         return this;
     }
 
@@ -87,6 +91,31 @@ class ShopBuilder {
                 this.setSubCategoryPages(subCategory);
             }
         }
+    }
+
+    public updateCategory(category: CategoryBuilder) {
+        const categoryInfo = category.info;
+        this._processCategory(categoryInfo, this.data.info.currency);
+        const existingIndex = this.data.categories.findIndex(cat => cat.id === categoryInfo.id);
+        if (existingIndex !== -1) {
+            this.data.categories[existingIndex] = categoryInfo;
+        } else {
+            this.data.categories.push(categoryInfo);
+        }
+        this.pages.set(categoryInfo, new ShopFormPage(this, categoryInfo));
+        this.setSubCategoryPages(categoryInfo);
+        return this;
+    }
+
+    public showCategory(
+        player: Player,
+        id: string
+    ) {
+        const category = this.data.categories.find(cat => cat.id === id);
+        if (!category) {
+            throw new Error(`Category with id '${id}' does not exist in shop '${this.id}'.`);
+        }
+        this.showPage(player, category, []);
     }
 
     public showPage(

@@ -3,31 +3,34 @@ import { BlockBreak } from "../../Types/types";
 
 const BlockPointValues: { [key in BlockIdentifier]?: BlockBreak } = {
     /* Ores */
+    [BlockIdentifier.Cobblestone]: {
+        break: { xp: 0 }
+    },
     [BlockIdentifier.CoalOre]: {
-        break: { points: [0, 1], xp: [0, 2], item: ItemIdentifier.Coal, applyFortune: true }
+        break: { points: [0, 1], xp: [0, 2], item: ItemIdentifier.Coal, applyFortune: true, stashChance: 1 }
     },
     [BlockIdentifier.IronOre]: {
-        break: { points: [0, 2] }
+        break: { points: [0, 2], stashChance: 1 }
     },
     [BlockIdentifier.GoldOre]: {
-        break: { points: [0, 2] }
+        break: { points: [0, 2], stashChance: 1 }
     },
     [BlockIdentifier.LapisOre]: {
-        break: { points: [0, 3], xp: [2, 5], item: ItemIdentifier.LapisLazuli, amount: [1, 4], applyFortune: true }
+        break: { points: [0, 3], xp: [2, 5], item: ItemIdentifier.LapisLazuli, amount: [4, 4], applyFortune: true, stashChance: 1 }
     },
     [BlockIdentifier.DiamondOre]: {
-        break: { points: [0, 3], xp: [2, 6], item: ItemIdentifier.Diamond, applyFortune: true }
+        break: { points: [0, 3], xp: [2, 6], item: ItemIdentifier.Diamond, applyFortune: true, stashChance: 1 }
     },
     [BlockIdentifier.EmeraldOre]: {
-        break: { points: [0, 3], xp: [3, 7], item: ItemIdentifier.Emerald, applyFortune: true }
+        break: { points: [0, 3], xp: [3, 7], item: ItemIdentifier.Emerald, applyFortune: true, stashChance: 1 }
     },
 
     /* Crops */
     [BlockIdentifier.Pumpkin]: {
-        break: { points: 5 }
+        break: { points: 5, stashChance: 3 }
     },
     [BlockIdentifier.MelonBlock]: {
-        break: { points: 7, item: ItemIdentifier.MelonSlice, amount: [3, 7], applyFortune: true }
+        break: { points: 7, item: ItemIdentifier.MelonSlice, amount: [3, 7], applyFortune: true, stashChance: 3 }
     },
 
     /* Ore Blocks */

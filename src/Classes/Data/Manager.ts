@@ -1,5 +1,5 @@
 import { Document, UpdateFilter } from "mongodb";
-import { CollectionManager } from "../classes";
+import { CollectionManager } from "..";
 import { OperationResult } from "../../Types/types";
 
 /**

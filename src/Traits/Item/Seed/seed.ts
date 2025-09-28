@@ -10,7 +10,7 @@ import {
     EntityInventoryTrait,
 } from "@serenityjs/core";
 import { BlockFace, ItemUseMethod } from "@serenityjs/protocol";
-import { Island } from "../../../Classes/classes";
+import { Island } from "../../../Classes";
 import { CropLevelRequirement } from "../../../Configuration/config";
 
 const MessageCooldown = new Map<string, number>()

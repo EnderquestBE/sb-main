@@ -1,7 +1,6 @@
 import { CustomEnum, Entity, LevelDBProvider, ModalForm, StringEnum } from "@serenityjs/core"
-import { CommandOverload, Island, IslandDatabase } from "../../Classes/classes"
+import { CommandOverload, Island, IslandDatabase, IslandGenerator } from "../../Classes"
 import { validifyIslandName } from "../../Utils/utils"
-import { IslandGenerator } from "../../Classes/Island/generator"
 import { Gamemode } from "@serenityjs/protocol"
 
 class IslandCreateEnum extends CustomEnum {

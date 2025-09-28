@@ -26,13 +26,17 @@ interface PlayerData {
    */
   ranks: (keyof typeof PlayerRank)[]
   /**
-   * The rank the player is currently using.
+   * The ranks the player is currently using.
    */
-  rank: keyof typeof PlayerRank
+  activeRanks: (keyof typeof PlayerRank)[]
   /**
    * The chat color the player is currently using.
    */
   chatColor: string
+  /**
+   * The size of the player's chat messages.
+   */
+  chatSize: boolean
   /**
    * The island UUID the player currently belongs to.
    */

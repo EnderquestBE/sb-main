@@ -1,5 +1,6 @@
 import { BlockIdentifier, EntityHitSignal, PlayerBreakBlockSignal, PlayerInteractWithBlockSignal, PlayerOpenedContainerSignal, PlayerPlaceBlockSignal } from "@serenityjs/core";
 import { Vector3f } from "@serenityjs/protocol";
+import { EnchantmentHandler } from "../Enchantment/handler";
 
 const MessageCooldown = new Map<string, number>()
 
@@ -12,7 +13,7 @@ class PermissionsHandler {
         BlockIdentifier.MelonBlock
     ])
 
-    public static onBreak({ player, block }: PlayerBreakBlockSignal) {
+    public static onBreak({ player, block, itemStack }: PlayerBreakBlockSignal) {
         if (!player.isWorldIsland()) {
             player.error("You do not have permission to break blocks here.")
             return false
@@ -27,6 +28,8 @@ class PermissionsHandler {
             player.error("You've reached the island boundary! Expand your island with §d/is expand §cto continue ahead!")
             return false
         }
+        // Handle custom enchantments on block break.
+        EnchantmentHandler.onBlockBreak(player, itemStack, block);
         return true
     }
 

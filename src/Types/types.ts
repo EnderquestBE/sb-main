@@ -20,3 +20,5 @@ export * from "./Break/data"
 export * from "./Form/dataFormButton"
 /* Shop */
 export * from "./Shop/shop"
+/* Enchantment */
+export * from "./Enchantment/types"

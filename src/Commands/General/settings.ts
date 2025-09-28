@@ -1,5 +1,5 @@
 import { Entity } from "@serenityjs/core";
-import { CommandBuilder, CommandOverload, Settings } from "../../Classes/classes"
+import { CommandBuilder, CommandOverload, Settings } from "../../Classes"
 
 new CommandBuilder("settings", "Change your settings.").setAliases(["pref"]).addOverload(
     new CommandOverload({

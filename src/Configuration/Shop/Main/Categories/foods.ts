@@ -2,6 +2,8 @@ import { ItemIdentifier } from "@serenityjs/core";
 import { CategoryBuilder } from "../../../../Classes/Shop/CategoryBuilder";
 
 const ShopFoodsCategory = new CategoryBuilder({ id: "foods", display: { name: "Foods" } })
+    .addItem({ id: ItemIdentifier.Apple, price: 100, transactionSound: "dig.wood" })
+/*
     .addItem({ id: ItemIdentifier.Cookie, price: 350, transactionSound: "dig.wood" })
     .addItem({ id: ItemIdentifier.GlowBerries, price: 450, transactionSound: "dig.wood" })
     .addItem({ id: ItemIdentifier.BeetrootSoup, price: 2250, transactionSound: "dig.wood" })
@@ -10,5 +12,6 @@ const ShopFoodsCategory = new CategoryBuilder({ id: "foods", display: { name: "F
     .addItem({ id: ItemIdentifier.Cake, price: 6250, transactionSound: "dig.wood" })
     .addItem({ id: ItemIdentifier.GoldenApple, price: 7500, transactionSound: "dig.wood" })
     .addItem({ id: ItemIdentifier.EnchantedGoldenApple, price: 250000, transactionSound: "dig.wood" });
+    */
 
 export { ShopFoodsCategory };

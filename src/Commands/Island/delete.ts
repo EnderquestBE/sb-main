@@ -1,8 +1,7 @@
 import { CustomEnum, Entity } from "@serenityjs/core"
-import { CommandOverload, Island, IslandDatabase } from "../../Classes/classes"
+import { CommandOverload, Island, IslandDatabase, Warp } from "../../Classes"
 import { resolve } from "path"
 import { rmdir } from "fs/promises"
-import { Warp } from "../../Classes/Warp/warp"
 
 const DeleteCooldownMap = new Map<string, number>()
 

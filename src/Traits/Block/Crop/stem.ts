@@ -7,7 +7,7 @@ import {
     EntityInventoryTrait,
     ItemIdentifier,
 } from "@serenityjs/core";
-import { Island } from "../../../Classes/classes";
+import { Island } from "../../../Classes";
 class BlockStemCropTrait extends BlockTrait {
     public static readonly identifier: string = "minecraft:stem";
     public static readonly types: Array<BlockIdentifier> = [

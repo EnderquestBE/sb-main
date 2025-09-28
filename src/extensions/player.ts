@@ -1,13 +1,12 @@
 
 import { Player } from "@serenityjs/core";
-import { PlayerSession } from "../Classes/Data/PlayerSession";
-import { PlayerDatabase } from "../Classes/Database/Collections/Player";
+import { Island, PlayerDatabase, PlayerSession } from "../Classes";
 import { OperationResult, PlayerData, RankInfo } from "../Types/types";
 import { ChatSource, DEFAULT_PLAYER_DATA, PERMISSION_INTEGER } from "../Configuration/config";
 import { PlayerRank, RANKS } from "../Configuration/Ranks/ranks";
-import { Island } from "../Classes/Data/Island";
 import { Setting } from "../Configuration/Settings/settings";
 import { PlayerInventory } from "./inventory";
+import { DeviceOS, EquipmentSlot } from "@serenityjs/protocol";
 
 const sessionSymbol = Symbol("player-session");
 
@@ -15,6 +14,8 @@ declare module "@serenityjs/core" {
   interface Player {
     [sessionSymbol]?: PlayerSession;
     session(): PlayerSession | null;
+
+    getDevice(): string;
 
     getTimePlayed(): number
     setTimePlayed(value: number): Promise<OperationResult>
@@ -50,8 +51,13 @@ declare module "@serenityjs/core" {
     hasRank(rankId: string): boolean;
     addRank(rankId: string): Promise<OperationResult>;
     removeRank(rankId: string): Promise<OperationResult>;
-    getRank(): RankInfo;
-    setRank(rankId: string): Promise<OperationResult>;
+    getPrimaryRank(): RankInfo;
+    getActiveRanks(): RankInfo[];
+    pushActiveRank(rankId: string): Promise<OperationResult>;
+    popActiveRank(): Promise<OperationResult>;
+    updateRanks(): void;
+    getChatSize(): boolean;
+    setChatSize(large: boolean): Promise<OperationResult>;
     getChatColor(): string;
     setChatColor(color: string): Promise<OperationResult>;
 
@@ -69,13 +75,15 @@ declare module "@serenityjs/core" {
     getSetting(key: keyof typeof Setting): string | boolean | undefined
     setSetting(key: keyof typeof Setting, value: string | boolean): Promise<OperationResult>;
     hasSetting(key: string): boolean;
+
+    // While Equipped Check
+    whileEquippedCheck: { [key in EquipmentSlot]: NodeJS.Timeout | null }
   }
 }
 
 class PlayerExtension {
 
   private static readonly NO_SESSION_RESULT: Promise<OperationResult> = Promise.resolve({ success: false, reason: "Player session not available." });
-
 
   public static setSession(player: Player, session: PlayerSession): void {
     player[sessionSymbol] = session;
@@ -107,6 +115,11 @@ class PlayerExtension {
 Player.prototype.session = function (this: Player): PlayerSession | null {
   return PlayerExtension.getSession(this);
 };
+
+Player.prototype.getDevice = function (this: Player): string {
+  const device = DeviceOS[this.clientSystemInfo.os];
+  return device;
+}
 
 Player.prototype.getTimePlayed = function (this: Player): number {
   const session = PlayerExtension.getSession(this);
@@ -207,6 +220,7 @@ Player.prototype.removeXp = async function (this: Player, amount: number): Promi
 Player.prototype.setXp = async function (this: Player, amount: number): Promise<OperationResult> {
   const session = PlayerExtension.getSession(this);
   if (!session) return PlayerExtension['NO_SESSION_RESULT'];
+  this.setExperience(amount);
   return session.setXp(amount);
 }
 
@@ -222,21 +236,74 @@ Player.prototype.hasRank = function (this: Player, rankId: keyof typeof PlayerRa
 Player.prototype.addRank = async function (this: Player, rankId: keyof typeof PlayerRank): Promise<OperationResult> {
   const session = PlayerExtension.getSession(this);
   if (!session) return PlayerExtension['NO_SESSION_RESULT'];
-  return session.addRank(rankId);
+  return session.addRank(rankId).then((result) => {
+    if (result.success) {
+      this.updateRanks();
+    }
+    return result;
+  });
 }
 Player.prototype.removeRank = async function (this: Player, rankId: keyof typeof PlayerRank): Promise<OperationResult> {
   const session = PlayerExtension.getSession(this);
   if (!session) return PlayerExtension['NO_SESSION_RESULT'];
-  return session.removeRank(rankId);
+  return session.removeRank(rankId).then((result) => {
+    if (result.success) {
+      this.updateRanks();
+    }
+    return result;
+  });
 }
-Player.prototype.getRank = function (this: Player): RankInfo {
+Player.prototype.getPrimaryRank = function (this: Player): RankInfo {
   const session = PlayerExtension.getSession(this);
-  return session ? session.getRank() : RANKS.get("GUEST")!;
+  return session ? session.getPrimaryRank() : RANKS.get("GUEST")!;
 }
-Player.prototype.setRank = async function (this: Player, rankId: keyof typeof PlayerRank): Promise<OperationResult> {
+Player.prototype.getActiveRanks = function (this: Player): RankInfo[] {
+  const session = PlayerExtension.getSession(this);
+  return session ? session.getActiveRanks() : [RANKS.get("GUEST")!];
+}
+Player.prototype.pushActiveRank = async function (this: Player, rankId: keyof typeof PlayerRank): Promise<OperationResult> {
   const session = PlayerExtension.getSession(this);
   if (!session) return PlayerExtension['NO_SESSION_RESULT'];
-  return session.setRank(rankId);
+  return session.pushActiveRank(rankId).then((result) => {
+    if (result.success) {
+      this.updateRanks();
+    }
+    return result;
+  });
+}
+Player.prototype.popActiveRank = async function (this: Player): Promise<OperationResult> {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return PlayerExtension['NO_SESSION_RESULT'];
+  return session.popActiveRank().then((result) => {
+    if (result.success) {
+      this.updateRanks();
+    }
+    return result;
+  })
+}
+Player.prototype.updateRanks = function (this: Player): void {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return
+  const ranks = session.getActiveRanks()
+  if (ranks.length === 0) return;
+
+  // Update rank permissions.
+  const newPermissions = this.permissions.permissions.filter((x) => !x.startsWith("rank."))
+  for (const rank of ranks) {
+    newPermissions.push(...rank.permissions)
+  }
+  this.permissions.permissions = newPermissions
+  // Set chat color.
+  this.setChatColor(ranks[0]!.color)
+}
+Player.prototype.getChatSize = function (this: Player): boolean {
+  const session = PlayerExtension.getSession(this);
+  return session ? session.getChatSize() : DEFAULT_PLAYER_DATA.chatSize
+}
+Player.prototype.setChatSize = async function (this: Player, large: boolean): Promise<OperationResult> {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return PlayerExtension['NO_SESSION_RESULT'];
+  return session.setChatSize(large);
 }
 Player.prototype.getChatColor = function (this: Player): string {
   const session = PlayerExtension.getSession(this);
@@ -296,5 +363,25 @@ Player.prototype.hasSetting = function (this: Player, key: string): boolean {
   const session = PlayerExtension.getSession(this);
   return session ? session.hasSetting(key) : false;
 }
+
+// While Equipped Check
+const whileEquippedCheckSymbol = Symbol("whileEquippedCheck");
+
+Object.defineProperty(Player.prototype, "whileEquippedCheck", {
+  get: function (this: Player & { [whileEquippedCheckSymbol]?: any }) {
+    if (!this[whileEquippedCheckSymbol]) {
+      this[whileEquippedCheckSymbol] = {
+        [EquipmentSlot.Head]: null,
+        [EquipmentSlot.Chest]: null,
+        [EquipmentSlot.Legs]: null,
+        [EquipmentSlot.Feet]: null,
+      }
+    }
+    return this[whileEquippedCheckSymbol];
+  },
+  set: function (this: Player & { [whileEquippedCheckSymbol]?: any }, value) {
+    this[whileEquippedCheckSymbol] = value;
+  }
+});
 
 export { PlayerExtension };

@@ -1,5 +1,5 @@
 import { Player } from "@serenityjs/core"
-import { Island } from "../../Classes/classes"
+import { Island } from "../.."
 
 interface IslandPerkType {
     id: string, // The ID associated with the perk.
@@ -18,22 +18,20 @@ class IslandPerkUnlocks {
                 id: "flight",
                 name: "Flight",
                 unlock: {
-                    permissions: ["enderquest.fly"]
+                    permissions: ["island.fly"]
                 },
                 level: 100
             }
         }
 
     public static applyPermissions(player: Player, island: Island) {
-        const islandPerks = island.getPerks();
-        for (const perkId of islandPerks) {
+        // Remove all island perk permissions first.
+        const newPermissions = player.permissions.permissions.filter((x) => !x.startsWith("island."))
+        newPermissions.push(...island.getPerks().flatMap((perkId) => {
             const perk = this.perks[perkId as keyof typeof this.perks];
-            if (perk?.unlock.permissions) {
-                for (const permission of perk.unlock.permissions) {
-                    player.addPermission(permission);
-                }
-            }
-        }
+            return perk?.unlock.permissions ?? []
+        }))
+        player.permissions.permissions = newPermissions
     }
 
     public static getAll(): IslandPerkType[] {

@@ -1,4 +1,4 @@
-import { Island } from "../../Classes/classes"
+import { Island } from "../.."
 import { IslandLimitType } from "../../Types/types"
 
 interface IslandLimitUnlock {

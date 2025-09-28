@@ -69,7 +69,9 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
   public getMoney(): number { return this.data.balance.money; }
   public getXp(): number { return this.data.balance.xp; }
   public getRankIds(): string[] { return this.data.ranks; }
-  public getRank(): RankInfo { return RANKS.get(this.data.rank as PlayerRank)!; }
+  public getPrimaryRank(): RankInfo { return RANKS.get(this.data.activeRanks[0] as PlayerRank)!; }
+  public getActiveRanks(): RankInfo[] { return this.data.activeRanks.map(id => RANKS.get(id as PlayerRank)!) }
+  public getChatSize(): boolean { return this.data.chatSize }
   public getChatColor(): string { return this.data.chatColor }
   public getIslandName(): string { return this.data.island; }
   public getIsland(): Island | null { return Island.loadSync(this.data.island) }
@@ -204,12 +206,30 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
   }
 
   /**
-   * Sets the player's active rank.
-   * @param rankId The ID of the rank to set as active.
+   * Pushes a rank to the player's active ranks.
+   * @param rankId The ID of the rank to push.
    */
-  public async setRank(rankId: keyof typeof PlayerRank): Promise<OperationResult> {
+  public async pushActiveRank(rankId: keyof typeof PlayerRank): Promise<OperationResult> {
     if (!this.hasRank(rankId)) return { success: false, reason: "Player does not own this rank." };
-    return this.updateOne({ $set: { rank: rankId } });
+    return this._addToArray('activeRanks', rankId);
+  }
+
+  /**
+   * Pops a rank from the player's active ranks.
+   */
+  public async popActiveRank(): Promise<OperationResult> {
+    if (this.data.activeRanks.length <= 1) return { success: false, reason: "You must have at least one active rank." };
+    const newRanks = [...this.data.activeRanks];
+    newRanks.pop();
+    return this.updateOne({ $set: { activeRanks: newRanks } });
+  }
+
+  /**
+   * Sets the player's chat size preference.
+   * @param large True for large chat, false for small chat.
+   */
+  public async setChatSize(large: boolean): Promise<OperationResult> {
+    return this.updateOne({ $set: { chatSize: large } });
   }
 
   /**

@@ -1,4 +1,4 @@
-import { CommandBuilder } from "../../Classes/classes";
+import { CommandBuilder } from "../../Classes";
 import { IslandAcceptCommand } from "./accept";
 import { IslandBanCommand } from "./ban";
 import { IslandBankCommand } from "./bank";
@@ -11,6 +11,7 @@ import { IslandDemoteCommand } from "./demote";
 import { IslandDepositCommand } from "./deposit";
 import { IslandExpandCommand } from "./expand";
 import { IslandGoCommand } from "./go";
+import { IslandHelpCommand } from "./help";
 import { IslandHomeCommand } from "./home";
 import { IslandHomesCommand, IslandHomesListCommand } from "./homes";
 import { IslandInviteCommand } from "./invite";
@@ -65,6 +66,7 @@ new CommandBuilder("island", "Create an island.").setAliases(["is", "skyblock", 
   .addOverload(IslandDelHomeCommand)
   .addOverload(IslandPerksCommand)
   .addOverload(IslandCropsCommand)
-
   .addOverload(IslandGoCommand)
+
+  .addOverload(IslandHelpCommand)
   .register("Island")

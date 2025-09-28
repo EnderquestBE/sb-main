@@ -1,5 +1,5 @@
 import { Player } from "@serenityjs/core";
-import { CommandBuilder, CommandOverload } from "../../Classes/classes";
+import { CommandBuilder, CommandOverload } from "../../Classes";
 import { SellableItems } from "../../Configuration/config";
 import { Utils } from "../../Utils/utils";
 

@@ -1,5 +1,6 @@
 import { Player, PlayerChatSignal, Serenity } from "@serenityjs/core";
-import { Filter, Island } from "../../Classes/classes";
+import { Filter, Island } from "../../Classes";
+import { Color } from "../../Types/types";
 
 class ChatHandler {
     private static readonly lastConversationMap = new Map<string, string>();
@@ -34,6 +35,13 @@ class ChatHandler {
         return false
     }
 
+    public static broadcast(message: string, serenity: Serenity) {
+        const recipients = serenity.getPlayers()
+        for (const recipient of recipients) {
+            recipient.info(message)
+        }
+    }
+
     public static onJoin(player: Player, serenity: Serenity) {
         const recipients = serenity.getPlayers()
         for (const recipient of recipients) {
@@ -49,7 +57,20 @@ class ChatHandler {
     }
 
     private static format(player: Player, island: Island | null, message: string) {
-        return `§f➙ ${island ? `§7~§f${island.getLevel()}§7~ §f*${island.getData().owner.xuid === player.xuid ? "*" : ""} §5${island.getName()} ` : ""}§7[${player.getRank().displayName}§7] §a${player.username} §7» §f${message}`
+        const level = island?.getLevel() ?? 0
+        return `${player.getChatSize() ? "" : "§f➙ "}${island ? `§7~${this.chooseIslandLevelColor(level)}${level}§7~ §f*${island.getData().owner.xuid === player.xuid ? "*" : ""} §5${island.getName()} ` : ""}${player.getActiveRanks().reverse().map((x) => `§7[${x.displayName}§7]`).join("")} §a${player.username} §7» ${Color[player.getChatColor() as keyof typeof Color]}${message}`
+    }
+
+    private static chooseIslandLevelColor(level: number) {
+        if (level < 10) return "§f"
+        else if (level < 20) return "§4"
+        else if (level < 50) return "§6"
+        else if (level < 100) return "§c"
+        else if (level < 200) return "§a"
+        else if (level < 300) return "§e"
+        else if (level < 500) return "§b"
+        else if (level < 1000) return "§9"
+        else return "§f"
     }
 }
 

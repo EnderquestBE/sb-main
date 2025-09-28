@@ -14,7 +14,7 @@ class PlayerInventory {
   public readonly getItemCount = (itemId: string) => {
     const { container } = this.player.getTrait(EntityInventoryTrait);
     return container.storage.reduce((sum, item) => {
-      return sum + (item?.identifier === itemId ? item?.stackSize : 0);
+      return sum + (item?.identifier === itemId && item.getDisplayName() === "" && item.maxStackSize === 64 ? item?.stackSize : 0);
     }, 0);
   };
 
@@ -81,6 +81,42 @@ class PlayerInventory {
       }
       if (clearCount >= (clearAmount ?? 1)) break;
     }
+  };
+
+  public readonly consume = (itemId: string, amount: number, requiresNbt: { [key: string]: any }): boolean => {
+    const { container } = this.player.getTrait(EntityInventoryTrait);
+    let consumeAmount = amount;
+    let consumeCount = 0;
+
+    for (const [slot, itemStack] of Object.entries(container.storage)) {
+      if (!itemStack || itemStack.type.identifier !== itemId) {
+        continue;
+      }
+
+      if (requiresNbt) {
+        let matches = true;
+        for (const [key, value] of Object.entries(requiresNbt)) {
+          if (itemStack.nbt.get(key)?.valueOf() !== value) {
+            matches = false;
+            break;
+          }
+        }
+        if (!matches) continue;
+      }
+
+      const stackAmount = itemStack.stackSize;
+      const amountLeftToConsume = (consumeAmount ?? 1) - consumeCount;
+
+      if (stackAmount <= amountLeftToConsume) {
+        container.clearSlot(Number.parseInt(slot));
+        consumeCount += stackAmount;
+      } else {
+        itemStack.setStackSize(stackAmount - amountLeftToConsume);
+        consumeCount += amountLeftToConsume;
+      }
+      if (consumeCount >= (consumeAmount ?? 1)) break;
+    }
+    return consumeCount >= (consumeAmount ?? 1);
   };
 }
 

@@ -1,5 +1,5 @@
 import { EntityInventoryTrait, IntegerEnum, ItemStack, Player, StringEnum } from "@serenityjs/core";
-import { CommandBuilder, CommandOverload } from "../../Classes/classes";
+import { CommandBuilder, CommandOverload } from "../../Classes";
 
 new CommandBuilder("cgive", "Gives an unrestricted itemstack.")
     .setPermissions(["serenity.operator"])

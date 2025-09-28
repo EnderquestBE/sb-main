@@ -1,5 +1,5 @@
 import { CustomEnum, Entity } from "@serenityjs/core";
-import { CommandOverload, Island } from "../../Classes/classes";
+import { CommandOverload, Island } from "../../Classes";
 import { IslandLimitType } from "../../Types/types";
 import { IslandLimitUnlocks } from "../../Handlers/Island/limits";
 import { Utils } from "../../Utils/utils";

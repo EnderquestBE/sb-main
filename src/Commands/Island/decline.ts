@@ -1,7 +1,6 @@
 import { CustomEnum, Entity } from "@serenityjs/core";
-import { CommandOverload } from "../../Classes/classes";
+import { CommandOverload, PlayerEnum } from "../../Classes";
 import { IslandInvites } from "../../Handlers/Island/invites";
-import { PlayerEnum } from "../../Classes/Command/Enums/player";
 import { Server } from "../../server";
 
 class IslandDeclineEnum extends CustomEnum {

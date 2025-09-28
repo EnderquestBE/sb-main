@@ -5,7 +5,7 @@
   "description": "Main functionality for the Enderquest Skyblock server.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "scripts": {
     "build": "tsup",
     "watch": "tsup --watch"
@@ -21,6 +21,7 @@
   "devDependencies": {
     "@types/node": "^24.5.2",
     "@types/uuid": "^10.0.0",
+    "jimp": "^1.6.0",
     "mongodb": "^6.19.0",
     "tsup": "^8.3.5",
     "typescript": "^5.6.3",

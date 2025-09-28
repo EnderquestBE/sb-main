@@ -7,7 +7,20 @@ const BlockOverrides: Map<BlockIdentifier[], ItemIdentifier> = new Map([[
 [
     [BlockIdentifier.LitFurnace],
     ItemIdentifier.Furnace
-]])
+],
+[
+    [BlockIdentifier.PumpkinStem],
+    ItemIdentifier.PumpkinSeeds
+],
+[
+    [BlockIdentifier.MelonStem],
+    ItemIdentifier.MelonSeeds
+],
+[
+    [BlockIdentifier.Farmland],
+    ItemIdentifier.Dirt
+]
+])
 
 const BlockOverrideMap: Map<BlockIdentifier, ItemIdentifier> = new Map()
 

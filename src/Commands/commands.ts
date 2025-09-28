@@ -2,6 +2,18 @@
 import "./Admin/data"
 import "./Admin/resetdb"
 import "./Admin/cgive"
+import "./Admin/rank"
+import "./Admin/spawnertest"
+import "./Admin/ce"
+import "./Admin/tome"
+import "./Admin/scroll"
+import "./Admin/rot"
+import "./Admin/morph"
+import "./Admin/stash"
+import "./Admin/playeradmin"
+import "./Admin/islandadmin"
+import "./Admin/money"
+import "./Admin/xp"
 
 /** General Commands */
 import "./General/settings"
@@ -14,9 +26,23 @@ import "./General/pay"
 import "./General/vendor"
 import "./General/message"
 import "./General/reply"
+import "./General/buy"
 
 /** Island Commands */
 import "./Island/island"
 
 /** Rank Commands */
 import "./Rank/fly"
+import "./Rank/chatsize"
+import "./Rank/sellall"
+import "./Rank/sellallxp"
+
+/** Enchantment Commands */
+import "./Enchantment/merge"
+import "./Enchantment/binding"
+import "./Enchantment/refine"
+import "./Enchantment/master"
+import "./Enchantment/expel"
+import "./Enchantment/temper"
+import "./Enchantment/restore"
+import "./Enchantment/celist"

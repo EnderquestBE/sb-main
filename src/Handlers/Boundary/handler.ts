@@ -1,6 +1,6 @@
 import { Player, WorldTickSignal } from "@serenityjs/core";
 import { Vector3f } from "@serenityjs/protocol";
-import { Warp } from "../../Classes/Warp/warp";
+import { Warp } from "../../Classes";
 import { WarpLocation } from "../../Configuration/Warp/warpLocation";
 
 class BoundaryHandler {

@@ -4,6 +4,7 @@ interface BreakData {
     points?: number | [number, number]; // Island points to be given on break.
     xp?: number | [number, number]; // XP to be given on break.
     applyFortune?: boolean // Whether or not to apply a multiplier to the amount from the fortune enchantment.
+    stashChance?: number // If defined, acts as a multiplier on the chance of receiving a stash. Otherwise, doesn't drop a stash.
 }
 
 interface PlaceData {

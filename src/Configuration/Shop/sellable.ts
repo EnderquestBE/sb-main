@@ -35,8 +35,29 @@ const SellableItems = new Map<ItemIdentifier, SellableItem>([
     [ItemIdentifier.MelonSlice, { money: 80, xp: 8 }],
     [ItemIdentifier.MelonBlock, { money: 720, xp: 72 }],
 
+    /* Spawn Drops */
+    [ItemIdentifier.RottenFlesh, { money: 25, xp: 2.5 }],
+    [ItemIdentifier.Porkchop, { money: 30, xp: 3 }],
+    [ItemIdentifier.CookedPorkchop, { money: 40, xp: 4 }],
+    [ItemIdentifier.Chicken, { money: 30, xp: 3 }],
+    [ItemIdentifier.CookedChicken, { money: 40, xp: 4 }],
+    [ItemIdentifier.Feather, { money: 50, xp: 5 }],
+    [ItemIdentifier.Beef, { money: 40, xp: 4 }],
+    [ItemIdentifier.CookedBeef, { money: 50, xp: 5 }],
+    [ItemIdentifier.Leather, { money: 50, xp: 5 }],
+    [ItemIdentifier.String, { money: 60, xp: 6 }],
+    [ItemIdentifier.SpiderEye, { money: 30, xp: 3 }],
+    [ItemIdentifier.Gunpowder, { money: 60, xp: 6 }],
+    [ItemIdentifier.Arrow, { money: 50, xp: 5 }],
+    [ItemIdentifier.InkSac, { money: 60, xp: 6 }],
+    [ItemIdentifier.Poppy, { money: 25, xp: 2.5 }],
+    [ItemIdentifier.BlazeRod, { money: 80, xp: 8 }],
+
     /* Misc */
     [ItemIdentifier.OakLog, { money: 50 }],
+
+    /* Admin */
+    [ItemIdentifier.YellowShulkerBox, { money: 10000000, xp: 1000000 }]
 ]);
 
 export { SellableItems };

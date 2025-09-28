@@ -6,7 +6,7 @@ import { ShopVanillaEnchantConfirmationPage } from "./confirmation";
 import { Enchantment } from "@serenityjs/protocol";
 import { Utils } from "../../../../../Utils/utils";
 import { CurrencyInfo } from "../../../../../Configuration/Shop/currency";
-import { EnchantmentSlot, EnchantmentSlotMap, VanillaEnchantmentSlot } from "../../../../../Configuration/config";
+import { EnchantmentIncompatibleMap, EnchantmentSlot, EnchantmentSlotMap, EnchantmentSlotType } from "../../../../../Configuration/config";
 
 class ShopVanillaEnchantTransactionPage extends ShopTransactionPage {
 
@@ -25,7 +25,7 @@ class ShopVanillaEnchantTransactionPage extends ShopTransactionPage {
         this.form.input("Enter a level:", "0");
     }
 
-    private slotAcceptsItem(item: ItemIdentifier, allowedSlots: VanillaEnchantmentSlot[]) {
+    private slotAcceptsItem(item: ItemIdentifier, allowedSlots: EnchantmentSlotType[]) {
         for (const slot of allowedSlots)
             if (EnchantmentSlot[slot].has(item)) return true
         return false
@@ -48,6 +48,14 @@ class ShopVanillaEnchantTransactionPage extends ShopTransactionPage {
             if (!allowedSlots || !this.slotAcceptsItem(item.identifier as ItemIdentifier, allowedSlots)) throw new Error("This enchantment cannot be applied to this item.")
             enchantable = item.hasTrait(ItemStackEnchantableTrait) ? item.getTrait(ItemStackEnchantableTrait) : item.addTrait(ItemStackEnchantableTrait);
             if (!enchantable) throw new Error("This item cannot be enchanted.")
+            const incompatibles = EnchantmentIncompatibleMap.get(enchantId)
+            if (incompatibles) {
+                const enchantments = enchantable.getEnchantments()
+                if (incompatibles.some(e => enchantments.has(e))) {
+                    const names = incompatibles.filter(e => enchantments.has(e)).map(e => Enchantment[e]).join(", ")
+                    throw new Error(`This enchantment cannot be used with: §e${names}§c.`)
+                }
+            }
         } catch (e: any) {
             player.error("Failed to purchase enchantment: " + e.message)
             return

@@ -10,10 +10,12 @@ import {
     ItemIdentifier,
     BlockDestroyOptions,
     BlockTrait,
+    ItemTypeBlockPlacerComponent,
 } from "@serenityjs/core";
 import { CompoundTag, IntTag, StringTag } from "@serenityjs/nbt";
 import { Utils } from "../../../Utils/utils";
 import { ItemSmeltableMap } from "../../../Configuration/Smelting/smelting";
+import { ServerTaskHandler } from "../../../Handlers/Server/handler";
 
 class BlockFurnaceTrait extends BlockTrait {
     public static readonly identifier: string = "minecraft:furnace";
@@ -26,10 +28,9 @@ class BlockFurnaceTrait extends BlockTrait {
         super(block);
     }
 
-    public onInteract({ origin }: BlockInteractionOptions): void {
-
-        const player = origin!
-
+    public onInteract({ origin: player }: BlockInteractionOptions): boolean {
+        if (!player) return false;
+        if (player.isSneaking && player.getHeldItem()?.hasComponent(ItemTypeBlockPlacerComponent)) return true;
         // Display form.
         const form = new ActionForm("Furnace")
         form.content = "Tap an item to smelt it."
@@ -39,14 +40,14 @@ class BlockFurnaceTrait extends BlockTrait {
         if (smeltingItem) {
             // Update the display timer.
             function updateSmeltingData() {
-                if (!smeltingItem) return
+                if (!smeltingItem) return false;
                 const timeRemaining = ((smeltingItem.start + (smeltingItem.amount * 10)) - Math.floor(Date.now() / 1000))
                 form.content = `Tap an item to smelt it.\n§6Time Remaining: §7${timeRemaining > 0 ? Utils.formatTime(timeRemaining) : "§aCompleted"}`
                 const finishedItems = Math.min(Math.floor(((Date.now() / 1000) - smeltingItem.start) / 10), smeltingItem.amount)
                 if (finishedItems === smeltingItem.amount) form.buttons[0] = { text: `${Utils.formatString(smeltingItem.item)} x§6${finishedItems}` }
                 else form.buttons[0] = { text: `${Utils.formatString(smeltingItem.item)} x§c${smeltingItem.amount - finishedItems}§r - x§6${finishedItems}` }
-                form.update(player)
-                if (timeRemaining > 0) setTimeout(updateSmeltingData, 1000)
+                form.update(player!)
+                if (timeRemaining > 0) ServerTaskHandler.queueTask(updateSmeltingData, 1000)
             }
             updateSmeltingData()
         }
@@ -62,7 +63,7 @@ class BlockFurnaceTrait extends BlockTrait {
             smeltableItems.push(item)
         }
         form.show(player, (result, _error) => {
-            if (result === null) return
+            if (result === null) return false;
             if (result === 0) {
                 // Collect smelted item.
                 if (smeltingItem) {
@@ -72,9 +73,9 @@ class BlockFurnaceTrait extends BlockTrait {
                     if (!smeltedItem) {
                         player.error("Failed to smelt item.")
                         this.clearItemSmelting()
-                        return
+                        return false;
                     }
-                    if (finishedItems <= 0) return
+                    if (finishedItems <= 0) return false;
                     // If items are not all done smelting, extract part.
                     else if (finishedItems < smeltingItem.amount) {
                         const newFurnaceItem = new ItemStack(smeltingItem.item, { stackSize: smeltingItem.amount - finishedItems })
@@ -85,24 +86,25 @@ class BlockFurnaceTrait extends BlockTrait {
                         this.clearItemSmelting()
                         player.inventory.giveItem(smeltedItem, smeltingItem.amount)
                     }
-                    return
+                    return true;
                 }
                 else result++
             }
             // Only allow smelting one item at a time.
             if (smeltingItem) {
                 player.error("You can only smelt one item at a time.")
-                return
+                return false;
             }
             // Start smelting.
             const item = smeltableItems[result - 1]
             if (!item) {
                 player.error("Failed to queue item for smelting.")
-                return
+                return false;
             }
             this.setItemSmelting(item)
             inv.clearSlot(invItems.indexOf(item))
         })
+        return false;
     }
 
     public onBreak({ origin }: BlockDestroyOptions): void {

@@ -10,3 +10,6 @@ export * from "./Furnace/furnace"
 export * from "./Crop/crop"
 export * from "./Crop/multiblock"
 export * from "./Crop/stem"
+
+/* Spawner */
+export * from "./Spawner/spawner"

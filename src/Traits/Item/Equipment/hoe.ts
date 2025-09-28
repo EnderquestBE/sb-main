@@ -6,6 +6,7 @@ import {
     Player,
     ItemStackUseOnBlockOptions,
     BlockPermutation,
+    ItemStackDurabilityTrait,
 } from "@serenityjs/core";
 import { BlockFace, ItemUseMethod } from "@serenityjs/protocol";
 
@@ -47,6 +48,9 @@ class ItemHoeTrait extends ItemStackTrait {
 
         // Set the block to farmland.
         targetBlock.setPermutation(BlockPermutation.resolve(BlockIdentifier.Farmland))
+
+        // Take durability.
+        this.item.getTrait(ItemStackDurabilityTrait).processDamage(player);
 
         // Update the block.
         targetBlock.update()

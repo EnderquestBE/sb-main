@@ -6,7 +6,7 @@ import { IslandDatabase } from "../Database/Collections/Island";
 import { BankLogEntry, IslandData, IslandHome, IslandLimit, IslandLimitType, IslandRole, IslandRoleHierarchy, OperationResult, PlayerInfo } from "../../Types/types";
 import { Server } from "../../server";
 import { Logger, LoggerColors } from "@serenityjs/logger";
-import { IslandLevel, PlayerDatabase } from "../classes";
+import { IslandLevel, PlayerDatabase } from "..";
 import { IslandLimitUnlocks } from "../../Handlers/Island/limits";
 import { IslandPerkUnlocks } from "../../Handlers/Island/perks";
 

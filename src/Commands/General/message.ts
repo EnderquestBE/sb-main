@@ -1,6 +1,5 @@
 import { StringEnum, Player } from "@serenityjs/core";
-import { CommandBuilder, CommandOverload } from "../../Classes/classes";
-import { PlayerEnum } from "../../Classes/Command/Enums/player";
+import { CommandBuilder, CommandOverload, PlayerEnum } from "../../Classes";
 import { Server } from "../../server";
 import { ChatHandler } from "../../Handlers/Chat/handler"; // Updated import
 
@@ -18,9 +17,9 @@ new CommandBuilder("message", "Sends a private message to a player.")
                 return origin.error("Player is offline or does not exist.");
             }
 
-            /*if (target.xuid === origin.xuid) {
+            if (target.xuid === origin.xuid) {
                 return origin.error("You cannot message yourself.");
-            }*/
+            }
 
             ChatHandler.privateMessage(origin, target, message.result!);
         })
