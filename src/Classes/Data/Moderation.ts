@@ -3,6 +3,7 @@ import { DataManager } from "./Manager";
 import { ModerationDatabase } from "../Database";
 import { DEFAULT_MODERATION_DATA } from "../../Configuration/Data";
 import { Player } from "@serenityjs/core";
+import { Server } from "../../server";
 
 class ModerationManager extends DataManager<ModerationData, ModerationDatabase> {
     public static instance: ModerationManager;
@@ -22,6 +23,10 @@ class ModerationManager extends DataManager<ModerationData, ModerationDatabase> 
             moderationData = data;
         }
         ModerationManager.instance = new ModerationManager(moderationData, ModerationDatabase.instance);
+        // Log whitelist method.
+        const manager = ModerationManager.instance;
+        Server.logger.info(`§bWhitelist is ${manager.whitelistMode === "OPEN" ? "§cinactive" : "§aactive"} §7(§fMode: §e${manager.whitelistMode}§7)${manager.whitelistMode === "ALLOW" ? `\n§fWhitelisted: §7${manager.users.join(", ")}` : (manager.whitelistMode === "RESTRICTED" ? `\n§cMinimum Permission: §6${manager.permissionLevel}` : "")}`);
+
     }
 
     public get whitelistMode(): WhitelistMode {
