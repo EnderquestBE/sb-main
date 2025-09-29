@@ -1,7 +1,6 @@
 import { OperationResult, VendorData, VendorItem } from "../../Types/types";
 import { DataManager } from "./Manager";
 import { VendorDatabase } from "../Database/Collections/Vendor";
-import { ItemStack } from "@serenityjs/core";
 
 class Vendor extends DataManager<VendorData, VendorDatabase> {
     public constructor(initialData: VendorData, dbManager: VendorDatabase) {

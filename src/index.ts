@@ -1,5 +1,5 @@
 import { Plugin, PluginEvents } from "@serenityjs/plugins";
-import { CustomEntityType, EntityHealthTrait, EntityHitSignal, Player, PlayerBreakBlockSignal, PlayerChatSignal, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerListTrait, PlayerOpenedContainerSignal, PlayerPlaceBlockSignal, WorldEvent, WorldInitializeSignal } from "@serenityjs/core";
+import { ActionForm, CustomEntityType, EntityHealthTrait, EntityHitSignal, Player, PlayerBreakBlockSignal, PlayerChatSignal, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerListTrait, PlayerOpenedContainerSignal, PlayerPlaceBlockSignal, WorldEvent, WorldInitializeSignal } from "@serenityjs/core";
 import { ContainerType } from "@serenityjs/protocol";
 import { IslandGenerator } from "./Classes/Island/generator";
 import { ChatHandler } from "./Handlers/Chat/handler";
@@ -13,7 +13,7 @@ import { BlockHandler } from "./Handlers/Block/handler";
 import { PlayerEnum } from "./Classes/Command/Enums/player";
 import { ServerTaskHandler } from "./Handlers/Server/handler";
 import { PlayerExtension } from "./extensions/player";
-import { CommandBuilder, CustomItemRegistry, DatabaseService, Island, IslandDatabase, PlayerDatabase, Slapper, VendorDatabase, Warp } from "./Classes";
+import { CommandBuilder, CustomItemRegistry, DatabaseService, Island, IslandDatabase, ModerationDatabase, PlayerDatabase, Slapper, VendorDatabase, Warp } from "./Classes";
 import { IslandPerkUnlocks } from "./Handlers/Island/perks";
 import { Utils } from "./Utils/utils";
 import { PlayerHud } from "./Handlers/Hud";
@@ -24,6 +24,7 @@ import { EntitySlapperTrait } from "./Traits/Entity/Slapper/slapper";
 import { MorphManager } from "./Classes/Morph";
 import { LeaderboardHandler } from "./Handlers/Leaderboard/handler";
 import { BlockSpecialSignTrait } from "./Traits/Block/Sign/sign";
+import { DiscordClient } from "./Discord";
 
 /**
  * @IMPORTS
@@ -39,6 +40,7 @@ import "./Configuration/Morph/morph"
 
 import "./Commands/commands"
 import "./Traits/Block/Liquid/liquidInteraction"
+import { ModerationManager } from "./Classes/Data/Moderation";
 
 class EnderquestPlugin extends Plugin implements PluginEvents {
 
@@ -106,6 +108,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     new PlayerDatabase(this.database);
     new IslandDatabase(this.database);
     new VendorDatabase(this.database);
+    new ModerationDatabase(this.database);
     // Initialize leaderboards.
     LeaderboardHandler.initialize(this.serenity.getWorld());
   }
@@ -121,6 +124,8 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     // Initialize handlers.
     BlockHandler.initialize()
     SpawnerHandler.initialize()
+    // Initialize discord bot.
+    DiscordClient.initialize();
     // Mark server as started.
     this.logger.info("§5Ender§dquest§r has started.");
   }
@@ -128,6 +133,8 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
   public async onShutDown(): Promise<void> {
     // Disconnect database.
     await this.database.disconnect();
+    // Disconnect discord bot.
+    await DiscordClient.disconnect();
     ServerTaskHandler.clearAllTasks();
     // Execute leave event.
     for (let player of this.serenity.getPlayers()) {
@@ -135,6 +142,13 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     }
     // Mark server as stopped.
     this.logger.info("§5Ender§dquest§r has stopped safely.");
+  }
+
+
+  public beforePlayerJoin({ player }: PlayerJoinSignal): boolean {
+    // Manage whitelist.
+    if (!ModerationManager.instance.isWhitelisted(player)) return false;
+    return true;
   }
 
   public async onPlayerJoin({ player }: PlayerJoinSignal): Promise<void> {
@@ -159,7 +173,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
             LevelDBProvider.loadWorld(this.instance, island.getWorldId())
         }
         */
-        if (island.isOwner(player.xuid)) IslandPerkUnlocks.applyPermissions(player, island);
+        if (island!.isOwner(player.xuid)) IslandPerkUnlocks.applyPermissions(player, island);
         this.logger.info(`Loaded island §e${islandName}§r into cache for ${player.username}.`);
       } else {
         this.logger.error(`§cFailed to load island data for ${player.username}.`)
@@ -174,7 +188,14 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     // Increment player count.
     Server.incrementPlayerCount();
     // Custom palm model.
-    if (player.username === "The Palm Healer") MorphManager.morph(player, "palm")
+    if (player.username === "The Palm Healer") MorphManager.morph(player, "palm");
+    // Show welcome form.
+    ServerTaskHandler.queueTask(() => {
+      const form = new ActionForm("Early Access");
+      form.content = " \n       §l§eWelcome to §dEnderquest§e!§r§f\n\n  Thank you for your interest in this\n  server! Before you proceed, please\n    note that the server is still in\n development; features are incomplete\n       and you may lose progress.\n  If you encounter any issues, please\n         report them on Discord.\n\n   Thank you for your understanding!\n "
+      form.button("Acknowledge");
+      form.show(player);
+    }, 3000);
   }
 
   public async onPlayerLeave({ player }: PlayerLeaveSignal): Promise<void> {

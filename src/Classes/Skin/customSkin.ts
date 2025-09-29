@@ -1,10 +1,13 @@
 import { SerializedSkin, SkinImage } from "@serenityjs/protocol";
 import { v4 as uuid } from 'uuid';
-import { Jimp } from "jimp";
+import * as Jimp from 'jimp';
+import { resolve } from "path";
+import { existsSync } from "fs";
+import { mkdir, readFile, writeFile } from "fs/promises";
 
 async function getRawPixelData(imageUrl: string): Promise<Buffer> {
     try {
-        const image = await Jimp.read(imageUrl);
+        const image = await Jimp.Jimp.read(imageUrl);
         return image.bitmap.data;
     } catch (error) {
         //@ts-ignore
@@ -39,6 +42,9 @@ type CustomSkinOptions = {
 }
 
 class CustomSkin {
+    private static skinCache: Map<string, Buffer<ArrayBufferLike>> = new Map();
+    private static headCache: Map<string, Buffer<ArrayBufferLike>> = new Map();
+
     private identifier!: string;
     private skin!: SkinImage;
     private cape?: SkinImage;
@@ -71,6 +77,65 @@ class CustomSkin {
             if (options.armSize === "slim" && !options.geometryKey) customSkin.geometryKey = "geometry.npc.alex";
         }
         return customSkin;
+    }
+
+    public static async getImage(xuid: string, skin?: SkinImage) {
+        if (skin) {
+            // Create image.
+            const image = new Jimp.Jimp({ data: skin.data, width: skin.width, height: skin.height });
+            // Cache skin locally.
+            const skinCache = resolve("./cache/skins");
+            await mkdir(skinCache, { recursive: true });
+            const skinPath = resolve(skinCache, xuid + ".png");
+            await writeFile(skinPath, await image.getBuffer("image/png"));
+            this.skinCache.set(xuid, await image.getBuffer("image/png"));
+            // Return image buffer.
+            return image.getBuffer("image/png");
+        } else if (this.skinCache.has(xuid)) {
+            return this.skinCache.get(xuid)!;
+        } else {
+            // Get from cache if exists.
+            const skinCache = resolve("./cache/skins");
+            await mkdir(skinCache, { recursive: true });
+            const skinPath = resolve(skinCache, xuid + ".png");
+            if (existsSync(skinPath)) {
+                const skin = await readFile(skinPath);
+                const image = await Jimp.Jimp.read(skin, { "image/png": {} });
+                this.skinCache.set(xuid, await image.getBuffer("image/png"));
+                return image.getBuffer("image/png");
+            } else return null;
+        }
+    }
+
+    public static async getHeadImage(xuid: string, skin?: SkinImage) {
+        if (skin) {
+            // Create image.
+            const image = new Jimp.Jimp({ data: skin.data, width: skin.width, height: skin.height });
+            // Crop and resize.
+            image.crop({ w: 8, h: 8, x: 8, y: 8 });
+            image.resize({ w: 256, h: 256, mode: Jimp.ResizeStrategy.NEAREST_NEIGHBOR });
+            // Cache skin locally.
+            const skinCache = resolve("./cache/heads");
+            await mkdir(skinCache, { recursive: true });
+            const skinPath = resolve(skinCache, xuid + ".png");
+            await writeFile(skinPath, await image.getBuffer("image/png"));
+            this.headCache.set(xuid, await image.getBuffer("image/png"));
+            // Return image buffer.
+            return image.getBuffer("image/png");
+        } else if (this.headCache.has(xuid)) {
+            return this.headCache.get(xuid)!;
+        } else {
+            // Get from cache if exists.
+            const skinCache = resolve("./cache/heads");
+            await mkdir(skinCache, { recursive: true });
+            const skinPath = resolve(skinCache, xuid + ".png");
+            if (existsSync(skinPath)) {
+                const skin = await readFile(skinPath);
+                const image = await Jimp.Jimp.read(skin, { "image/png": {} });
+                this.headCache.set(xuid, await image.getBuffer("image/png"));
+                return image.getBuffer("image/png");
+            } else return null;
+        }
     }
 
     public toSerializedSkin() {

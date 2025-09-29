@@ -6,7 +6,7 @@ export * from "./Chat/filter"
 export * from "./Chat/source"
 
 /* Data */
-export * from "./Data/player"
+export * from "./Data"
 
 /* Ranks */
 export * from "./Ranks/ranks"
@@ -38,3 +38,6 @@ export * from "./Stash"
 
 /* Leaderboard */
 export * from "./Leaderboard/leaderboard"
+
+/* Tips */
+export * from "./Tips/tips"

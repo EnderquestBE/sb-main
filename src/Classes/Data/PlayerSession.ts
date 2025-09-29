@@ -5,7 +5,6 @@ import { Island } from "./Island";
 import { PlayerDatabase } from "../Database/Collections/Player";
 import { Setting } from "../../Configuration/Settings/settings";
 
-
 /**
  * @name PlayerSession
  * Class for manipulating a player's session data.
@@ -16,6 +15,7 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
   private constructor(initialData: PlayerData, dbManager: PlayerDatabase) {
     super(initialData, dbManager);
     this.createdAt = Date.now()
+    this.updateLastSeen();
   }
 
   /**
@@ -30,7 +30,7 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
   public static async load(xuid: string, playerDB: PlayerDatabase): Promise<PlayerSession | null> {
     const playerData = await playerDB.get(xuid);
     if (!playerData) return null;
-    playerData.settings = { ...DEFAULT_PLAYER_DATA.settings, ...playerData.settings }
+    playerData.settings = { ...DEFAULT_PLAYER_DATA.settings, ...playerData.settings };
     return new PlayerSession(playerData, playerDB);
   }
 
@@ -51,6 +51,7 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
     initialData.username = username;
     initialData.lastUpdated = now;
     initialData.lastSeen = now;
+    initialData.firstSeen = now;
     const data = await playerDB.get(xuid)
     if (data) {
       initialData.timePlayed = data.timePlayed

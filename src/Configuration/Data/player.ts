@@ -22,6 +22,7 @@ const DEFAULT_PLAYER_DATA: PlayerData = {
     },
     timePlayed: 0,
     lastSeen: new Date(),
+    firstSeen: new Date(),
     lastUpdated: new Date(),
 };
 

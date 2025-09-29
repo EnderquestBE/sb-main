@@ -54,6 +54,10 @@ interface PlayerData {
    */
   lastSeen: Date;
   /**
+   * The date the player was first seen on the server.
+   */
+  firstSeen: Date;
+  /**
    * The date this data instance was cached.
    */
   lastUpdated: Date;

@@ -83,7 +83,7 @@ class Utils {
   }
 
   public static readonly formatIntToFixed = (value: number, fixed?: number) => {
-    const types = ["", "k", "m", "b", "t", "qt"];
+    const types = ["", "K", "M", "B", "T", "QT"];
     if (value < 1e3) return value.toString();
     let logBase1000 = Math.log(value) / Math.log(1000);
     let selectType = Math.floor(logBase1000);
@@ -99,11 +99,11 @@ class Utils {
 
   public static readonly intFromString = (value: string) => {
     const multipliers: { [key: string]: number } = {
-      k: 1000,
-      m: 1000000,
-      b: 1000000000,
-      t: 1000000000000,
-      qt: 1000000000000000,
+      K: 1000,
+      M: 1000000,
+      B: 1000000000,
+      T: 1000000000000,
+      QT: 1000000000000000,
     };
 
     const match = value.toLowerCase().match(/(\d+\.?\d*)([kmbqt])?/);
