@@ -68,146 +68,150 @@ export class DiscordClient {
 
     public static onInteraction() {
         this.client.on("interactionCreate", async (interaction) => {
-            if (interaction.isCommand()) {
-                if (isDev) return;
-                const execution = this.executions[interaction.commandName];
-                if (execution) {
-                    if (interaction.isChatInputCommand()) {
-                        await execution(interaction);
+            try {
+                if (interaction.isCommand()) {
+                    if (isDev) return;
+                    const execution = this.executions[interaction.commandName];
+                    if (execution) {
+                        if (interaction.isChatInputCommand()) {
+                            await execution(interaction);
+                        }
                     }
                 }
-            }
-            else if (interaction.isStringSelectMenu()) {
-                if (interaction.customId === "application_select") {
-                    const selected = interaction.values[0];
-                    if (!selected) return;
-                    // Check if player has already submitted an application.
-                    const guild = this.client.guilds.cache.get("1420107089472262207")!;
-                    const member = guild.members.cache.get(interaction.user.id);
-                    if (member?.roles.cache.has("1422453759174377482")) {
-                        interaction.reply({ content: "You are already a play tester.", flags: "Ephemeral" });
-                        return;
-                    }
-                    new FormApplication(selected, interaction);
-                }
-            }
-            else if (interaction.isModalSubmit()) {
-                if (interaction.customId.startsWith("application_")) {
-                    await interaction.reply({ content: "Your application has been submitted! Thank you for your interest and offer to help, it is much appreciated! 🙂", flags: "Ephemeral" });
-                    const type = interaction.customId.replace("application_", "");
-                    const ApplicationData = Applications.get(type);
-                    if (!ApplicationData) return;
-                    const embed = ApplicationData.submitEmbed?.(interaction, interaction.fields.fields.map((x) => {
-                        return {
-                            question: ApplicationData?.questions![parseInt(x.customId.substring(9))]!.question,
-                            answer: x.value
-                        };
-                    }));
-                    const accept = new ButtonBuilder();
-                    accept.setCustomId("tester_accept");
-                    accept.setLabel("Accept");
-                    accept.setStyle(ButtonStyle.Success);
-
-                    const deny = new ButtonBuilder();
-                    deny.setCustomId("tester_deny");
-                    deny.setLabel("Deny");
-                    deny.setStyle(ButtonStyle.Danger);
-
-                    const row = new ActionRowBuilder().addComponents(accept, deny).toJSON();
-                    if (type === "play_tester") {
-                        (this.client.channels.cache.get("1422419850248196137") as TextChannel).send({ embeds: [embed!], components: [row] });
+                else if (interaction.isStringSelectMenu()) {
+                    if (interaction.customId === "application_select") {
+                        const selected = interaction.values[0];
+                        if (!selected) return;
+                        // Check if player has already submitted an application.
+                        const guild = this.client.guilds.cache.get("1420107089472262207")!;
+                        const member = guild.members.cache.get(interaction.user.id);
+                        if (member?.roles.cache.has("1422453759174377482")) {
+                            interaction.reply({ content: "You are already a play tester.", flags: "Ephemeral" });
+                            return;
+                        }
+                        new FormApplication(selected, interaction);
                     }
                 }
-            }
-            else if (interaction.isButton()) {
-                if (interaction.customId === "tester_accept") {
-                    if (!interaction.memberPermissions?.has("ManageMessages")) {
-                        interaction.reply({ content: "You do not have permission to do this.", flags: "Ephemeral" });
-                        return;
+                else if (interaction.isModalSubmit()) {
+                    if (interaction.customId.startsWith("application_")) {
+                        await interaction.reply({ content: "Your application has been submitted! Thank you for your interest and offer to help, it is much appreciated! 🙂", flags: "Ephemeral" });
+                        const type = interaction.customId.replace("application_", "");
+                        const ApplicationData = Applications.get(type);
+                        if (!ApplicationData) return;
+                        const embed = ApplicationData.submitEmbed?.(interaction, interaction.fields.fields.map((x) => {
+                            return {
+                                question: ApplicationData?.questions![parseInt(x.customId.substring(9))]!.question,
+                                answer: x.value
+                            };
+                        }));
+                        const accept = new ButtonBuilder();
+                        accept.setCustomId("tester_accept");
+                        accept.setLabel("Accept");
+                        accept.setStyle(ButtonStyle.Success);
+
+                        const deny = new ButtonBuilder();
+                        deny.setCustomId("tester_deny");
+                        deny.setLabel("Deny");
+                        deny.setStyle(ButtonStyle.Danger);
+
+                        const row = new ActionRowBuilder().addComponents(accept, deny).toJSON();
+                        if (type === "play_tester") {
+                            (this.client.channels.cache.get("1422419850248196137") as TextChannel).send({ embeds: [embed!], components: [row] });
+                        }
                     }
-                    const author = interaction.message.embeds[0]?.author!.name;
-                    // Get user.
-                    const username = author?.substring(0, author.indexOf(" ("));
-                    const user = this.client.users.cache.find(u => u.username === username);
-                    if (!user) {
-                        interaction.reply({ content: "Could not find user.", flags: "Ephemeral" });
-                        return;
-                    }
-                    // Add user to whitelist.
-                    const gamertag = author?.substring(author.indexOf("(") + 1, author.indexOf(")"))!;
-                    ModerationManager.instance.addToWhitelist(gamertag);
-
-                    // Mark application as accepted.
-                    const accepted = new ButtonBuilder();
-                    accepted.setCustomId("tester_accepted");
-                    accepted.setLabel("Accepted");
-                    accepted.setStyle(ButtonStyle.Success);
-                    accepted.setDisabled(true);
-
-                    const row = new ActionRowBuilder().addComponents(accepted).toJSON();
-                    interaction.message.edit({ components: [row] });
-
-                    // Give play tester role.
-                    const guild = this.client.guilds.cache.get("1420107089472262207")!;
-                    const member = guild.members.cache.get(user.id);
-                    if (!member) {
-                        interaction.reply({ content: "Could not find user in guild.", flags: "Ephemeral" });
-                        return;
-                    }
-                    member.roles.add("1422453759174377482");
-
-                    // Send success message.
-                    interaction.reply({ content: `\`✅\` **<@${user.id}> has been accepted as a play tester!**`, flags: "Ephemeral" });
-
-                    // Send success embed.
-                    const embed = new EmbedBuilder()
-                        .setColor(10181046)
-                        .setAuthor({
-                            name: user.username,
-                            iconURL: user.displayAvatarURL()
-                        })
-                        .setTitle("Application Accepted")
-                        .setDescription(`You have been accepted into **early access**, welcome to the server! I really hope you enjoy your time playing. Please be sure to report any issues that you encounter during your experience.\n## What now?\n► Join the server: \`play.enderquest.me\`\n► Read the server rules: <#1420116331524522106>\n► Follow updates and changes: <#1420118855019397202>\n► Report issues by creating a ticket: <#1420119180086349944>\n► If you have any questions, feel free to reach out to a staff member.`)
-                        .setTimestamp();
-                    user.send({ embeds: [embed] });
-                } else if (interaction.customId === "tester_deny") {
-                    if (!interaction.memberPermissions?.has("ManageMessages")) {
-                        interaction.reply({ content: "You do not have permission to do this.", flags: "Ephemeral" });
-                        return;
-                    }
-                    const author = interaction.message.embeds[0]?.author!.name;
-                    // Get user.
-                    const username = author?.substring(0, author.indexOf(" ("));
-                    const user = this.client.users.cache.find(u => u.username === username);
-                    if (!user) {
-                        interaction.reply({ content: "Could not find user.", flags: "Ephemeral" });
-                        return;
-                    }
-
-                    // Mark application as denied.
-                    const denied = new ButtonBuilder();
-                    denied.setCustomId("tester_denied");
-                    denied.setLabel("Denied");
-                    denied.setStyle(ButtonStyle.Danger);
-                    denied.setDisabled(true);
-                    const row = new ActionRowBuilder().addComponents(denied).toJSON();
-                    interaction.message.edit({ components: [row] });
-                    interaction.reply({ content: `\`❌\` **<@${user.id}> has been denied as a play tester.**`, flags: "Ephemeral" });
-
-                    // Send denied embed.
-                    const embed = new EmbedBuilder()
-                        .setColor("Red")
-                        .setAuthor({
-                            name: user.username,
-                            iconURL: user.displayAvatarURL()
-                        })
-                        .setTitle("Application Denied")
-                        .setDescription(`Your application to join early access has been denied.\n\nI know this may be disappointing, but don't feel disheartened; it's unlikely that your application was the issue. As we finish the server, we are looking for people that check specific boxes to help us test certain features.\n\nWe do expect to open the server publicly in the very near future, so I hope that you will stick around until then.\n\nBest wishes, and thank you for your interest in our server. 🙂`)
-                        .setTimestamp();
-                    user.send({ embeds: [embed] });
                 }
+                else if (interaction.isButton()) {
+                    if (interaction.customId === "tester_accept") {
+                        if (!interaction.memberPermissions?.has("ManageMessages")) {
+                            interaction.reply({ content: "You do not have permission to do this.", flags: "Ephemeral" });
+                            return;
+                        }
+                        const author = interaction.message.embeds[0]?.author!.name;
+                        // Get user.
+                        const username = author?.substring(0, author.indexOf(" ("));
+                        const user = this.client.users.cache.find(u => u.username === username);
+                        if (!user) {
+                            interaction.reply({ content: "Could not find user.", flags: "Ephemeral" });
+                            return;
+                        }
+                        // Add user to whitelist.
+                        const gamertag = author?.substring(author.indexOf("(") + 1, author.indexOf(")"))!;
+                        ModerationManager.instance.addToWhitelist(gamertag);
+
+                        // Mark application as accepted.
+                        const accepted = new ButtonBuilder();
+                        accepted.setCustomId("tester_accepted");
+                        accepted.setLabel("Accepted");
+                        accepted.setStyle(ButtonStyle.Success);
+                        accepted.setDisabled(true);
+
+                        const row = new ActionRowBuilder().addComponents(accepted).toJSON();
+                        interaction.message.edit({ components: [row] });
+
+                        // Give play tester role.
+                        const guild = this.client.guilds.cache.get("1420107089472262207")!;
+                        const member = guild.members.cache.get(user.id);
+                        if (!member) {
+                            interaction.reply({ content: "Could not find user in guild.", flags: "Ephemeral" });
+                            return;
+                        }
+                        member.roles.add("1422453759174377482");
+
+                        // Send success message.
+                        interaction.reply({ content: `\`✅\` **<@${user.id}> has been accepted as a play tester!**`, flags: "Ephemeral" });
+
+                        // Send success embed.
+                        const embed = new EmbedBuilder()
+                            .setColor(10181046)
+                            .setAuthor({
+                                name: user.username,
+                                iconURL: user.displayAvatarURL()
+                            })
+                            .setTitle("Application Accepted")
+                            .setDescription(`You have been accepted into **early access**, welcome to the server! I really hope you enjoy your time playing. Please be sure to report any issues that you encounter during your experience.\n## What now?\n► Join the server: \`play.enderquest.me\`\n► Read the server rules: <#1420116331524522106>\n► Follow updates and changes: <#1420118855019397202>\n► Report issues by creating a ticket: <#1420119180086349944>\n► If you have any questions, feel free to reach out to a staff member.`)
+                            .setTimestamp();
+                        user.send({ embeds: [embed] });
+                    } else if (interaction.customId === "tester_deny") {
+                        if (!interaction.memberPermissions?.has("ManageMessages")) {
+                            interaction.reply({ content: "You do not have permission to do this.", flags: "Ephemeral" });
+                            return;
+                        }
+                        const author = interaction.message.embeds[0]?.author!.name;
+                        // Get user.
+                        const username = author?.substring(0, author.indexOf(" ("));
+                        const user = this.client.users.cache.find(u => u.username === username);
+                        if (!user) {
+                            interaction.reply({ content: "Could not find user.", flags: "Ephemeral" });
+                            return;
+                        }
+
+                        // Mark application as denied.
+                        const denied = new ButtonBuilder();
+                        denied.setCustomId("tester_denied");
+                        denied.setLabel("Denied");
+                        denied.setStyle(ButtonStyle.Danger);
+                        denied.setDisabled(true);
+                        const row = new ActionRowBuilder().addComponents(denied).toJSON();
+                        interaction.message.edit({ components: [row] });
+                        interaction.reply({ content: `\`❌\` **<@${user.id}> has been denied as a play tester.**`, flags: "Ephemeral" });
+
+                        // Send denied embed.
+                        const embed = new EmbedBuilder()
+                            .setColor("Red")
+                            .setAuthor({
+                                name: user.username,
+                                iconURL: user.displayAvatarURL()
+                            })
+                            .setTitle("Application Denied")
+                            .setDescription(`Your application to join early access has been denied.\n\nI know this may be disappointing, but don't feel disheartened; it's unlikely that your application was the issue. As we finish the server, we are looking for people that check specific boxes to help us test certain features.\n\nWe do expect to open the server publicly in the very near future, so I hope that you will stick around until then.\n\nBest wishes, and thank you for your interest in our server. 🙂`)
+                            .setTimestamp();
+                        user.send({ embeds: [embed] });
+                    }
+                }
+            } catch (e) {
+                console.error("Error processing interaction:", e);
             }
-        });
+        })
     }
 
     public static async dumpImage(id: string, buffer: Buffer<ArrayBufferLike>) {
