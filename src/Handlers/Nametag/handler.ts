@@ -21,7 +21,7 @@ enum DeviceName {
 
 class NametagHandler {
     public static format(player: Player) {
-        player.nameTag = `§f<§l§d< §7[${player.getPrimaryRank().displayName}§7] §e${player.username} §d>§r§f>\n§c${DeviceName[player.clientSystemInfo.os]}`
+        player.nameTag = (`§f<§l§d< §7[${player.getPrimaryRank().displayName}§7] §e${player.username} §d>§r§f>\n§c${DeviceName[player.clientSystemInfo.os]}`)
     }
 }
 

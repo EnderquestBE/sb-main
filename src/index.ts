@@ -65,8 +65,6 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
 
   private readonly entityTraits = [
     EntityStackTrait,
-    PlayerCommandCooldownTrait,
-    PlayerListCustomTrait,
     EntityPersistenceTrait
   ]
 
@@ -244,9 +242,13 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
 
   public onWorldInitialize({ world }: WorldInitializeSignal): void {
     // Register island block traits.
+    world.entityPalette.unregisterTrait(PlayerListTrait)
+    world.entityPalette.unregisterTrait(EntityHealthTrait)
+    world.entityPalette.registerTrait(PlayerListCustomTrait)
+    world.entityPalette.registerTrait(PlayerCommandCooldownTrait)
+    world.entityPalette.registerTrait(EntitySlapperTrait)
     if (world.identifier.startsWith("sb_")) {
-      world.entityPalette.unregisterTrait(PlayerListTrait)
-      world.entityPalette.unregisterTrait(EntityHealthTrait)
+      // Register traits.
       for (let trait of this.blockTraits) {
         world.blockPalette.registerTrait(trait);
       }

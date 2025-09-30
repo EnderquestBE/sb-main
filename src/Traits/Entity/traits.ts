@@ -2,7 +2,7 @@
 export * from "./Stack/stack"
 
 /* Item */
-export * from "./Item/item"
+export * from "./Persistence/persistence"
 
 /* Player Traits */
 export * from "./Player"

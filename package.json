@@ -12,11 +12,11 @@
   },
   "keywords": [],
   "peerDependencies": {
-    "@serenityjs/core": "^0.8.13-beta-20250917173959",
-    "@serenityjs/logger": "^0.8.13-beta-20250917173959",
-    "@serenityjs/nbt": "^0.8.13-beta-20250917173959",
-    "@serenityjs/plugins": "^0.8.13-beta-20250917173959",
-    "@serenityjs/protocol": "^0.8.13-beta-20250917173959"
+    "@serenityjs/core": "0.8.13-beta-20250917173959",
+    "@serenityjs/logger": "0.8.13-beta-20250917173959",
+    "@serenityjs/nbt": "0.8.13-beta-20250917173959",
+    "@serenityjs/plugins": "0.8.13-beta-20250917173959",
+    "@serenityjs/protocol": "0.8.13-beta-20250917173959"
   },
   "devDependencies": {
     "@types/node": "^24.5.2",

@@ -5,7 +5,7 @@ import { Vector3f } from "@serenityjs/protocol";
 import { SpawnerEntity } from "../../../Handlers/Entity/spawnerEntity";
 
 class EntityPersistenceTrait extends EntityTrait {
-    public static readonly identifier = "item-stack";
+    public static readonly identifier = "persistence";
     public static readonly types = SpawnerEntity.keys.concat([EntityIdentifier.Item]);
 
     public constructor(entity: Entity) {
@@ -15,8 +15,8 @@ class EntityPersistenceTrait extends EntityTrait {
     }
 
     public onTick({ currentTick }: TraitOnTickDetails): void {
-        if (Number(currentTick) % 5 !== 0) return;
-        if (this.entity.position.y < -24) {
+        if (Number(currentTick) % 20 !== 0) return;
+        if (this.entity.isFalling) {
             const island = Island.loadSync(this.dimension.world.identifier.slice(3));
             if (island) {
                 const spawn = island.getSpawn();

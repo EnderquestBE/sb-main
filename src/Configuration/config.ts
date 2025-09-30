@@ -41,3 +41,6 @@ export * from "./Leaderboard/leaderboard"
 
 /* Tips */
 export * from "./Tips/tips"
+
+/* Server Rules */
+export * from "./Rules/rules"

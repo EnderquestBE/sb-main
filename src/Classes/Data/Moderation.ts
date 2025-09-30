@@ -105,6 +105,9 @@ class ModerationManager extends DataManager<ModerationData, ModerationDatabase> 
      * @param username The username of the player to add.
      */
     public async addToWhitelist(username: string): Promise<OperationResult> {
+        if (this.users.includes(username)) {
+            return { success: false, reason: "Player is already whitelisted." };
+        }
         const updateDoc = { $push: { "whitelist.properties.allowlist": username } } as any;
         const result = await this.updateOne(updateDoc);
         if (result.success) {

@@ -24,7 +24,7 @@ class ItemSpawnerTrait extends ItemStackTrait {
         super(item);
     }
 
-    public onUseOnBlock(player: Player, { targetBlock: block, face }: ItemStackUseOnBlockOptions): void {
+    public onUseOnBlock(_player: Player, { targetBlock: block, face }: ItemStackUseOnBlockOptions): void {
         ServerTaskHandler.queueTask(() => {
             block = block.face(face)
             if (block.type.identifier !== BlockIdentifier.MobSpawner) return
