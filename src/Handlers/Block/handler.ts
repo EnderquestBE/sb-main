@@ -6,7 +6,6 @@ import {
     ItemStack,
     ItemStackEnchantableTrait,
     Player,
-    PlayerBreakBlockSignal,
     PlayerHungerTrait,
     PlayerPlaceBlockSignal,
 } from "@serenityjs/core";
@@ -57,7 +56,7 @@ class BlockHandler {
 
             const info = BlockPointValues[block.identifier]?.break;
             if (!info) {
-                if (player.gamemode === Gamemode.Survival) {
+                if (player.getGamemode() === Gamemode.Survival) {
                     try {
                         const id = BlockOverrideMap.get(block.identifier) ?? block.identifier
                         const item = new ItemStack(id, { stackSize: 1 });
@@ -107,7 +106,7 @@ class BlockHandler {
 
             if (info.stashChance) StashHandler.handleStashChance(player, stashChance)
 
-            if (player.gamemode !== Gamemode.Survival) return;
+            if (player.getGamemode() !== Gamemode.Survival) return;
 
             if (itemCount <= 0) continue;
             const item = new ItemStack(itemId, { stackSize: itemCount });

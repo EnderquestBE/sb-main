@@ -94,21 +94,21 @@ class BlockSpawnerTrait extends BlockTrait {
             )
             const entity = this.dimension.spawnEntity(this.ENTITY, spawnPos)
             entity.applyImpulse(new Vector3f(0.1, 0, 0.1))
-            entity.nbt.set("MobStack", new ShortTag(1, "MobStack"))
-            entity.nameTag = `§l§e${Utils.formatString(this.ENTITY)} §7x§c1`
-            entity.alwaysShowNameTag = true
+            entity.setStorageEntry("MobStack", new ShortTag(1, "MobStack"))
+            entity.setNametag(`§l§e${Utils.formatString(this.ENTITY)} §7x§c1`)
+            entity.setNametagAlwaysVisible(true)
         }
         // Increment existing entity.
         else {
             const entity = entities[0]!
-            const mobStack = entity.nbt.get<ShortTag>("MobStack")?.valueOf()
+            const mobStack = entity.getStorageEntry<ShortTag>("MobStack")?.valueOf()
             if (!mobStack) {
                 entity.kill()
                 return
             }
-            entity.nbt.set("MobStack", new ShortTag(mobStack + 1, "MobStack"))
-            entity.nameTag = `§l§e${Utils.formatString(this.ENTITY)} §7x§c${mobStack + 1}`
-            entity.alwaysShowNameTag = true
+            entity.setStorageEntry("MobStack", new ShortTag(mobStack + 1, "MobStack"))
+            entity.setNametag(`§l§e${Utils.formatString(this.ENTITY)} §7x§c${mobStack + 1}`)
+            entity.setNametagAlwaysVisible(true)
         }
     }
 

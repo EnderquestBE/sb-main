@@ -24,7 +24,7 @@ class LeaderboardHandler {
                 const entity = world.getDimension().getEntities().find(e => e.identifier === EntityIdentifier.Tadpole && e.hasTag(id));
                 if (!entity) return;
                 const statPath = criteria.stat.split(".");
-                entity.nameTag = `${secondary}======= §l${primary}${name}§r ${secondary}=======\n${results.map((x, i) => {
+                entity.setNametag(`${secondary}======= §l${primary}${name}§r ${secondary}=======\n${results.map((x, i) => {
                     let value = x;
                     for (const key of statPath) {
                         //@ts-ignore
@@ -32,7 +32,7 @@ class LeaderboardHandler {
                     }
                     //@ts-ignore
                     return format({ rank: i + 1, name: x[criteria.name], value });
-                }).join("\n")}`;
+                }).join("\n")}`);
             });
         }
     }
@@ -43,10 +43,10 @@ class LeaderboardHandler {
             entity.teleport(position);
             entity.removeTrait(EntityGravityTrait);
             entity.removeTrait(EntityHealthTrait);
-            entity.flags.set(ActorFlag.Invisible, true);
-            entity.alwaysShowNameTag = true;
+            entity.flags.setActorFlag(ActorFlag.AlwaysShowName, true);
+            entity.flags.setActorFlag(ActorFlag.Invisible, true);
             entity.addTag(id)
-            entity.nbt.set("Persistent", new ByteTag(0, "Persistent"));
+            entity.setStorageEntry("Persistent", new ByteTag(0, "Persistent"));
         }
         this.update(world);
     }

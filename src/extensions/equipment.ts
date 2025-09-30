@@ -120,7 +120,7 @@ EntityEquipmentTrait.prototype.onContainerUpdate = function onContainerUpdate(co
     }
 
     // Set the armor list to the entity's nbt
-    this.entity.nbt.add(armor);
+    this.entity.addStorageEntry(armor);
 
     // Create a new MobArmorEquipmentPacket, and assign the equipment properties
     const packet = new MobArmorEquipmentPacket();
