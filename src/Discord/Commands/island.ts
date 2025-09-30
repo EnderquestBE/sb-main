@@ -44,7 +44,7 @@ async function execute(interaction: ChatInputCommandInteraction) {
 
         // Get head image.
         const player = Server.instance.getPlayerByXuid(owner.xuid);
-        const headImage = await CustomSkin.getHeadImage(owner.xuid, player?.skin.skinImage);
+        const headImage = await CustomSkin.getHeadImage(owner.xuid, await player?.skin.getSkinImage());
         const ownerHead = new AttachmentBuilder(headImage ?? "https://mc-heads.net/avatar/jeb_/256", { name: `${owner.username.replace(/\s/g, "")}.png` });
         // Create embed body.
         const line1 = `> **Owner:** ${owner.username

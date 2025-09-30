@@ -222,7 +222,7 @@ export class DiscordClient {
     }
 
     public static async dumpHeadImage(player: Player) {
-        const head = await CustomSkin.getHeadImage(player.xuid, player.skin.skinImage);
+        const head = await CustomSkin.getHeadImage(player.xuid, await player.skin.getSkinImage());
         if (!head) return;
         return this.dumpImage(player.xuid, head);
     }

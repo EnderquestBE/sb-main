@@ -270,12 +270,13 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
           world.entityPalette.registerType(type)
           // Spawn entity.
           const dimension = world.getDimension()
-          const entity = dimension.spawnEntity(type, slapper.position)
+          const entity = dimension.spawnEntity(type, slapper.position, false)
           if (slapper.rotation) {
             entity.setRotation(slapper.rotation)
           }
           entity.setGravityForce(0)
           entity.addTrait(EntitySlapperTrait)
+          entity.spawn();
         }
       }, 3000);
     }
