@@ -1,5 +1,5 @@
 import { Plugin, PluginEvents } from "@serenityjs/plugins";
-import { ActionForm, CustomEntityType, EntityHealthTrait, EntityHitSignal, Player, PlayerBreakBlockSignal, PlayerChatSignal, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerListTrait, PlayerOpenedContainerSignal, PlayerPlaceBlockSignal, WorldEvent, WorldInitializeSignal } from "@serenityjs/core";
+import { ActionForm, CustomEntityType, EntityHealthTrait, EntityHitSignal, LevelDBProvider, Player, PlayerBreakBlockSignal, PlayerChatSignal, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerListTrait, PlayerOpenedContainerSignal, PlayerPlaceBlockSignal, WorldEvent, WorldInitializeSignal } from "@serenityjs/core";
 import { ContainerType } from "@serenityjs/protocol";
 import { IslandGenerator } from "./Classes/Island/generator";
 import { ChatHandler } from "./Handlers/Chat/handler";
@@ -166,11 +166,10 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
       const island = await Island.load(islandName);
       if (island) {
         // Load island world from storage.
-        /*
         if (island.getOnlineOwners().length <= 1) {
-            LevelDBProvider.loadWorld(this.instance, island.getWorldId())
+          //@ts-ignore
+          LevelDBProvider.loadWorld(this.serenity, island.getWorldId())
         }
-        */
         if (island!.isOwner(player.xuid)) IslandPerkUnlocks.applyPermissions(player, island);
         this.logger.info(`Loaded island §e${islandName}§r into cache for ${player.username}.`);
       } else {
@@ -221,7 +220,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
               survivor.info(`§cYou have been kicked from §e${island.getName()}§c: Island has gone offline.`)
             }
             // Unload island from storage.
-            //this.instance.unregisterWorld(world)
+            this.serenity.unregisterWorld(world)
           }
         }
         this.logger.info(`Unloaded island §e${islandName}§r from cache.`)
