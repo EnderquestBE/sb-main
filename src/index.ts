@@ -1,5 +1,5 @@
 import { Plugin, PluginEvents } from "@serenityjs/plugins";
-import { ActionForm, CustomEntityType, EntityHealthTrait, EntityHitSignal, LevelDBProvider, Player, PlayerBreakBlockSignal, PlayerChatSignal, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerListTrait, PlayerOpenedContainerSignal, PlayerPlaceBlockSignal, WorldEvent, WorldInitializeSignal } from "@serenityjs/core";
+import { ActionForm, CustomEntityType, EntityHealthTrait, EntityHitSignal, EntitySpawnedSignal, LevelDBProvider, Player, PlayerBreakBlockSignal, PlayerChatSignal, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerLevelingTrait, PlayerListTrait, PlayerOpenedContainerSignal, PlayerPlaceBlockSignal, WorldEvent, WorldInitializeSignal } from "@serenityjs/core";
 import { ContainerType } from "@serenityjs/protocol";
 import { IslandGenerator } from "./Classes/Island/generator";
 import { ChatHandler } from "./Handlers/Chat/handler";
@@ -193,6 +193,14 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
       form.button("Acknowledge");
       form.show(player);
     }, 3000);
+  }
+
+  public onEntitySpawned(event: EntitySpawnedSignal): void {
+    if (!event.initialSpawn || !(event.entity instanceof Player)) return;
+    const player = event.entity;
+    // Update XP.
+    const leveling = player.getTrait(PlayerLevelingTrait) ?? player.addTrait(PlayerLevelingTrait)
+    leveling.setExperience(player.getXp());
   }
 
   public async onPlayerLeave({ player }: PlayerLeaveSignal): Promise<void> {

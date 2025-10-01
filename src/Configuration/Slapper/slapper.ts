@@ -57,7 +57,9 @@ Slapper.registerSlapper({
     skinURL: "https://drive.usercontent.google.com/u/0/uc?id=1-PGeb-RoKUkUjuIoOMxZK6CxuKwHM_kE&export=download",
     skinOptions: { geometry: SlapperTeleportGeometry, geometryKey: "geometry.BeachPartySkinPack.CoolnCasual" },
     function: (player) => {
-        player.executeCommand("is go");
+        const island = player.getIsland()
+        if (!island) player.executeCommand("is create")
+        else player.executeCommand("is go");
     }
 })
 
