@@ -5,18 +5,7 @@ import { resolve } from "path";
 import { existsSync } from "fs";
 import { mkdir, readFile, writeFile } from "fs/promises";
 
-async function getRawPixelData(imageUrl: string): Promise<Buffer> {
-    try {
-        const image = await Jimp.Jimp.read(imageUrl);
-        return image.bitmap.data;
-    } catch (error) {
-        //@ts-ignore
-        console.error(`Error processing image from URL ${imageUrl}: ${error.message}`);
-        return Buffer.alloc(0);
-    }
-}
-
-async function fetchJSONContent<T>(url: string): Promise<T> {
+async function fetchJSONContent<T>(url: string): Promise<T | undefined> {
     try {
         const response = await fetch(url);
         if (!response.ok) {
@@ -27,18 +16,19 @@ async function fetchJSONContent<T>(url: string): Promise<T> {
         return data;
     } catch (error) {
         console.error(`Error fetching JSON for ${url}:`, error);
-        throw error;
+        return undefined;
     }
 }
 
 type CustomSkinOptions = {
     width: number;
     height: number;
-    capeUrl: string;
+    capeTexture: string;
     armSize: "wide" | "slim";
     geometryUrl: string;
     geometry: string;
     geometryKey: string;
+    isPersona: boolean;
 }
 
 class CustomSkin {
@@ -51,24 +41,33 @@ class CustomSkin {
     private armSize: "wide" | "slim" = "wide";
     private geometry?: any;
     private geometryKey: string = "geometry.npc.steve";
+    private isPersona: boolean = false;
 
     /**
      * Creates a custom serialized skin object.
      * @param identifier Identifier to use for the skin.
-     * @param skinUrl URL to get the skin image from.
+     * @param texture Path to texture to use for the skin.
      * @param options More skin options.
      */
-    public static async from(identifier: string, skinUrl: string, options: Partial<CustomSkinOptions> = {}) {
+    public static async from(identifier: string, texture: string, options: Partial<CustomSkinOptions> = {}) {
         const customSkin = new CustomSkin();
 
         // Set identifier.
         customSkin.identifier = uuid() + "." + identifier;
 
         // Set skin.
-        customSkin.skin = new SkinImage(options.width ?? 64, options.height ?? 64, await getRawPixelData(skinUrl));
+        const skinPath = resolve("./skins/textures/" + texture);
+        const skinTexture = await readFile(skinPath);
+        const image = await Jimp.Jimp.read(skinTexture, { "image/png": {} });
+        customSkin.skin = new SkinImage(options.width ?? 64, options.height ?? 64, image.bitmap.data);
 
         // Properties
-        if (options.capeUrl) customSkin.cape = new SkinImage(64, 32, await getRawPixelData(options.capeUrl));
+        if (options.capeTexture) {
+            const capePath = resolve("./capes/textures/" + options.capeTexture);
+            const capeTexture = await readFile(capePath);
+            const capeImage = await Jimp.Jimp.read(capeTexture, { "image/png": {} });
+            customSkin.cape = new SkinImage(64, 32, capeImage.bitmap.data);
+        }
         if (options.geometryUrl) customSkin.geometry = JSON.stringify(await fetchJSONContent(options.geometryUrl));
         else if (options.geometry) customSkin.geometry = options.geometry;
         if (options.geometryKey) customSkin.geometryKey = options.geometryKey;
@@ -76,6 +75,7 @@ class CustomSkin {
             customSkin.armSize = options.armSize;
             if (options.armSize === "slim" && !options.geometryKey) customSkin.geometryKey = "geometry.npc.alex";
         }
+        if (options.isPersona) customSkin.isPersona = options.isPersona;
         return customSkin;
     }
 
@@ -568,7 +568,7 @@ class CustomSkin {
                     }
                 ]
             }
-                , null, 2), "0.0.0", "", "", this.identifier, this.armSize, "#0", [], [], true, false, false, true, false
+                , null, 2), "0.0.0", "", "", this.identifier, this.armSize, "#0", [], [], true, this.isPersona, false, true, false
         )
     }
 }

@@ -88,7 +88,6 @@ class BlockFurnaceTrait extends BlockTrait {
                     }
                     return true;
                 }
-                else result++
             }
             // Only allow smelting one item at a time.
             if (smeltingItem) {
@@ -96,13 +95,13 @@ class BlockFurnaceTrait extends BlockTrait {
                 return false;
             }
             // Start smelting.
-            const item = smeltableItems[result - 1]
+            const item = smeltableItems[result]
             if (!item) {
                 player.error("Failed to queue item for smelting.")
                 return false;
             }
             this.setItemSmelting(item)
-            inv.clearSlot(invItems.indexOf(item))
+            inv.clearSlot(item.slot)
         })
         return false;
     }

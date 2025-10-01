@@ -6,9 +6,7 @@ import { Utils } from "../Utils/utils";
 import { FormApplication } from "./Applications/form";
 import { Applications } from "./Applications/applications";
 import { ModerationManager } from "../Classes/Data/Moderation";
-
-const envArg = process.argv.find(arg => arg.startsWith('--env='));
-const isDev = envArg === '--env=development';
+import { isDevEnvironment } from "..";
 
 export class DiscordClient {
 
@@ -87,7 +85,7 @@ export class DiscordClient {
         this.client.on("interactionCreate", async (interaction) => {
             try {
                 if (interaction.isCommand()) {
-                    if (isDev) return;
+                    if (isDevEnvironment) return;
                     const execution = this.executions[interaction.commandName];
                     if (execution) {
                         if (interaction.isChatInputCommand()) {
@@ -249,7 +247,7 @@ export class DiscordClient {
     }
 
     public static async logPlayerJoin(player: Player) {
-        if (!this.client || isDev) return;
+        if (!this.client || isDevEnvironment) return;
         const channel = this.channels.logs;
         if (!channel) return;
         const head = await this.dumpHeadImage(player)
@@ -258,7 +256,7 @@ export class DiscordClient {
     }
 
     public static logPlayerLeave(player: Player) {
-        if (!this.client || isDev) return;
+        if (!this.client || isDevEnvironment) return;
         const channel = this.channels.logs;
         if (!channel) return;
         const embed = new EmbedBuilder().setAuthor({ iconURL: this.getHeadImage(player.xuid), name: `${player.username} left the server.` }).setColor("Red").setTimestamp();
@@ -266,14 +264,14 @@ export class DiscordClient {
     }
 
     public static logPlayerChat(message: string) {
-        if (!this.client || isDev) return;
+        if (!this.client || isDevEnvironment) return;
         const channel = this.channels.logs;
         if (!channel) return;
         channel.send({ content: Utils.stripColorCodes(message) });
     }
 
     public static logStart() {
-        if (!this.client || isDev) return;
+        if (!this.client || isDevEnvironment) return;
         const channel = this.channels.logs;
         if (!channel) return;
         const embed = new EmbedBuilder().setAuthor({ name: `✅ Server has started.` }).setColor("Green").setTimestamp();
@@ -281,7 +279,7 @@ export class DiscordClient {
     }
 
     public static logStop() {
-        if (!this.client || isDev) return;
+        if (!this.client || isDevEnvironment) return;
         const channel = this.channels.logs;
         if (!channel) return;
         const embed = new EmbedBuilder().setAuthor({ name: `🔸 Restart in progress...` }).setColor("Red").setTimestamp();

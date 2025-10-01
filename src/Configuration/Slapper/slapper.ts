@@ -42,7 +42,7 @@ Slapper.registerSlapper({
     identifier: "slapper:shop",
     name: "§l§bShop§r",
     position: new Vector3f(-11.5, 66, -14.5),
-    skinURL: "https://drive.usercontent.google.com/u/0/uc?id=1LfCNlLIcgwYlhlthJnkEYpoEG4k5oWOT&export=download",
+    texture: "shop.png",
     skinOptions: { geometry: SlapperShopGeometry, geometryKey: "geometry.Redstone.artisan_slim" },
     function: (player) => {
         MainShop.show(player)
@@ -54,7 +54,7 @@ Slapper.registerSlapper({
     identifier: "slapper:istp",
     name: "§l§eGo to Island§r",
     position: new Vector3f(-6.5, 66, -16.5),
-    skinURL: "https://drive.usercontent.google.com/u/0/uc?id=1-PGeb-RoKUkUjuIoOMxZK6CxuKwHM_kE&export=download",
+    texture: "istp.png",
     skinOptions: { geometry: SlapperTeleportGeometry, geometryKey: "geometry.BeachPartySkinPack.CoolnCasual" },
     function: (player) => {
         const island = player.getIsland()
@@ -70,7 +70,7 @@ Slapper.registerSlapper({
     identifier: "slapper:visitislands",
     name: "§l§aVisit Islands§r",
     position: new Vector3f(7.5, 66, -16.5),
-    skinURL: "https://drive.usercontent.google.com/u/0/uc?id=1Kckg2Ix4iw5_p7PNz-8_nfXzE3DDNhEQ&export=download",
+    texture: "visitislands.png",
     skinOptions: { geometry: SlapperVisitGeometry, geometryKey: "geometry.MiniGameHeroes.MiniGameHeroesCowGlider" },
     function: (player) => {
         player.executeCommand("is visit");
@@ -82,7 +82,7 @@ Slapper.registerSlapper({
     identifier: "slapper:islandactions",
     name: "§l§dIsland Actions§r",
     position: new Vector3f(12.5, 66, -14.5),
-    skinURL: "https://drive.usercontent.google.com/u/0/uc?id=1Gnq6zQ21xh4HLPemuurLzbzGTqU2QDzP&export=download",
+    texture: "islandactions.png",
     skinOptions: { armSize: "slim" },
     function: (player) => {
         player.executeCommand("is help")

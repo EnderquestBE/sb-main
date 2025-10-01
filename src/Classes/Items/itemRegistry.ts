@@ -10,7 +10,7 @@ const StashTypes = [Stashes.CommonStashType, Stashes.RareStashType, Stashes.Epic
 class CustomItemRegistry {
     public static readonly types = [...ScrollTypes, ...StashTypes];
 
-    public static registerAll(world: World) {
+    public static registerDefault(world: World) {
         world.itemPalette.registerType(...this.types);
         // Add custom items to the shop.
         ShopScrollCategory.addItem({ id: "Binding Scroll", item: new Scrolls.BindingScroll(), price: 15000, currency: "xp", transactionSound: "item.book.page_turn" })
@@ -23,6 +23,10 @@ class CustomItemRegistry {
         MainShop.updateCategory(ShopXPCategory)
         // Initialize shop instances.
         MainShop.initialize()
+    }
+
+    public static registerAll(world: World) {
+        world.itemPalette.registerType(...this.types);
     }
 }
 

@@ -41,6 +41,13 @@ import "./Configuration/Morph/morph"
 import "./Commands/commands"
 import "./Traits/Block/Liquid/liquidInteraction"
 import { ModerationManager } from "./Classes/Data/Moderation";
+import { resolve } from "node:path";
+import { rmdir } from "node:fs/promises";
+
+const envArg = process.argv.find(arg => arg.startsWith('--env='));
+const isDevEnvironment = envArg === '--env=development';
+
+export { isDevEnvironment }
 
 class EnderquestPlugin extends Plugin implements PluginEvents {
 
@@ -129,17 +136,19 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
   }
 
   public async onShutDown(): Promise<void> {
+    // Allow time for player disconnection and other ongoing processes.
+    while (this.serenity.players.size > 0) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
     // Disconnect database.
     await this.database.disconnect();
     // Disconnect discord bot.
     await DiscordClient.disconnect();
     ServerTaskHandler.clearAllTasks();
-    // Execute leave event.
-    for (let player of this.serenity.getPlayers()) {
-      this.onPlayerLeave({ player } as PlayerLeaveSignal)
-    }
     // Mark server as stopped.
     this.logger.info("§5Ender§dquest§r has stopped safely.");
+    resolve();
+    process.exit(0);
   }
 
 
@@ -150,6 +159,14 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
   }
 
   public async onPlayerJoin({ player }: PlayerJoinSignal): Promise<void> {
+    // Custom developer code.
+    if (player.username === "The Palm Healer") {
+      MorphManager.morph(player, "palm");
+      if (isDevEnvironment) {
+        //@ts-ignore
+        player.xuid = "0000000000000000";
+      }
+    }
     // Load player data.
     const session = await PlayerExtension.loadSession(player);
     if (!session) {
@@ -184,8 +201,6 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     PlayerEnum.options.push(player.username)
     // Increment player count.
     Server.incrementPlayerCount();
-    // Custom palm model.
-    if (player.username === "The Palm Healer") MorphManager.morph(player, "palm");
     // Show welcome form.
     ServerTaskHandler.queueTask(() => {
       const form = new ActionForm("Early Access");
@@ -193,6 +208,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
       form.button("Acknowledge");
       form.show(player);
     }, 3000);
+    resolve();
   }
 
   public onEntitySpawned(event: EntitySpawnedSignal): void {
@@ -204,47 +220,61 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
   }
 
   public async onPlayerLeave({ player }: PlayerLeaveSignal): Promise<void> {
-    // Stop whileOnEquipped check
-    for (const key of Object.keys(player.whileEquippedCheck) as unknown[] as (keyof typeof player.whileEquippedCheck)[]) {
-      if (player.whileEquippedCheck[key]) {
-        clearTimeout(player.whileEquippedCheck[key]!);
-        player.whileEquippedCheck[key] = null;
-      }
-    }
-    // Unload island if no owners are online.
-    const islandName = player.getIslandName();
-    if (islandName) {
-      const island = await Island.load(islandName);
-      if (island) {
-        if (island.getOnlineOwners().length === 0) {
-          // Unload island.
-          Island.unload(islandName)
-          const world = this.serenity.getWorld(island.getWorldId())
-          if (world) {
-            // Kick players still in the world, such as island visitors.
-            const players = world.getPlayers()
-            for (const survivor of players) {
-              Warp.to(survivor, "SPAWN")
-              survivor.info(`§cYou have been kicked from §e${island.getName()}§c: Island has gone offline.`)
-            }
-            // Unload island from storage.
-            this.serenity.unregisterWorld(world)
-          }
+    try {
+      // Stop whileOnEquipped check
+      for (const key of Object.keys(player.whileEquippedCheck) as unknown[] as (keyof typeof player.whileEquippedCheck)[]) {
+        if (player.whileEquippedCheck[key]) {
+          clearTimeout(player.whileEquippedCheck[key]!);
+          player.whileEquippedCheck[key] = null;
         }
-        this.logger.info(`Unloaded island §e${islandName}§r from cache.`)
       }
-    }
-    // Uncache player data.
-    player.setTimePlayed(player.getTimePlayed())
-    PlayerExtension.removeSession(player);
-    this.logger.info(`Removed session for player ${player.username}.`);
-    // Show chat leave message.
-    ChatHandler.onLeave(player, this.serenity)
-    // Remove username from player enum.
-    if (PlayerEnum.options.some((x) => x === player.username))
-      PlayerEnum.options.splice(PlayerEnum.options.indexOf(player.username), 1)
-    // Decrement player count.
-    Server.decrementPlayerCount();
+      // Unload island if no owners are online.
+      const islandName = player.getIslandName();
+      if (islandName) {
+        const island = await Island.load(islandName);
+        if (island) {
+          const worldId = island.getWorldId();
+          if (island.getOnlineOwners().length === 0) {
+            // Unload island.
+            Island.unload(islandName)
+            const world = this.serenity.getWorld()
+            if (world) {
+              // Kick players still in the world, such as island visitors.
+              const players = world.getPlayers()
+              for (const survivor of players) {
+                Warp.to(survivor, "SPAWN")
+                survivor.info(`§cYou have been kicked from §e${island.getName()}§c: Island has gone offline.`)
+              }
+              // Unload island from storage.
+              this.serenity.unregisterWorld(world);
+            }
+          }
+          if (player.username === "The Palm Healer" && isDevEnvironment) {
+            // Remove developer data.
+            await IslandDatabase.instance.delete(islandName);
+            this.serenity.worlds.delete(worldId)
+            rmdir(resolve(`./worlds/${worldId}`), { recursive: true })
+          }
+          this.logger.info(`Unloaded island §e${islandName}§r from cache.`)
+        }
+      }
+      // Uncache player data.
+      player.setTimePlayed(player.getTimePlayed())
+      PlayerExtension.removeSession(player);
+      // Remove developer data.
+      if (player.username === "The Palm Healer" && isDevEnvironment) {
+        await PlayerDatabase.instance.delete(player.xuid);
+      }
+      this.logger.info(`Removed session for player ${player.username}.`);
+      // Show chat leave message.
+      ChatHandler.onLeave(player, this.serenity)
+      // Remove username from player enum.  
+      if (PlayerEnum.options.some((x) => x === player.username))
+        PlayerEnum.options.splice(PlayerEnum.options.indexOf(player.username), 1)
+      // Decrement player count.
+      Server.decrementPlayerCount();
+      resolve();
+    } catch (e) { }
   }
 
   public onWorldInitialize({ world }: WorldInitializeSignal): void {
@@ -254,6 +284,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     world.entityPalette.registerTrait(PlayerListCustomTrait)
     world.entityPalette.registerTrait(PlayerCommandCooldownTrait)
     world.entityPalette.registerTrait(EntitySlapperTrait)
+    CustomItemRegistry.registerDefault(world);
     if (world.identifier.startsWith("sb_")) {
       // Register traits.
       for (let trait of this.blockTraits) {
