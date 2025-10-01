@@ -74,7 +74,7 @@ new CommandBuilder("merge", "Combines enchantment tomes in your inventory onto y
                 const roll = Math.random() * 100;
                 if (roll <= strength) {
                     // Success
-                    const result = heldItem.addCustomEnchantment(enchantId, 1);
+                    const result = heldItem.addCustomEnchantment(enchantId, level);
                     if (result.success) {
                         inventory.clearSlot(slot);
                         player.info(`§a> ${enchantDisplayName} §ehas been successfully enchanted onto the item!`);

@@ -25,12 +25,12 @@ const SellableItems = new Map<ItemIdentifier, SellableItem>([
     [ItemIdentifier.DiamondBlock, { money: 1000, xp: 100 }],
 
     /* Crops */
-    [ItemIdentifier.Beetroot, { money: 20, xp: 2 }],
-    [ItemIdentifier.Wheat, { money: 25, xp: 2.5 }],
-    [ItemIdentifier.Carrot, { money: 30, xp: 3 }],
-    [ItemIdentifier.Potato, { money: 35, xp: 3.5 }],
-    [ItemIdentifier.BakedPotato, { money: 40, xp: 4 }],
-    [ItemIdentifier.Cactus, { money: 40, xp: 4 }],
+    [ItemIdentifier.Beetroot, { money: 25, xp: 2.5 }],
+    [ItemIdentifier.Wheat, { money: 30, xp: 3 }],
+    [ItemIdentifier.Carrot, { money: 40, xp: 4 }],
+    [ItemIdentifier.Potato, { money: 45, xp: 4.5 }],
+    [ItemIdentifier.BakedPotato, { money: 60, xp: 6 }],
+    [ItemIdentifier.Cactus, { money: 50, xp: 5 }],
     [ItemIdentifier.Pumpkin, { money: 75, xp: 7.5 }],
     [ItemIdentifier.MelonSlice, { money: 80, xp: 8 }],
     [ItemIdentifier.MelonBlock, { money: 720, xp: 72 }],

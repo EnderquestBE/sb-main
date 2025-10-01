@@ -619,7 +619,7 @@ class Island extends DataManager<IslandData, IslandDatabase> {
     if (oldCeil < newLevel) {
       const members = this.getMembersInWorld();
       for (const member of members) {
-        member.onScreenDisplay.updateSubtitle(`§6${oldCeil} §a-> §e${newLevel}`);
+        member.onScreenDisplay.updateSubtitle(`§6${oldCeil} §d-> §e${newLevel}`);
         member.onScreenDisplay.setTitle("§eIsland Level Up!");
       }
 
