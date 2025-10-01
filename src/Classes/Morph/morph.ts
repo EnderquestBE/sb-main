@@ -32,7 +32,7 @@ class MorphManager {
         packet.uuid = player.uuid;
         packet.skin = morphData.skin!;
         packet.skinName = morphData.identifier;
-        packet.oldSkinName = player.skin.identifier;
+        packet.oldSkinName = player.skin.getSerialized().identifier;
         packet.isVerified = true;
         player.world.broadcast(packet)
     }

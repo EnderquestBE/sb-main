@@ -27,7 +27,7 @@ class EntitySlapperTrait extends EntityTrait {
     public async sendPacketData(player: Player) {
         //@ts-ignore
         const entityUuid = uuid();
-        const skin = (this.info.skin ? this.info.skin : player.skin);
+        const skin = (this.info.skin ? this.info.skin : player.skin.getSerialized());
 
         const listPacket = new PlayerListPacket();
         listPacket.action = PlayerListAction.Add;
