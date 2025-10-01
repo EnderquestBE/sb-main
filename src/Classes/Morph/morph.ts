@@ -25,7 +25,7 @@ class MorphManager {
         }
 
         //@ts-ignore
-        player.skin = morphData.skin!;
+        player.skin.source = morphData.skin!;
 
         // Apply the morph
         const packet = new PlayerSkinPacket()
