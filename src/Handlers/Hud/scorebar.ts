@@ -6,6 +6,7 @@ import { Server } from "../../server";
 
 class Scorebar {
     public static TITLE = "§l§dEnder§eQuest §bSB";
+    public static DISCORD = "§➲   §d» §9discord.ender.quest §d«";
     private static readonly S_GT = " §d➲ §bGT: §f";
     private static readonly S_PLAYERS = " §d➲ §ePlayers: §f";
     private static readonly S_BALANCE = " §d➲ §6Balance: §f$";
@@ -40,8 +41,9 @@ class Scorebar {
         displayPacket.sortOrder = ObjectiveSortOrder.Descending;
 
         const scores: ScoreEntry[] = [];
-        let scoreIndex = 12;
+        let scoreIndex = 13;
 
+        scores.push({ scoreboardId: ScoreboardIdentity.IDENTIFIER++, objectiveName: objective, score: scoreIndex--, identityType: ScoreboardIdentityType.FakePlayer, actorUniqueId: null, customName: this.DISCORD });
         scores.push({ scoreboardId: ScoreboardIdentity.IDENTIFIER++, objectiveName: objective, score: scoreIndex--, identityType: ScoreboardIdentityType.FakePlayer, actorUniqueId: null, customName: `${this.S_GT}${player.username}` });
         scores.push({ scoreboardId: ScoreboardIdentity.IDENTIFIER++, objectiveName: objective, score: scoreIndex--, identityType: ScoreboardIdentityType.FakePlayer, actorUniqueId: null, customName: `${this.S_PLAYERS}${Server.playerCount}§7/§f20` });
         scores.push({ scoreboardId: ScoreboardIdentity.IDENTIFIER++, objectiveName: objective, score: scoreIndex--, identityType: ScoreboardIdentityType.FakePlayer, actorUniqueId: null, customName: `${this.S_BALANCE}${Utils.formatInt(player.getMoney())}` });

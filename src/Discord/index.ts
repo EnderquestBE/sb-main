@@ -23,6 +23,7 @@ export class DiscordClient {
     public static client = new Client({
         intents: [
             "Guilds",
+            "GuildMembers",
             "GuildMessages",
             "MessageContent",
             "GuildMessageReactions",
@@ -31,7 +32,7 @@ export class DiscordClient {
     });
 
     public static async initialize() {
-        this.client.once("clientReady", () => {
+        this.client.once("clientReady", async () => {
             console.log(`Logged in as ${this.client.user?.tag}!`);
 
             // Register slash commands.
@@ -53,7 +54,23 @@ export class DiscordClient {
             this.logStart();
             // Send pending embeds.
             import("./Embeds/index");
+
+            // Make sure all current members have the guest role.
+            const guild = this.client.guilds.cache.get("1420107089472262207")!;
+            const role = guild.roles.cache.get('1420130564781903972')!;
+            await guild.members.fetch();
+            const members = guild.members.cache;
+            for (const [_id, member] of members) {
+                if (member.user.bot || member.roles.cache.has(role.id)) continue;
+                member.roles.add(role);
+            }
         });
+
+        // Automatically apply the guest role.
+        this.client.on("guildMemberAdd", member => {
+            const role = member.guild.roles.cache.get('1420130564781903972')!;
+            member.roles.add(role);
+        })
 
         await import("./Commands/index")
         // Login
