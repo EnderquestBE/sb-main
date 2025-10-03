@@ -2,7 +2,7 @@ import { BlockIdentifier, Entity, EntityIdentifier, EntityTrait, TraitOnTickDeta
 import { ByteTag } from "@serenityjs/nbt";
 import { Island } from "../../../Classes";
 import { Vector3f } from "@serenityjs/protocol";
-import { SpawnerEntity } from "../../../Handlers/Entity/spawnerEntity";
+import { SpawnerEntity } from "../../../Handlers";
 
 class EntityPersistenceTrait extends EntityTrait {
     public static readonly identifier = "persistence";

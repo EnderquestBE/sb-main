@@ -1,7 +1,7 @@
 import { EntityInventoryTrait, ItemIdentifier, Player } from "@serenityjs/core";
 import { CommandBuilder, CommandOverload, EnchantmentTome } from "../../Classes";
 import { CompoundTag, ShortTag, StringTag } from "@serenityjs/nbt";
-import { EnchantmentHandler } from "../../Handlers/Enchantment/handler";
+import { EnchantmentHandler } from "../../Handlers";
 import { EnchantmentSlot } from "../../Configuration/config";
 import { Utils } from "../../Utils/utils";
 

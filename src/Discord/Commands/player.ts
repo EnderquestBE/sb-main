@@ -2,7 +2,7 @@ import { AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder, Permissio
 import { DiscordClient } from "..";
 import { CustomSkin, PlayerDatabase } from "../../Classes";
 import { Server } from "../../server";
-import { ServerTaskHandler } from "../../Handlers/Server/handler";
+import { ServerTaskHandler } from "../../Handlers";
 import { Utils } from "../../Utils/utils";
 import { RANKS } from "../../Configuration/config";
 

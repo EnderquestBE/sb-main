@@ -27,6 +27,10 @@ const IslandDeleteCommand = new CommandOverload(
         player.getIslandAsync().then(async (island) => {
             if (!island) return player.error(`You don't have an island! Use /is create <name> to create one.`)
 
+            if (island.getLevel() < 5) {
+                return player.error("Your island must be at least level §65 §cto delete it.")
+            }
+
             //@ts-ignore
             if (!confirm.result) {
                 return player.error("Are you sure you want to permanently delete your island? §6To confirm, use §e/is delete §dconfirm§6.")
@@ -42,9 +46,14 @@ const IslandDeleteCommand = new CommandOverload(
                 return player.error("Only the island owner can delete the island.")
             }
 
-            const serenity = player.world.serenity
+            const world = player.world
+            const serenity = world.serenity
 
-            Warp.to(player, "SPAWN")
+            const players = world.getPlayers()
+            for (const p of players) {
+                Warp.to(p, "SPAWN");
+                p.info(`§cYou have been kicked from §e${island.getName()}§c: Island has been deleted.`);
+            }
             const name = island.getName()
 
             serenity.worlds.delete(island.getWorldId())

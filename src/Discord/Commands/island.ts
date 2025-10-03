@@ -2,7 +2,7 @@ import { AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder, Permissio
 import { DiscordClient } from "..";
 import { CustomSkin, Island, IslandLevel } from "../../Classes";
 import { Server } from "../../server";
-import { ServerTaskHandler } from "../../Handlers/Server/handler";
+import { ServerTaskHandler } from "../../Handlers";
 import { IslandLimitType } from "../../Types/types";
 import { Utils } from "../../Utils/utils";
 

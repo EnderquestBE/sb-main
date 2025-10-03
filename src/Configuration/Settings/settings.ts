@@ -1,4 +1,4 @@
-import { Scorebar } from "../../Handlers/Hud"
+import { Scorebar } from "../../Handlers"
 import { UserSetting } from "../../Types/types"
 
 enum Setting {

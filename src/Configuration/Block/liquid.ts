@@ -4,7 +4,7 @@ import { FlowingLiquidType } from "../../Types/Block/liquid";
 
 // Map of all liquid-like blocks to their source part.
 const LiquidBlockMap: {
-  [key in LiquidType | FlowingLiquidType]: BlockIdentifier;
+  [key in LiquidType | FlowingLiquidType]: LiquidType;
 } = {
   [BlockIdentifier.Water]: BlockIdentifier.Water,
   [BlockIdentifier.FlowingWater]: BlockIdentifier.Water,

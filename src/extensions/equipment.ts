@@ -1,7 +1,7 @@
 import { Container, EntityEquipmentTrait, ItemStack, Player } from "@serenityjs/core";
 import { CompoundTag, IntTag, ListTag } from "@serenityjs/nbt";
 import { EquipmentSlot, MobArmorEquipmentPacket } from "@serenityjs/protocol";
-import { ServerTaskHandler } from "../Handlers/Server/handler";
+import { ServerTaskHandler } from "../Handlers";
 
 function checkWhileEquipped(this: EntityEquipmentTrait, item: ItemStack, slot: EquipmentSlot) {
     if (this.entity.isPlayer()) {

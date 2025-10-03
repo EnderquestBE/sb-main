@@ -12,14 +12,8 @@ class Server {
         this.instance = instance;
     }
 
-    public static incrementPlayerCount() {
-        this.PLAYER_COUNT++;
-    }
-
-    public static decrementPlayerCount() {
-        if (this.PLAYER_COUNT > 0) {
-            this.PLAYER_COUNT--;
-        }
+    public static updatePlayerCount() {
+        this.PLAYER_COUNT = this.instance.players.size;
     }
 
     public static get playerCount(): number {

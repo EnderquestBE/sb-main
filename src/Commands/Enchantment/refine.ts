@@ -1,7 +1,7 @@
 import { EntityInventoryTrait, Player } from "@serenityjs/core";
 import { CommandBuilder, CommandOverload, RefinementScroll, CustomEnchantEnum } from "../../Classes";
 import { Utils } from "../../Utils/utils";
-import { EnchantmentHandler } from "../../Handlers/Enchantment/handler";
+import { EnchantmentHandler } from "../../Handlers";
 
 new CommandBuilder("refine", "Uses a Refinement Scroll to upgrade a CE's level.")
     .addOverload(

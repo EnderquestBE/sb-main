@@ -1,5 +1,3 @@
-export * from "./Island/validifyName"
-
 class Utils {
   private static readonly ROMAN_NUMERAL_MAP = new Map<number, string>([
     [1000, "M"],

@@ -1,6 +1,6 @@
 import { ActionForm, Player } from "@serenityjs/core";
 import { CommandBuilder, CommandOverload } from "../../Classes";
-import { EnchantmentHandler } from "../../Handlers/Enchantment/handler";
+import { EnchantmentHandler } from "../../Handlers";
 import { Utils } from "../../Utils/utils";
 import { EnchantmentRarity } from "../../Types/types";
 import { MainShop } from "../../Configuration/Shop/Main/main";

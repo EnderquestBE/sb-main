@@ -1,9 +1,9 @@
-import { Entity, EntityInteractMethod, EntityTrait, Player } from "@serenityjs/core";
+import { Entity, EntityTrait, Player } from "@serenityjs/core";
 import { Slapper, SlapperInfo } from "../../../Classes";
 import { ByteTag } from "@serenityjs/nbt";
 import { AddPlayerPacket, Color, CommandPermissionLevel, Gamemode, NetworkItemStackDescriptor, PermissionLevel, PlayerListAction, PlayerListPacket, SkinImage } from "@serenityjs/protocol";
 import { v4 as uuid } from 'uuid';
-import { ServerTaskHandler } from "../../../Handlers/Server/handler";
+import { ServerTaskHandler } from "../../../Handlers";
 
 class EntitySlapperTrait extends EntityTrait {
     public static readonly identifier = "slapper";

@@ -15,7 +15,7 @@ import {
 import { CompoundTag, IntTag, StringTag } from "@serenityjs/nbt";
 import { Utils } from "../../../Utils/utils";
 import { ItemSmeltableMap } from "../../../Configuration/Smelting/smelting";
-import { ServerTaskHandler } from "../../../Handlers/Server/handler";
+import { ServerTaskHandler } from "../../../Handlers";
 
 class BlockFurnaceTrait extends BlockTrait {
     public static readonly identifier: string = "minecraft:furnace";

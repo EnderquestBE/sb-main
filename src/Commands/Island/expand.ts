@@ -1,7 +1,7 @@
 import { CustomEnum, Entity, MessageForm } from "@serenityjs/core";
 import { CommandOverload, Island } from "../../Classes";
 import { Utils } from "../../Utils/utils";
-import { Expansion } from "../../Handlers/Island/expansion";
+import { Expansion } from "../../Handlers";
 
 class IslandExpandEnum extends CustomEnum {
     public static readonly identifier = "islandExpand";

@@ -2,8 +2,7 @@ import { Entity, EntityAttributeTrait, EntityDespawnOptions, EntityHealthTrait, 
 import { ByteTag, ShortTag } from "@serenityjs/nbt";
 import { Utils } from "../../../Utils/utils";
 import { ActorDamageCause, ActorEvent, ActorEventPacket, AnimateId, AnimatePacket, AttributeName, Enchantment } from "@serenityjs/protocol";
-import { SpawnerEntity } from "../../../Handlers/Entity/spawnerEntity";
-import { EnchantmentHandler } from "../../../Handlers/Enchantment/handler";
+import { SpawnerEntity, EnchantmentHandler } from "../../../Handlers";
 
 class EntityStackTrait extends EntityAttributeTrait {
     public static readonly identifier = "stack";
