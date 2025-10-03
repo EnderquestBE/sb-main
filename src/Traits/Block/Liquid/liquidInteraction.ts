@@ -52,10 +52,11 @@ class LiquidInteractionBlockTrait extends BlockTrait {
   public InteractWithConnectedLavaSource() {
     for (const neighbor of neighbors) {
       const checkLava = this.block[neighbor](1);
-      if (checkLava.identifier === BlockIdentifier.Lava)
+      if (checkLava.identifier === BlockIdentifier.Lava) {
         checkLava.setPermutation(
           BlockPermutation.resolve(BlockIdentifier.Obsidian)
         );
+      }
     }
   }
 
@@ -100,10 +101,11 @@ class LiquidInteractionBlockTrait extends BlockTrait {
     if (
       checkWater.identifier === BlockIdentifier.Water ||
       checkWater.identifier === BlockIdentifier.FlowingWater
-    )
+    ) {
       checkWater.setPermutation(
         BlockPermutation.resolve(BlockIdentifier.Stone)
       );
+    }
   }
 }
 

@@ -1,6 +1,6 @@
 import { CustomEnum, Entity, StringEnum } from "@serenityjs/core";
 import { CommandOverload, Island, IslandDatabase } from "../../Classes";
-import { Utils, validifyIslandName } from "../../Utils/utils";
+import { Utils, validifyIslandName } from "../../Utils";
 
 class IslandRenameEnum extends CustomEnum {
     public static readonly identifier = "islandRename";

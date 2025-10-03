@@ -1,9 +1,9 @@
-import { Entity, EntityInteractMethod, EntityTrait, Player } from "@serenityjs/core";
+import { Entity, EntityTrait, Player } from "@serenityjs/core";
 import { Slapper, SlapperInfo } from "../../../Classes";
 import { ByteTag } from "@serenityjs/nbt";
 import { AddPlayerPacket, Color, CommandPermissionLevel, Gamemode, NetworkItemStackDescriptor, PermissionLevel, PlayerListAction, PlayerListPacket, SkinImage } from "@serenityjs/protocol";
 import { v4 as uuid } from 'uuid';
-import { ServerTaskHandler } from "../../../Handlers/Server/handler";
+import { ServerTaskHandler } from "../../../Handlers";
 
 class EntitySlapperTrait extends EntityTrait {
     public static readonly identifier = "slapper";
@@ -14,20 +14,20 @@ class EntitySlapperTrait extends EntityTrait {
     public constructor(entity: Entity) {
         super(entity);
         // Set non-save.
-        this.entity.nbt.set("Persistent", new ByteTag(0, "Persistent"))
+        this.entity.setStorageEntry("Persistent", new ByteTag(0, "Persistent"))
         const info = Slapper.get(this.entity.identifier);
         if (!info) throw new Error(`Slapper info not found for identifier ${this.entity.identifier}`);
         this.info = info;
         // Entity properties.
         this.entity.scale = 1.5;
-        this.entity.nameTag = info.name + "\n§r§dTAP TO USE§r"
-        this.entity.alwaysShowNameTag = true;
+        this.entity.setNametag(info.name + "\n§r§dTAP TO USE§r");
+        this.entity.setNametagAlwaysVisible(true);
     }
 
     public async sendPacketData(player: Player) {
         //@ts-ignore
         const entityUuid = uuid();
-        const skin = (this.info.skin ? this.info.skin : player.skin);
+        const skin = (this.info.skin ? this.info.skin : player.skin.getSerialized());
 
         const listPacket = new PlayerListPacket();
         listPacket.action = PlayerListAction.Add;
@@ -59,8 +59,8 @@ class EntitySlapperTrait extends EntityTrait {
         playerPacket.headYaw = this.entity.rotation.headYaw;
         playerPacket.heldItem = new NetworkItemStackDescriptor(0);
         playerPacket.gamemode = Gamemode.Creative;
-        playerPacket.data = [...this.entity.metadata.values()];
-        playerPacket.properties = this.entity.sharedProperties.getPropertySyncData();
+        playerPacket.data = this.entity.metadata.getAllActorMetadataAsDataItems();
+        playerPacket.properties = this.entity.sharedProperties.getSharedPropertiesAsSyncData();
         playerPacket.uniqueEntityId = this.entity.uniqueId;
         playerPacket.premissionLevel = PermissionLevel.Member;
         playerPacket.commandPermission = CommandPermissionLevel.Normal;

@@ -1,6 +1,6 @@
 import { CommandExecutionState, EntityEquipmentTrait, EntityIdentifier, Player, PlayerTrait } from "@serenityjs/core"
 import { Vector3f } from "@serenityjs/protocol";
-import { ServerTaskHandler } from "../../../Handlers/Server/handler";
+import { ServerTaskHandler } from "../../../Handlers";
 
 class PlayerCommandCooldownTrait extends PlayerTrait {
     public static readonly identifier = "command-cooldown"

@@ -9,9 +9,8 @@ import {
     EntityIdentifier,
 } from "@serenityjs/core";
 import { FloatTag, ShortTag, StringTag } from "@serenityjs/nbt";
-import { SpawnerHandler } from "../../../Handlers/Spawner/spawner";
+import { SpawnerHandler, ServerTaskHandler } from "../../../Handlers";
 import { BlockSpawnerTrait } from "../../Block/traits";
-import { ServerTaskHandler } from "../../../Handlers/Server/handler";
 
 class ItemSpawnerTrait extends ItemStackTrait {
     public static readonly identifier = "spawner";

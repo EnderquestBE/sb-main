@@ -1,6 +1,6 @@
 import { CustomEnum, Entity } from "@serenityjs/core";
 import { CommandOverload, Island, PlayerEnum } from "../../Classes";
-import { IslandInvites } from "../../Handlers/Island/invites";
+import { IslandInvites } from "../../Handlers";
 import { IslandRoleDisplay } from "../../Configuration/config";
 import { Server } from "../../server";
 

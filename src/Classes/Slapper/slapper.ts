@@ -7,7 +7,7 @@ type SlapperInfo = {
     name: string; // Name to use for nametag.
     position: Vector3f; // Position to spawn the slapper at.
     function: (player: Player) => void; // Function to execute when the slapper is used.
-    skinURL: string; // URL to the skin image.
+    texture: string; // Name of skin image.
     rotation?: Rotation; // The rotation of the slapper entity.
     skinOptions?: Partial<CustomSkinOptions>; // Additional skin options.
     skin?: SerializedSkin; // Constructed result skin.
@@ -17,7 +17,7 @@ class Slapper {
     private static slappers: Map<string, SlapperInfo> = new Map();
 
     public static async registerSlapper(slapper: SlapperInfo) {
-        slapper.skin = await (await CustomSkin.from(slapper.identifier, slapper.skinURL, { ...slapper.skinOptions })).toSerializedSkin();
+        slapper.skin = await (await CustomSkin.from(slapper.identifier, slapper.texture, { ...slapper.skinOptions })).toSerializedSkin();
         this.slappers.set(slapper.identifier, slapper);
     }
 

@@ -1,7 +1,7 @@
 import { ItemStack } from "@serenityjs/core";
 import { CompoundTag, ShortTag } from "@serenityjs/nbt";
 import { CustomEnchantment } from "../Classes/Enchantment/customEnchantment";
-import { EnchantmentHandler } from "../Handlers/Enchantment/handler";
+import { EnchantmentHandler } from "../Handlers";
 import { Utils } from "../Utils/utils";
 import { CEConfig } from "../Configuration/config";
 

@@ -2,8 +2,7 @@ import { Entity, EntityAttributeTrait, EntityDespawnOptions, EntityHealthTrait, 
 import { ByteTag, ShortTag } from "@serenityjs/nbt";
 import { Utils } from "../../../Utils/utils";
 import { ActorDamageCause, ActorEvent, ActorEventPacket, AnimateId, AnimatePacket, AttributeName, Enchantment } from "@serenityjs/protocol";
-import { SpawnerEntity } from "../../../Handlers/Entity/spawnerEntity";
-import { EnchantmentHandler } from "../../../Handlers/Enchantment/handler";
+import { SpawnerEntity, EnchantmentHandler } from "../../../Handlers";
 
 class EntityStackTrait extends EntityAttributeTrait {
     public static readonly identifier = "stack";
@@ -34,7 +33,7 @@ class EntityStackTrait extends EntityAttributeTrait {
             currentValue: entityInfo.health
         })
         // Set non-save.
-        this.entity.nbt.set("Persistent", new ByteTag(0, "Persistent"))
+        this.entity.setStorageEntry("Persistent", new ByteTag(0, "Persistent"))
     }
 
     public onDamage(
@@ -119,11 +118,11 @@ class EntityStackTrait extends EntityAttributeTrait {
     }
 
     public onKill(player?: Player): void {
-        const stack = this.entity.nbt.get<ShortTag>("MobStack")?.valueOf()
+        const stack = this.entity.getStorageEntry<ShortTag>("MobStack")?.valueOf()
         if (stack && stack > 1) {
-            this.entity.nbt.set("MobStack", new ShortTag(stack - 1, "MobStack"))
-            this.entity.nameTag = `§l§e${Utils.formatString(this.entity.identifier)} §7x§c${stack - 1}`
-            this.entity.alwaysShowNameTag = true
+            this.entity.setStorageEntry("MobStack", new ShortTag(stack - 1, "MobStack"))
+            this.entity.setNametag(`§l§e${Utils.formatString(this.entity.identifier)} §7x§c${stack - 1}`)
+            this.entity.setNametagAlwaysVisible(true);
             this.currentValue = this.defaultValue;
             this.aliveState = true;
         } else {

@@ -1,6 +1,6 @@
 import { EntityInventoryTrait, ItemStackEnchantableTrait, Player } from "@serenityjs/core";
 import { CommandBuilder, CommandOverload, EnchantmentTome, ExpulsionScroll, AllEnchantEnum } from "../../Classes";
-import { EnchantmentHandler } from "../../Handlers/Enchantment/handler";
+import { EnchantmentHandler } from "../../Handlers";
 import { Enchantment } from "@serenityjs/protocol";
 
 new CommandBuilder("expel", "Uses an Expulsion Scroll to remove an enchant from item.")

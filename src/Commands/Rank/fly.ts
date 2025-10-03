@@ -7,8 +7,8 @@ new CommandBuilder("fly", "Toggles flight on islands.").setPermissions(["island.
     }).onCallback((origin) => {
         if (!(origin instanceof Entity) || !origin.isPlayer()) return;
 
-        origin.abilities.set(AbilityIndex.MayFly, !origin.abilities.mayFly);
+        origin.abilities.setAbility(AbilityIndex.MayFly, !origin.abilities.getAbility(AbilityIndex.MayFly));
 
-        origin.info(`§eFlight §f>> ${origin.abilities.mayFly ? "§aON" : "§cOFF"}`)
+        origin.info(`§eFlight §f>> ${origin.abilities.getAbility(AbilityIndex.MayFly) ? "§aON" : "§cOFF"}`)
     })
 ).register("Rank")

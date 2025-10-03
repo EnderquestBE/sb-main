@@ -68,7 +68,7 @@ class ServerTaskHandler {
         }, this.clearEntitiesInterval)
         this.queueIntervalTask(() => {
             this.randomTipsTask();
-        }, 900000)
+        }, 600000)
     }
 
     public static clearAllTasks() {

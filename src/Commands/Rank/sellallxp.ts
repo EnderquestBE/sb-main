@@ -3,7 +3,7 @@ import { CommandBuilder, CommandOverload } from "../../Classes"
 import { SellableItems } from "../../Configuration/config";
 import { Utils } from "../../Utils/utils";
 
-new CommandBuilder("sellallxp", "Sells all items in your inventory.").setAliases(["saxp"]).setPermissions(["rank.sellallxp"]).addOverload(
+new CommandBuilder("sellallxp", "Sells all items in your inventory.").setAliases(["saxp", "sellinvxp"]).setPermissions(["rank.sellallxp"]).addOverload(
     new CommandOverload({
     }).onCallback((player) => {
         if (!(player instanceof Player)) return

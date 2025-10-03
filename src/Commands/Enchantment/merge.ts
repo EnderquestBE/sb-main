@@ -1,7 +1,7 @@
 import { EntityInventoryTrait, ItemIdentifier, Player } from "@serenityjs/core";
-import { CommandBuilder, CommandOverload } from "../../Classes";
+import { CommandBuilder, CommandOverload, EnchantmentTome } from "../../Classes";
 import { CompoundTag, ShortTag, StringTag } from "@serenityjs/nbt";
-import { EnchantmentHandler } from "../../Handlers/Enchantment/handler";
+import { EnchantmentHandler } from "../../Handlers";
 import { EnchantmentSlot } from "../../Configuration/config";
 import { Utils } from "../../Utils/utils";
 
@@ -18,6 +18,65 @@ new CommandBuilder("merge", "Combines enchantment tomes in your inventory onto y
             }
 
             const inventory = player.getTrait(EntityInventoryTrait).container
+
+            // Allow merging two tomes of the same enchantment to increase strength.
+            if (EnchantmentTome.is(heldItem)) {
+
+                const heldTomeNBT = heldItem.nbt.get<CompoundTag>("EnchantmentTome");
+                if (!heldTomeNBT) {
+                    return player.error("That item is not a valid tome.");
+                }
+
+                const heldEnchantId = heldTomeNBT.get<StringTag>("Enchantment")?.valueOf();
+                const heldStrength = heldTomeNBT.get<ShortTag>("Strength")?.valueOf();
+
+                if (!heldEnchantId || heldStrength === undefined) {
+                    return player.error("That item is not a valid tome.");
+                }
+
+                if (heldStrength >= 100) {
+                    return player.error("That tome already at maximum strength.");
+                }
+
+                for (const [slot, item] of inventory.storage.entries()) {
+                    if (!item || slot === player.getSelectedSlot()) continue;
+
+                    // Check if the item is an Enchantment Tome by its NBT data
+                    const tomeNBT = item.nbt.get<CompoundTag>("EnchantmentTome");
+                    if (!tomeNBT) continue;
+
+                    // Get tome data.
+                    const enchantId = tomeNBT.get<StringTag>("Enchantment")?.valueOf();
+                    const strength = tomeNBT.get<ShortTag>("Strength")?.valueOf();
+
+                    if (!enchantId || strength === undefined) continue;
+
+                    // Get enchantment info
+                    const enchantInfo = EnchantmentHandler.getById(enchantId);
+                    if (!enchantInfo) continue;
+
+                    const enchantDisplayName = `§l${enchantInfo.color}${enchantInfo.name}§r`
+
+                    player.info(`§6> ${enchantDisplayName} §eis interacting with the item...`);
+
+                    if (enchantId !== heldEnchantId) {
+                        player.info(`§c> ${enchantDisplayName} §cis a different enchantment than your tome.`);
+                        continue;
+                    }
+
+                    if (heldStrength >= 100) {
+                        player.info(`§c> ${enchantDisplayName} §cis already at maximum strength.`);
+                        continue;
+                    }
+
+                    heldItem.strength = Math.min(100, heldStrength + strength);
+                    inventory.clearSlot(slot);
+                    heldItem.update();
+                    player.info(`§a> ${enchantDisplayName} §ehas merged with another tome powering a new strength of §c${heldItem.strength}%%§e!`);
+                    return;
+                }
+                return;
+            }
 
             let tomeCount = 0;
             for (const [slot, item] of inventory.storage.entries()) {
@@ -74,7 +133,7 @@ new CommandBuilder("merge", "Combines enchantment tomes in your inventory onto y
                 const roll = Math.random() * 100;
                 if (roll <= strength) {
                     // Success
-                    const result = heldItem.addCustomEnchantment(enchantId, 1);
+                    const result = heldItem.addCustomEnchantment(enchantId, level);
                     if (result.success) {
                         inventory.clearSlot(slot);
                         player.info(`§a> ${enchantDisplayName} §ehas been successfully enchanted onto the item!`);

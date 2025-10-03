@@ -6,9 +6,7 @@ import { Utils } from "../Utils/utils";
 import { FormApplication } from "./Applications/form";
 import { Applications } from "./Applications/applications";
 import { ModerationManager } from "../Classes/Data/Moderation";
-
-const envArg = process.argv.find(arg => arg.startsWith('--env='));
-const isDev = envArg === '--env=development';
+import { isDevEnvironment } from "..";
 
 export class DiscordClient {
 
@@ -23,6 +21,7 @@ export class DiscordClient {
     public static client = new Client({
         intents: [
             "Guilds",
+            "GuildMembers",
             "GuildMessages",
             "MessageContent",
             "GuildMessageReactions",
@@ -31,7 +30,7 @@ export class DiscordClient {
     });
 
     public static async initialize() {
-        this.client.once("clientReady", () => {
+        this.client.once("clientReady", async () => {
             console.log(`Logged in as ${this.client.user?.tag}!`);
 
             // Register slash commands.
@@ -53,7 +52,23 @@ export class DiscordClient {
             this.logStart();
             // Send pending embeds.
             import("./Embeds/index");
+
+            // Make sure all current members have the guest role.
+            const guild = this.client.guilds.cache.get("1420107089472262207")!;
+            const role = guild.roles.cache.get('1420130564781903972')!;
+            await guild.members.fetch();
+            const members = guild.members.cache;
+            for (const [_id, member] of members) {
+                if (member.user.bot || member.roles.cache.has(role.id)) continue;
+                member.roles.add(role);
+            }
         });
+
+        // Automatically apply the guest role.
+        this.client.on("guildMemberAdd", member => {
+            const role = member.guild.roles.cache.get('1420130564781903972')!;
+            member.roles.add(role);
+        })
 
         await import("./Commands/index")
         // Login
@@ -70,7 +85,7 @@ export class DiscordClient {
         this.client.on("interactionCreate", async (interaction) => {
             try {
                 if (interaction.isCommand()) {
-                    if (isDev) return;
+                    if (isDevEnvironment) return;
                     const execution = this.executions[interaction.commandName];
                     if (execution) {
                         if (interaction.isChatInputCommand()) {
@@ -222,7 +237,7 @@ export class DiscordClient {
     }
 
     public static async dumpHeadImage(player: Player) {
-        const head = await CustomSkin.getHeadImage(player.xuid, player.skin.skinImage);
+        const head = await CustomSkin.getHeadImage(player.xuid, await player.skin.getSkinImage());
         if (!head) return;
         return this.dumpImage(player.xuid, head);
     }
@@ -232,7 +247,7 @@ export class DiscordClient {
     }
 
     public static async logPlayerJoin(player: Player) {
-        if (!this.client || isDev) return;
+        if (!this.client || isDevEnvironment) return;
         const channel = this.channels.logs;
         if (!channel) return;
         const head = await this.dumpHeadImage(player)
@@ -241,7 +256,7 @@ export class DiscordClient {
     }
 
     public static logPlayerLeave(player: Player) {
-        if (!this.client || isDev) return;
+        if (!this.client || isDevEnvironment) return;
         const channel = this.channels.logs;
         if (!channel) return;
         const embed = new EmbedBuilder().setAuthor({ iconURL: this.getHeadImage(player.xuid), name: `${player.username} left the server.` }).setColor("Red").setTimestamp();
@@ -249,14 +264,14 @@ export class DiscordClient {
     }
 
     public static logPlayerChat(message: string) {
-        if (!this.client || isDev) return;
+        if (!this.client || isDevEnvironment) return;
         const channel = this.channels.logs;
         if (!channel) return;
         channel.send({ content: Utils.stripColorCodes(message) });
     }
 
     public static logStart() {
-        if (!this.client || isDev) return;
+        if (!this.client || isDevEnvironment) return;
         const channel = this.channels.logs;
         if (!channel) return;
         const embed = new EmbedBuilder().setAuthor({ name: `✅ Server has started.` }).setColor("Green").setTimestamp();
@@ -264,7 +279,7 @@ export class DiscordClient {
     }
 
     public static logStop() {
-        if (!this.client || isDev) return;
+        if (!this.client || isDevEnvironment) return;
         const channel = this.channels.logs;
         if (!channel) return;
         const embed = new EmbedBuilder().setAuthor({ name: `🔸 Restart in progress...` }).setColor("Red").setTimestamp();

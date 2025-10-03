@@ -2,7 +2,7 @@ import { AttachmentBuilder, ChatInputCommandInteraction, EmbedBuilder, Permissio
 import { DiscordClient } from "..";
 import { CustomSkin, PlayerDatabase } from "../../Classes";
 import { Server } from "../../server";
-import { ServerTaskHandler } from "../../Handlers/Server/handler";
+import { ServerTaskHandler } from "../../Handlers";
 import { Utils } from "../../Utils/utils";
 import { RANKS } from "../../Configuration/config";
 
@@ -42,7 +42,7 @@ async function execute(interaction: ChatInputCommandInteraction) {
         const { xuid, activeRanks, island, timePlayed, lastSeen, firstSeen, balance: { money, xp }, } = data;
         // Get head image.
         const player = Server.instance.getPlayerByXuid(xuid);
-        const headImage = await CustomSkin.getHeadImage(xuid, player?.skin.skinImage);
+        const headImage = await CustomSkin.getHeadImage(xuid, await player?.skin.getSkinImage());
         const ownerHead = new AttachmentBuilder(headImage ?? "https://mc-heads.net/avatar/jeb_/256", { name: `${username.replace(/\s/g, "")}.png` });
         // Create embed body.
         const line1 = `> **Balance:** $${Utils.formatInt(money)}\n> **XP:** ${xp}\n> **Rank:** ${activeRanks.reverse().map((x) => `[${RANKS.get(x)!.name}]`).join("")}\n> **Island:** ${island === "" ? "--" : island}\n> **Time Played:** ${Utils.formatDuration(timePlayed)}\n> **K:** 0 **D:** 0 **R:** 0`.toString();

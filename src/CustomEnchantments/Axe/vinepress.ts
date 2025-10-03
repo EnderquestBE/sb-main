@@ -1,7 +1,7 @@
 import { Block } from "@serenityjs/core";
 import { CustomEnchantment } from "../../Classes";
 import { CropBlocks } from "../Constant/cropBlocks";
-import { BlockHandler } from "../../Handlers/Block/handler";
+import { BlockHandler } from "../../Handlers";
 
 new CustomEnchantment("vinepress", "Vinepress")
     .setDescription("Breaks a few extra crops directly connected to the crop when activated.")

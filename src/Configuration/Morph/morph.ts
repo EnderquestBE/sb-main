@@ -6,24 +6,24 @@ import { SpongebobGeometry } from "./Geometry/spongebob";
 
 MorphManager.registerMorph({
     identifier: "spongebob",
-    skinURL: "https://drive.usercontent.google.com/u/0/uc?id=1Is1xsxshdxDsOmpG5HWhKsIzx1XmDwjy&export=download",
-    skinOptions: { geometry: SpongebobGeometry, geometryKey: "geometry.spongebob" }
+    texture: "spongebob.png",
+    skinOptions: { geometry: SpongebobGeometry, geometryKey: "geometry.spongebob", isPersona: true, width: 256, height: 256 }
 })
 
 MorphManager.registerMorph({
     identifier: "imposter",
-    skinURL: "https://drive.usercontent.google.com/u/0/uc?id=1T3kBk779Vrc25rsWgk_CuB-eFcQ0du9L&export=download",
+    texture: "imposter.png",
     skinOptions: { geometry: ImposterGeometry, geometryKey: "geometry.imposter" }
 })
 
 MorphManager.registerMorph({
     identifier: "palm",
-    skinURL: "https://drive.usercontent.google.com/u/0/uc?id=17zRczizNhS5sMMKXjZcS0MmweU9DB1em&export=download",
+    texture: "top_hat_chicken_shirt.png",
     skinOptions: { geometry: PalmGeometry, geometryKey: "geometry.palm" }
 })
 
 MorphManager.registerMorph({
     identifier: "pig",
-    skinURL: "https://drive.usercontent.google.com/u/0/uc?id=1MCJmyN_IFX370LRUDyP0qSmh16wyRieX&export=download",
+    texture: "pig.png",
     skinOptions: { geometry: PigGeometry, geometryKey: "geometry.pig" }
 })
