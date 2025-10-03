@@ -1,4 +1,4 @@
-import { Player } from "@serenityjs/core"
+import { MessageForm, Player } from "@serenityjs/core"
 import { CommandBuilder, CommandOverload } from "../../Classes"
 import { Server } from "../../server"
 import { Utils } from "../../Utils"
@@ -27,6 +27,11 @@ export async function calculateCpuUsage(sampleIntervalMs: number = 1000): Promis
     return cpuPercentage;
 }
 
+function showUptimeMessage(uptime: string, memoryUsed: string, memoryTotal: string, cpu: string, tps: number) {
+    const message = `§fUptime: §e${uptime}\n§fMemory Usage: §c${memoryUsed} MB / ${memoryTotal} MB\n§fCPU Usage: §6${cpu}§e%%%%\n§fTPS: §b${tps}`
+    return message;
+}
+
 new CommandBuilder("uptime", "Shows statistics for the server's uptime.")
     .setAliases(["performance"])
     .setPermissions(["serenity.operator"])
@@ -35,23 +40,41 @@ new CommandBuilder("uptime", "Shows statistics for the server's uptime.")
         }).onCallback((origin) => {
 
             if (origin instanceof Player) {
-                origin.info("§7§oLogging server performance...")
+
+                const cpuReadings: number[] = [];
+                const maxReadings = 5;
+
+                const form = new MessageForm("Server Uptime");
+                form.content = "Logging server performance...";
+                const intervalId = setInterval(() => {
+                    calculateCpuUsage().then((cpu) => {
+                        cpuReadings.push(cpu);
+
+                        if (cpuReadings.length > maxReadings) {
+                            cpuReadings.shift();
+                        }
+                        const sum = cpuReadings.reduce((a, b) => a + b, 0);
+                        const averageCpu = sum / cpuReadings.length;
+
+                        form.content = showUptimeMessage(
+                            Utils.formatDuration(Math.floor(process.uptime())),
+                            (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2),
+                            (process.constrainedMemory() / 1024 / 1024).toFixed(2),
+                            averageCpu.toFixed(2),
+                            Server.instance.tps
+                        );
+
+                        form.update(origin);
+                    });
+                }, 1000);
+                form.show(origin, () => {
+                    clearInterval(intervalId);
+                })
             } else {
                 Server.logger.info("Logging server performance...")
+                calculateCpuUsage().then((cpu) => {
+                    Server.logger.info("\n§6§l=== Server Uptime ===§r\n" + showUptimeMessage(Utils.formatDuration(Math.floor(process.uptime())), (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2), (process.constrainedMemory() / 1024 / 1024).toFixed(2), (cpu).toFixed(2), Server.instance.tps).replace("%%%%", "%"))
+                })
             }
-
-            calculateCpuUsage().then((cpu) => {
-                const message = `§6§l=== Server Uptime ===§r
-§fUptime: §e${Utils.formatDuration(Math.floor(process.uptime()))}
-§fMemory Usage: §c${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB / ${(process.availableMemory() / 1024 / 1024).toFixed(2)} MB
-§fCPU Usage: §6${(cpu).toFixed(2)}§e%%
-§fTPS: §b${Server.instance.tps}
-`
-                if (origin instanceof Player) {
-                    origin.sendMessage(message)
-                } else {
-                    Server.logger.info(message.replace(/%%/g, "%"))
-                }
-            })
         })
     ).register("Admin")

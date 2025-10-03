@@ -121,7 +121,10 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
 
   public beforePlayerJoin({ player }: PlayerJoinSignal): boolean {
     // Manage whitelist.
-    if (!ModerationManager.instance.isWhitelisted(player)) return false;
+    if (!ModerationManager.instance.isWhitelisted(player)) {
+      player.disconnect("§cThe server is currently closed for play testing.\n§dIf you are interested, join our discord:\n§9https://discord.ender.quest")
+      return false;
+    }
     return true;
   }
 

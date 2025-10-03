@@ -6,10 +6,10 @@ new CustomEnchantment("frenzy", "Frenzy")
     .setDescription("Grants haste when activated.")
     .setRarity("Common")
     .allowOnSlots("Tool")
-    .setActivationChance({ base: 13, perLevel: 1, minimum: 1 })
+    .setActivationChance({ base: 26, perLevel: 2, minimum: 1 })
     .onBlockBreak(({ player, block, level }) => {
         if (!MiningBlocks.has(block.identifier)) return;
         if (player.hasEffect(EffectType.Haste)) player.removeEffect(EffectType.Haste);
-        player.addEffect(EffectType.Haste, level * 2, { amplifier: Math.ceil(level / 3) - 1, showParticles: false });
+        player.addEffect(EffectType.Haste, level, { amplifier: level > 6 ? 2 : 1, showParticles: false });
     })
     .register();

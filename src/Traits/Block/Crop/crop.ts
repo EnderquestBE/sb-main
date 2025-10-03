@@ -37,12 +37,12 @@ class BlockCropTrait extends BlockTrait {
         switch (block.identifier) {
             case BlockIdentifier.Beetroot:
                 this.SEED_ITEM = ItemIdentifier.BeetrootSeeds
-                this.harvestItems = (multiplier: number) => { return [[this.SEED_ITEM, Utils.randomInt(1, 4) * multiplier], [ItemIdentifier.Beetroot, 1]] }
+                this.harvestItems = (_multiplier: number) => { return [[this.SEED_ITEM, Utils.randomInt(1, 4)], [ItemIdentifier.Beetroot, 1]] }
                 this.harvestPoints = () => { return Utils.randomInt(0, 1) }
                 break;
             case BlockIdentifier.Wheat:
                 this.SEED_ITEM = ItemIdentifier.WheatSeeds
-                this.harvestItems = (multiplier: number) => { return [[this.SEED_ITEM, Utils.randomInt(1, 4) * multiplier], [ItemIdentifier.Wheat, 1]] }
+                this.harvestItems = (_multiplier: number) => { return [[this.SEED_ITEM, Utils.randomInt(1, 4)], [ItemIdentifier.Wheat, 1]] }
                 this.harvestPoints = () => { return Utils.randomInt(0, 2) }
                 break;
             case BlockIdentifier.Carrots:
