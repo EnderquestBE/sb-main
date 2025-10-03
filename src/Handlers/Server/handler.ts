@@ -1,6 +1,7 @@
 import { Serenity } from "@serenityjs/core";
 import { EntityPersistenceTrait } from "../../Traits/Entity/traits";
 import { ChatHandler } from "../Chat/handler";
+import { Tips } from "../../Configuration/config";
 
 class ServerTaskHandler {
     private static serenity: Serenity;
@@ -38,10 +39,24 @@ class ServerTaskHandler {
         }, 50000)
     }
 
+    public static randomTipsTask() {
+        const { color, message } = Tips[Math.floor(Math.random() * Tips.length)]!
+        ChatHandler.broadcast(`§l${color}»>\n§d[TIP]» §r${message}\n§l${color}»>`, this.serenity, false)
+    }
+
     public static queueTask(task: () => any, runAfter: number) {
         const timeout = setTimeout(() => {
             task();
         }, runAfter)
+        this.tasks.push(timeout)
+        return timeout
+    }
+
+    public static queueIntervalTask(task: () => any, interval: number) {
+        const timeout = setTimeout(() => {
+            task();
+            this.queueIntervalTask(task, interval);
+        }, interval)
         this.tasks.push(timeout)
         return timeout
     }
@@ -51,6 +66,9 @@ class ServerTaskHandler {
         this.queueTask(() => {
             this.clearEntitiesTask();
         }, this.clearEntitiesInterval)
+        this.queueIntervalTask(() => {
+            this.randomTipsTask();
+        }, 600000)
     }
 
     public static clearAllTasks() {

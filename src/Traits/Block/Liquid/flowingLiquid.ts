@@ -6,7 +6,7 @@ import {
 } from "@serenityjs/core";
 import { Direction } from "../../../Types/types";
 import { FlowSpeed, SourceBlockMap } from "../../../Configuration/Block/liquid";
-import { FlowingLiquidType } from "../../../Types/Block/liquid";
+import { FlowingLiquidType, LiquidType } from "../../../Types/Block/liquid";
 
 class FlowingLiquidBlockTrait extends BlockTrait {
   public static readonly identifier = "minecraft:flowing_liquid";
@@ -14,15 +14,23 @@ class FlowingLiquidBlockTrait extends BlockTrait {
     SourceBlockMap
   ) as FlowingLiquidType[];
 
-  public onTick(details: TraitOnTickDetails): void {
-    const sourceBlockType =
+  public SOURCE_TYPE!: LiquidType;
+
+  public FLOW_SPEED: number = Infinity;
+
+  public onAdd(): void {
+    this.SOURCE_TYPE =
       SourceBlockMap[this.block.identifier as FlowingLiquidType];
-    if (Number(details.currentTick) % FlowSpeed[sourceBlockType] > 0) return;
-    const level = this.block.getState("liquid_depth");
+    this.FLOW_SPEED = FlowSpeed[this.SOURCE_TYPE];
+  }
+
+  public onUpdate(): void {
+    //const level = this.block.getState("liquid_depth");
+    /*
     if (level === 8) {
       const sourceBlock = this.block.above(1);
       if (
-        sourceBlock.identifier !== sourceBlockType &&
+        sourceBlock.identifier !== this.SOURCE_TYPE &&
         sourceBlock.identifier !== this.block.identifier
       ) {
         this.block.setPermutation(
@@ -30,17 +38,18 @@ class FlowingLiquidBlockTrait extends BlockTrait {
         );
       }
     } else {
-      const directions: Direction[] = ["north", "west", "east", "south"];
-      let isSource = false;
-      for (const dir of directions) {
-        const sourceBlock = this.block[dir](1);
-        if (sourceBlock.identifier === sourceBlockType) isSource = true;
-      }
-      if (!isSource)
-        this.block.setPermutation(
-          BlockPermutation.resolve(BlockIdentifier.Air)
-        );
+      */
+    const directions: Direction[] = ["north", "west", "east", "south"];
+    let isSource = false;
+    for (const dir of directions) {
+      const sourceBlock = this.block[dir](1);
+      if (sourceBlock.identifier === this.SOURCE_TYPE) isSource = true;
     }
+    if (!isSource)
+      this.block.setPermutation(
+        BlockPermutation.resolve(BlockIdentifier.Air)
+      );
+    //}
   }
 }
 

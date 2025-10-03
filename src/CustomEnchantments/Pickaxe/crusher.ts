@@ -1,6 +1,6 @@
 import { Block } from "@serenityjs/core";
 import { CustomEnchantment } from "../../Classes";
-import { BlockHandler } from "../../Handlers/Block/handler";
+import { BlockHandler } from "../../Handlers";
 import { OreBlocks } from "../Constant/oreBlocks";
 
 new CustomEnchantment("crusher", "Crusher")

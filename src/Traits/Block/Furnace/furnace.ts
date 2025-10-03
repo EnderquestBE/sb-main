@@ -15,7 +15,7 @@ import {
 import { CompoundTag, IntTag, StringTag } from "@serenityjs/nbt";
 import { Utils } from "../../../Utils/utils";
 import { ItemSmeltableMap } from "../../../Configuration/Smelting/smelting";
-import { ServerTaskHandler } from "../../../Handlers/Server/handler";
+import { ServerTaskHandler } from "../../../Handlers";
 
 class BlockFurnaceTrait extends BlockTrait {
     public static readonly identifier: string = "minecraft:furnace";
@@ -88,7 +88,6 @@ class BlockFurnaceTrait extends BlockTrait {
                     }
                     return true;
                 }
-                else result++
             }
             // Only allow smelting one item at a time.
             if (smeltingItem) {
@@ -96,13 +95,13 @@ class BlockFurnaceTrait extends BlockTrait {
                 return false;
             }
             // Start smelting.
-            const item = smeltableItems[result - 1]
+            const item = smeltableItems[result]
             if (!item) {
                 player.error("Failed to queue item for smelting.")
                 return false;
             }
             this.setItemSmelting(item)
-            inv.clearSlot(invItems.indexOf(item))
+            inv.clearSlot(item.slot)
         })
         return false;
     }

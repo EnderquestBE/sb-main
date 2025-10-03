@@ -7,8 +7,8 @@ import { BankLogEntry, IslandData, IslandHome, IslandLimit, IslandLimitType, Isl
 import { Server } from "../../server";
 import { Logger, LoggerColors } from "@serenityjs/logger";
 import { IslandLevel, PlayerDatabase } from "..";
-import { IslandLimitUnlocks } from "../../Handlers/Island/limits";
-import { IslandPerkUnlocks } from "../../Handlers/Island/perks";
+import { IslandLimitUnlocks } from "../../Handlers";
+import { IslandPerkUnlocks } from "../../Handlers";
 
 /**
  * @name Island
@@ -619,7 +619,7 @@ class Island extends DataManager<IslandData, IslandDatabase> {
     if (oldCeil < newLevel) {
       const members = this.getMembersInWorld();
       for (const member of members) {
-        member.onScreenDisplay.updateSubtitle(`§6${oldCeil} §a-> §e${newLevel}`);
+        member.onScreenDisplay.updateSubtitle(`§6${oldCeil} §d-> §e${newLevel}`);
         member.onScreenDisplay.setTitle("§eIsland Level Up!");
       }
 

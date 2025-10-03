@@ -4,7 +4,7 @@ import { Player } from "@serenityjs/core";
 
 type Morph = {
     identifier: string; // Identifier for the morph.
-    skinURL: string; // URL to the skin image.
+    texture: string; // Path to skin image.
     skinOptions?: Partial<CustomSkinOptions>; // Additional skin options.
     skin?: SerializedSkin; // Constructed result skin.
 }
@@ -13,7 +13,7 @@ class MorphManager {
     private static morphs: Map<string, Morph> = new Map();
 
     public static async registerMorph(morph: Morph) {
-        morph.skin = await (await CustomSkin.from(morph.identifier, morph.skinURL, { ...morph.skinOptions })).toSerializedSkin();
+        morph.skin = await (await CustomSkin.from(morph.identifier, morph.texture, { ...morph.skinOptions })).toSerializedSkin();
         this.morphs.set(morph.identifier, morph);
     }
 
@@ -25,14 +25,14 @@ class MorphManager {
         }
 
         //@ts-ignore
-        player.skin = morphData.skin!;
+        player.skin.source = morphData.skin!;
 
         // Apply the morph
         const packet = new PlayerSkinPacket()
         packet.uuid = player.uuid;
         packet.skin = morphData.skin!;
         packet.skinName = morphData.identifier;
-        packet.oldSkinName = player.skin.identifier;
+        packet.oldSkinName = player.skin.getSerialized().identifier;
         packet.isVerified = true;
         player.world.broadcast(packet)
     }

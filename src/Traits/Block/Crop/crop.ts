@@ -10,7 +10,7 @@ import {
 } from "@serenityjs/core";
 import { Utils } from "../../../Utils/utils";
 import { Enchantment } from "@serenityjs/protocol";
-import { BlockHandler } from "../../../Handlers/Block/handler";
+import { BlockHandler } from "../../../Handlers";
 import { Island } from "../../../Classes";
 class BlockCropTrait extends BlockTrait {
     public static readonly identifier: string = "minecraft:crop";
@@ -63,23 +63,23 @@ class BlockCropTrait extends BlockTrait {
         this.grow()
     }
 
-    public onInteract({ origin }: BlockInteractionOptions): void {
+    public onInteract({ origin }: BlockInteractionOptions): boolean {
         const player = origin
 
         // Check if there is a player interacting.
-        if (!player) return;
+        if (!player) return false;
 
         // Get the item the player is holding.
         const item = player.getHeldItem()
 
         // Check if the player is holding bonemeal.
-        if (!item || item.identifier !== ItemIdentifier.BoneMeal) return;
+        if (!item || item.identifier !== ItemIdentifier.BoneMeal) return false;
 
         // Get the current growth state of the crop.
         const growth = (this.block.getState("growth") as number)
 
         // Check if the block has already reached max growth.
-        if (growth >= this.MAX_GROWTH) return
+        if (growth >= this.MAX_GROWTH) return false;
 
         // Calculate the amount of growth for the crop.
         const fertilizerGrowth = Math.floor(Math.random() * (this.MAX_GROWTH - growth)) + 1;
@@ -96,6 +96,7 @@ class BlockCropTrait extends BlockTrait {
 
         // Play bone meal sound.
         player.playSound("item.bone_meal.use", { position: this.block.position })
+        return false;
     }
 
     public onBreak({ origin, dropLoot }: BlockDestroyOptions): void {

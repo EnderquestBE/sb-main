@@ -7,10 +7,10 @@ import {
     ItemStackUseOnBlockOptions,
     BlockPermutation,
     ItemStackDurabilityTrait,
+    PlayerInteractWithBlockSignal,
 } from "@serenityjs/core";
 import { BlockFace, ItemUseMethod } from "@serenityjs/protocol";
-
-const MessageCooldown = new Map<string, number>()
+import { PermissionsHandler } from "../../../Handlers";
 
 class ItemHoeTrait extends ItemStackTrait {
     public static readonly identifier = "minecraft:hoe";
@@ -36,12 +36,12 @@ class ItemHoeTrait extends ItemStackTrait {
     /**
      * Till soil.
      */
-    public onUseOnBlock(player: Player, { targetBlock, method, face }: ItemStackUseOnBlockOptions): void {
+    public onUseOnBlock(player: Player, { targetBlock, method, face }: ItemStackUseOnBlockOptions): boolean {
         // Only allow placements on the top of farmland.
-        if (!ItemHoeTrait.tillable.has(targetBlock.identifier) || face !== BlockFace.Top) return
+        if (!ItemHoeTrait.tillable.has(targetBlock.identifier) || face !== BlockFace.Top) return false;
 
         // Check for an obstructing block above the soil block.
-        if (targetBlock.above(1).identifier !== BlockIdentifier.Air) return
+        if (targetBlock.above(1).identifier !== BlockIdentifier.Air) return false;
 
         // Set the use method to use tool.
         method = ItemUseMethod.UseTool
@@ -56,6 +56,7 @@ class ItemHoeTrait extends ItemStackTrait {
         targetBlock.update()
 
         player.playSound("use.gravel", { position: targetBlock.position })
+        return false;
     }
 }
 

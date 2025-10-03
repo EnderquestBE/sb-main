@@ -18,7 +18,7 @@ class PermissionsHandler {
             player.error("You do not have permission to break blocks here.")
             return false
         }
-        const island = player.getIsland()
+        const island = player.getWorldIsland();
         if (!island || !island.isMember(player.xuid)) {
             player.error("You must be a member of this island to break blocks.")
             return false
@@ -42,7 +42,7 @@ class PermissionsHandler {
             player.error("You do not have permission to place blocks here.")
             return false
         }
-        const island = player.getIsland()
+        const island = player.getWorldIsland();
         if (!island || !island.isMember(player.xuid)) {
             player.error("You must be a member of this island to place blocks.")
             return false
@@ -57,7 +57,7 @@ class PermissionsHandler {
     }
 
     public static onInteract({ source, block, placingBlock }: PlayerInteractWithBlockSignal) {
-        if (!placingBlock) return true
+        if (placingBlock) return true
         if (!source.isWorldIsland()) {
             if (!MessageCooldown.has(source.xuid) || MessageCooldown.get(source.xuid)! < Date.now()) {
                 source.error("You do not have permission to interact here.")
@@ -65,7 +65,7 @@ class PermissionsHandler {
             }
             return false
         }
-        const island = source.getIsland()
+        const island = source.getWorldIsland();
         if (!island || !island.isMember(source.xuid)) {
             if (!MessageCooldown.has(source.xuid) || MessageCooldown.get(source.xuid)! < Date.now()) {
                 source.error("You must be a member of this island to interact.")
@@ -82,17 +82,18 @@ class PermissionsHandler {
         return true
     }
 
-    public static onUseContainer({ player }: PlayerOpenedContainerSignal) {
+    public static onContainerOpen({ player }: PlayerOpenedContainerSignal) {
+        if (!player) return false;
         if (!player.isWorldIsland()) {
-            player.error("You do not have permission to use containers here.")
-            return false
+            player.error("You do not have permission to use containers here.");
+            return false;
         }
-        const island = player.getIsland()
+        const island = player.getWorldIsland();
         if (!island || !island.hasPermission(player.xuid, "admin")) {
-            player.error("You must be an admin of this island to use containers.")
-            return false
+            player.error("You must be an admin of this island to use containers.");
+            return false;
         }
-        return true
+        return true;
     }
 
     public static onEntityHit({ damagingEntity, hitEntity }: EntityHitSignal) {
@@ -101,7 +102,7 @@ class PermissionsHandler {
             damagingEntity.error("You do not have permission to attack here.")
             return false
         }
-        const island = damagingEntity.getIsland()
+        const island = damagingEntity.getWorldIsland();
         if (!island || !island.isMember(damagingEntity.xuid)) {
             damagingEntity.error("You must be a member of this island to attack.")
             return false

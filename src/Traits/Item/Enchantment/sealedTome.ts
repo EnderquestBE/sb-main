@@ -4,7 +4,7 @@ import { ItemUseMethod } from "@serenityjs/protocol";
 import { EnchantmentRarity } from "../../../Types/types";
 import { SealedTomeConfig } from "../../../Configuration/config";
 import { Utils } from "../../../Utils/utils";
-import { EnchantmentHandler } from "../../../Handlers/Enchantment/handler";
+import { EnchantmentHandler } from "../../../Handlers";
 import { EnchantmentTome } from "../../../Classes";
 
 class SealedTomeTrait extends ItemStackTrait {

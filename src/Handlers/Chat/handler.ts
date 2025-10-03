@@ -1,6 +1,7 @@
 import { Player, PlayerChatSignal, Serenity } from "@serenityjs/core";
 import { Filter, Island } from "../../Classes";
 import { Color } from "../../Types/types";
+import { DiscordClient } from "../../Discord";
 
 class ChatHandler {
     private static readonly lastConversationMap = new Map<string, string>();
@@ -27,18 +28,25 @@ class ChatHandler {
             return false
         }
         const recipients = serenity.getPlayers()
+        const island = player.getIsland()
+        const format = this.format(player, island, Filter.censor(message))
         for (const recipient of recipients) {
-            const island = player.getIsland()
-            recipient.sendMessage(this.format(player, island, Filter.censor(message)))
+            recipient.sendMessage(format)
         }
         this.lastChatMap.set(player.xuid, Date.now())
+        // Log to Discord
+        DiscordClient.logPlayerChat(format);
         return false
     }
 
-    public static broadcast(message: string, serenity: Serenity) {
+    public static broadcast(message: string, serenity: Serenity, useInfo = true) {
         const recipients = serenity.getPlayers()
         for (const recipient of recipients) {
-            recipient.info(message)
+            if (useInfo) {
+                recipient.info(message)
+            } else {
+                recipient.sendMessage(message)
+            }
         }
     }
 
@@ -47,6 +55,8 @@ class ChatHandler {
         for (const recipient of recipients) {
             recipient.sendMessage(`§f➙ §f[§a+§f] §a${player.username} §ejoined the server!`)
         }
+        // Log to Discord
+        DiscordClient.logPlayerJoin(player);
     }
 
     public static onLeave(player: Player, serenity: Serenity) {
@@ -54,6 +64,8 @@ class ChatHandler {
         for (const recipient of recipients) {
             recipient.sendMessage(`§f➙ §f[§c-§f] §a${player.username} §cleft the server!`)
         }
+        // Log to Discord
+        DiscordClient.logPlayerLeave(player);
     }
 
     private static format(player: Player, island: Island | null, message: string) {

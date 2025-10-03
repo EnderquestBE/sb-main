@@ -9,9 +9,8 @@ import {
     EntityIdentifier,
 } from "@serenityjs/core";
 import { FloatTag, ShortTag, StringTag } from "@serenityjs/nbt";
-import { SpawnerHandler } from "../../../Handlers/Spawner/spawner";
+import { SpawnerHandler, ServerTaskHandler } from "../../../Handlers";
 import { BlockSpawnerTrait } from "../../Block/traits";
-import { ServerTaskHandler } from "../../../Handlers/Server/handler";
 
 class ItemSpawnerTrait extends ItemStackTrait {
     public static readonly identifier = "spawner";
@@ -24,7 +23,7 @@ class ItemSpawnerTrait extends ItemStackTrait {
         super(item);
     }
 
-    public onUseOnBlock(player: Player, { targetBlock: block, face }: ItemStackUseOnBlockOptions): void {
+    public onUseOnBlock(_player: Player, { targetBlock: block, face }: ItemStackUseOnBlockOptions): void {
         ServerTaskHandler.queueTask(() => {
             block = block.face(face)
             if (block.type.identifier !== BlockIdentifier.MobSpawner) return

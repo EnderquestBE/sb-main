@@ -1,5 +1,5 @@
 import { EnchantmentSlotType } from "../../Configuration/config";
-import { EnchantmentHandler } from "../../Handlers/Enchantment/handler";
+import { EnchantmentHandler } from "../../Handlers";
 import { BlockBreakEnchantmentEvent, CustomEnchantmentProperties, EnchantmentActivationChance, EnchantmentRarity, EntityHurtEnchantmentEvent, WhileEquippedEnchantmentEvent } from "../../Types/types";
 
 enum EnchantmentRarityColor {

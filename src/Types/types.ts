@@ -22,3 +22,5 @@ export * from "./Form/dataFormButton"
 export * from "./Shop/shop"
 /* Enchantment */
 export * from "./Enchantment/types"
+/* Moderation */
+export * from "./Moderation/types"

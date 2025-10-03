@@ -1,33 +1,27 @@
 import { Plugin, PluginEvents } from "@serenityjs/plugins";
-import { CustomEntityType, EntityHealthTrait, EntityHitSignal, Player, PlayerBreakBlockSignal, PlayerChatSignal, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerListTrait, PlayerOpenedContainerSignal, PlayerPlaceBlockSignal, WorldEvent, WorldInitializeSignal } from "@serenityjs/core";
-import { ContainerType } from "@serenityjs/protocol";
+import { ActionForm, CustomEntityType, EntityHealthTrait, EntityHitSignal, EntitySpawnedSignal, EntityTraits, LevelDBProvider, Player, PlayerBreakBlockSignal, PlayerChatSignal, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerLevelingTrait, PlayerOpenedContainerSignal, PlayerPlaceBlockSignal, WorldEvent, WorldInitializeSignal } from "@serenityjs/core";
+import { BlockHandler, BoundaryHandler, ChatHandler, IslandPerkUnlocks, LeaderboardHandler, NametagHandler, PermissionsHandler, PlayerHud, ServerTaskHandler, SpawnerHandler } from "./Handlers";
 import { IslandGenerator } from "./Classes/Island/generator";
-import { ChatHandler } from "./Handlers/Chat/handler";
-import { PermissionsHandler } from "./Handlers/Permissions/handler";
-import { FlowingLiquidBlockTrait, LiquidInteractionBlockTrait, SourceLiquidBlockTrait, BlockFurnaceTrait, BlockCropTrait, BlockMultiBlockCropTrait, BlockStemCropTrait, BlockSpawnerTrait } from "./Traits/Block/traits";
-import { EntityStackTrait, EntityPersistenceTrait, PlayerCommandCooldownTrait, PlayerListCustomTrait } from "./Traits/Entity/traits";
-import { ItemSeedTrait, ItemHoeTrait, ItemSpawnerTrait, SealedTomeTrait } from "./Traits/Item/traits";
-import { NametagHandler } from "./Handlers/Nametag/handler";
-import { SpawnerHandler } from "./Handlers/Spawner/spawner";
-import { BlockHandler } from "./Handlers/Block/handler";
 import { PlayerEnum } from "./Classes/Command/Enums/player";
-import { ServerTaskHandler } from "./Handlers/Server/handler";
 import { PlayerExtension } from "./extensions/player";
-import { CommandBuilder, CustomItemRegistry, DatabaseService, Island, IslandDatabase, PlayerDatabase, Slapper, VendorDatabase, Warp } from "./Classes";
-import { IslandPerkUnlocks } from "./Handlers/Island/perks";
+import { CommandBuilder, CustomItemRegistry, DatabaseService, Island, IslandDatabase, ModerationDatabase, PlayerDatabase, Slapper, VendorDatabase, Warp } from "./Classes";
 import { Utils } from "./Utils/utils";
-import { PlayerHud } from "./Handlers/Hud";
-import { BoundaryHandler } from "./Handlers/Boundary/handler";
 import { registerIslandHelpCommands } from "./Commands/Island/help";
 import { Server } from "./server";
 import { EntitySlapperTrait } from "./Traits/Entity/Slapper/slapper";
 import { MorphManager } from "./Classes/Morph";
-import { LeaderboardHandler } from "./Handlers/Leaderboard/handler";
-import { BlockSpecialSignTrait } from "./Traits/Block/Sign/sign";
+import { DiscordClient } from "./Discord";
+import { ModerationManager } from "./Classes/Data/Moderation";
+import { resolve } from "node:path";
+import { rmdir } from "node:fs/promises";
+import { BlockTraits, ItemTraits } from "./Traits";
+import { PlayerCommandCooldownTrait, PlayerListCustomTrait } from "./Traits/Entity/Player";
+import { EntityStackTrait } from "./Traits/Entity/traits";
 
 /**
  * @IMPORTS
  */
+import "./Traits"
 import "./CustomEnchantments/enchantments"
 import "./Handlers/Enchantment/handler"
 import "./extensions/itemStack"
@@ -39,34 +33,14 @@ import "./Configuration/Morph/morph"
 
 import "./Commands/commands"
 import "./Traits/Block/Liquid/liquidInteraction"
+import { ContainerType } from "@serenityjs/protocol";
+
+const envArg = process.argv.find(arg => arg.startsWith('--env='));
+const isDevEnvironment = envArg === '--env=development';
+
+export { isDevEnvironment }
 
 class EnderquestPlugin extends Plugin implements PluginEvents {
-
-  private readonly blockTraits = [
-    LiquidInteractionBlockTrait,
-    SourceLiquidBlockTrait,
-    FlowingLiquidBlockTrait,
-    BlockFurnaceTrait,
-    BlockCropTrait,
-    BlockMultiBlockCropTrait,
-    BlockStemCropTrait,
-    BlockSpawnerTrait,
-    BlockSpecialSignTrait
-  ];
-
-  private readonly itemTraits = [
-    ItemSeedTrait,
-    ItemHoeTrait,
-    ItemSpawnerTrait,
-    SealedTomeTrait
-  ]
-
-  private readonly entityTraits = [
-    EntityStackTrait,
-    PlayerCommandCooldownTrait,
-    PlayerListCustomTrait,
-    EntityPersistenceTrait
-  ]
 
   private database!: DatabaseService;
 
@@ -106,6 +80,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     new PlayerDatabase(this.database);
     new IslandDatabase(this.database);
     new VendorDatabase(this.database);
+    new ModerationDatabase(this.database);
     // Initialize leaderboards.
     LeaderboardHandler.initialize(this.serenity.getWorld());
   }
@@ -121,23 +96,44 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     // Initialize handlers.
     BlockHandler.initialize()
     SpawnerHandler.initialize()
+    // Initialize discord bot.
+    DiscordClient.initialize();
     // Mark server as started.
     this.logger.info("§5Ender§dquest§r has started.");
   }
 
   public async onShutDown(): Promise<void> {
+    // Allow time for player disconnection and other ongoing processes.
+    while (this.serenity.players.size > 0) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
     // Disconnect database.
     await this.database.disconnect();
+    // Disconnect discord bot.
+    await DiscordClient.disconnect();
     ServerTaskHandler.clearAllTasks();
-    // Execute leave event.
-    for (let player of this.serenity.getPlayers()) {
-      this.onPlayerLeave({ player } as PlayerLeaveSignal)
-    }
     // Mark server as stopped.
     this.logger.info("§5Ender§dquest§r has stopped safely.");
+    resolve();
+    process.exit(0);
+  }
+
+
+  public beforePlayerJoin({ player }: PlayerJoinSignal): boolean {
+    // Manage whitelist.
+    if (!ModerationManager.instance.isWhitelisted(player)) return false;
+    return true;
   }
 
   public async onPlayerJoin({ player }: PlayerJoinSignal): Promise<void> {
+    // Custom developer code.
+    if (player.username === "The Palm Healer") {
+      MorphManager.morph(player, "palm");
+      if (isDevEnvironment) {
+        //@ts-ignore
+        player.xuid = "0000000000000000";
+      }
+    }
     // Load player data.
     const session = await PlayerExtension.loadSession(player);
     if (!session) {
@@ -154,12 +150,16 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
       const island = await Island.load(islandName);
       if (island) {
         // Load island world from storage.
-        /*
         if (island.getOnlineOwners().length <= 1) {
-            LevelDBProvider.loadWorld(this.instance, island.getWorldId())
+          try {
+            //@ts-ignore
+            LevelDBProvider.loadWorld(this.serenity, island.getWorldId())
+          } catch (e) {
+            player.disconnect("§cFailed to load your data. Please try again later.");
+            return;
+          }
         }
-        */
-        if (island.isOwner(player.xuid)) IslandPerkUnlocks.applyPermissions(player, island);
+        if (island!.isOwner(player.xuid)) IslandPerkUnlocks.applyPermissions(player, island);
         this.logger.info(`Loaded island §e${islandName}§r into cache for ${player.username}.`);
       } else {
         this.logger.error(`§cFailed to load island data for ${player.username}.`)
@@ -171,74 +171,106 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     NametagHandler.format(player)
     // Add username to player enum.
     PlayerEnum.options.push(player.username)
-    // Increment player count.
-    Server.incrementPlayerCount();
-    // Custom palm model.
-    if (player.username === "The Palm Healer") MorphManager.morph(player, "palm")
+    // Update player count.
+    Server.updatePlayerCount();
+    // Show welcome form.
+    ServerTaskHandler.queueTask(() => {
+      const form = new ActionForm("Early Access");
+      form.content = " \n       §l§eWelcome to §dEnderquest§e!§r§f\n\n  Thank you for your interest in this\n  server! Before you proceed, please\n    note that the server is still in\n development; features are incomplete\n       and you may lose progress.\n  If you encounter any issues, please\n         report them on Discord.\n\n   Thank you for your understanding!\n "
+      form.button("Acknowledge");
+      form.show(player);
+    }, 3000);
+    resolve();
+  }
+
+  public onEntitySpawned(event: EntitySpawnedSignal): void {
+    if (!event.initialSpawn || !(event.entity instanceof Player)) return;
+    const player = event.entity;
+    // Update XP.
+    const leveling = player.getTrait(PlayerLevelingTrait) ?? player.addTrait(PlayerLevelingTrait)
+    leveling.setExperience(player.getXp());
   }
 
   public async onPlayerLeave({ player }: PlayerLeaveSignal): Promise<void> {
-    // Stop whileOnEquipped check
-    for (const key of Object.keys(player.whileEquippedCheck) as unknown[] as (keyof typeof player.whileEquippedCheck)[]) {
-      if (player.whileEquippedCheck[key]) {
-        clearTimeout(player.whileEquippedCheck[key]!);
-        player.whileEquippedCheck[key] = null;
-      }
-    }
-    // Unload island if no owners are online.
-    const islandName = player.getIslandName();
-    if (islandName) {
-      const island = await Island.load(islandName);
-      if (island) {
-        if (island.getOnlineOwners().length === 0) {
-          // Unload island.
-          Island.unload(islandName)
-          const world = this.serenity.getWorld(island.getWorldId())
-          if (world) {
-            // Kick players still in the world, such as island visitors.
-            const players = world.getPlayers()
-            for (const survivor of players) {
-              Warp.to(survivor, "SPAWN")
-              survivor.info(`§cYou have been kicked from §e${island.getName()}§c: Island has gone offline.`)
-            }
-            // Unload island from storage.
-            //this.instance.unregisterWorld(world)
-          }
+    try {
+      // Stop whileOnEquipped check
+      for (const key of Object.keys(player.whileEquippedCheck) as unknown[] as (keyof typeof player.whileEquippedCheck)[]) {
+        if (player.whileEquippedCheck[key]) {
+          clearTimeout(player.whileEquippedCheck[key]!);
+          player.whileEquippedCheck[key] = null;
         }
-        this.logger.info(`Unloaded island §e${islandName}§r from cache.`)
       }
-    }
-    // Uncache player data.
-    player.setTimePlayed(player.getTimePlayed())
-    PlayerExtension.removeSession(player);
-    this.logger.info(`Removed session for player ${player.username}.`);
-    // Show chat leave message.
-    ChatHandler.onLeave(player, this.serenity)
-    // Remove username from player enum.
-    if (PlayerEnum.options.some((x) => x === player.username))
-      PlayerEnum.options.splice(PlayerEnum.options.indexOf(player.username), 1)
-    // Decrement player count.
-    Server.decrementPlayerCount();
+      // Unload island if no owners are online.
+      const islandName = player.getIslandName();
+      if (islandName) {
+        const island = await Island.load(islandName);
+        if (island) {
+          const worldId = island.getWorldId();
+          if (island.getOnlineOwners().length === 0) {
+            // Unload island.
+            const world = island.getWorld();
+            Island.unload(islandName);
+            if (world) {
+              // Kick players still in the world, such as island visitors.
+              const players = world.getPlayers();
+              for (const survivor of players) {
+                Warp.to(survivor, "SPAWN");
+                survivor.info(`§cYou have been kicked from §e${island.getName()}§c: Island has gone offline.`);
+              }
+              // Unload island from storage.
+              this.serenity.unregisterWorld(world);
+            }
+          }
+          if (player.username === "The Palm Healer" && isDevEnvironment) {
+            // Remove developer data.
+            await IslandDatabase.instance.delete(islandName);
+            this.serenity.worlds.delete(worldId)
+            rmdir(resolve(`./worlds/${worldId}`), { recursive: true })
+          }
+          this.logger.info(`Unloaded island §e${islandName}§r from cache.`)
+        }
+      }
+      // Uncache player data.
+      player.setTimePlayed(player.getTimePlayed())
+      PlayerExtension.removeSession(player);
+      // Remove developer data.
+      if (player.username === "The Palm Healer" && isDevEnvironment) {
+        await PlayerDatabase.instance.delete(player.xuid);
+      }
+      this.logger.info(`Removed session for player ${player.username}.`);
+      // Show chat leave message.
+      ChatHandler.onLeave(player, this.serenity)
+      // Remove username from player enum.  
+      if (PlayerEnum.options.some((x) => x === player.username))
+        PlayerEnum.options.splice(PlayerEnum.options.indexOf(player.username), 1)
+      // Update player count.
+      Server.updatePlayerCount();
+      resolve();
+    } catch (e) { }
   }
 
   public onWorldInitialize({ world }: WorldInitializeSignal): void {
     // Register island block traits.
+    world.entityPalette.unregisterTrait(EntityHealthTrait)
+    world.entityPalette.registerTrait(PlayerListCustomTrait)
+    world.entityPalette.registerTrait(PlayerCommandCooldownTrait)
+    world.entityPalette.registerTrait(EntitySlapperTrait)
     if (world.identifier.startsWith("sb_")) {
-      world.entityPalette.unregisterTrait(PlayerListTrait)
-      world.entityPalette.unregisterTrait(EntityHealthTrait)
-      for (let trait of this.blockTraits) {
+      // Register traits.
+      for (let trait of BlockTraits) {
         world.blockPalette.registerTrait(trait);
       }
-      for (let trait of this.itemTraits) {
+      for (let trait of ItemTraits) {
         world.itemPalette.registerTrait(trait)
       }
-      for (let trait of this.entityTraits) {
+      for (let trait of EntityTraits) {
         world.entityPalette.registerTrait(trait)
       }
       CustomItemRegistry.registerAll(world);
     }
     // Initialize hub slappers.
     if (world.identifier === "default") {
+      CustomItemRegistry.registerDefault(world);
       setTimeout(() => {
         // Initialize slappers.
         const slappers = Slapper.getAll()
@@ -248,12 +280,13 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
           world.entityPalette.registerType(type)
           // Spawn entity.
           const dimension = world.getDimension()
-          const entity = dimension.spawnEntity(type, slapper.position)
+          const entity = dimension.spawnEntity(type, slapper.position, false)
           if (slapper.rotation) {
             entity.setRotation(slapper.rotation)
           }
           entity.setGravityForce(0)
           entity.addTrait(EntitySlapperTrait)
+          entity.spawn();
         }
       }, 3000);
     }
@@ -279,7 +312,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
 
   public beforePlayerOpenedContainer(event: PlayerOpenedContainerSignal): boolean {
     if (event.container.type === ContainerType.Inventory) return true
-    return PermissionsHandler.onUseContainer(event)
+    else return PermissionsHandler.onContainerOpen(event)
   }
 
   public beforeEntityHit(event: EntityHitSignal): boolean {

@@ -3,7 +3,7 @@ import { CommandBuilder, CommandOverload } from "../../Classes"
 import { SellableItems } from "../../Configuration/config";
 import { Utils } from "../../Utils/utils";
 
-new CommandBuilder("sellall", "Sells all items in your inventory.").setAliases(["sa"]).setPermissions(["rank.sellall"]).addOverload(
+new CommandBuilder("sellall", "Sells all items in your inventory.").setAliases(["sa", "sellinv"]).setPermissions(["rank.sellall"]).addOverload(
     new CommandOverload({
     }).onCallback((player) => {
         if (!(player instanceof Player)) return

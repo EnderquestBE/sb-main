@@ -7,7 +7,6 @@ import {
     TraitOnTickDetails,
     EntityIdentifier,
     MessageForm,
-    BlockPermutation,
     BlockPlacementOptions,
 } from "@serenityjs/core";
 import { Island } from "../../../Classes";
@@ -92,23 +91,24 @@ class BlockSpawnerTrait extends BlockTrait {
                 y + 0.5,
                 z + Math.sin(angle) * distance
             )
-            const entity = this.dimension.spawnEntity(this.ENTITY, spawnPos)
+            const entity = this.dimension.spawnEntity(this.ENTITY, spawnPos, false)
             entity.applyImpulse(new Vector3f(0.1, 0, 0.1))
-            entity.nbt.set("MobStack", new ShortTag(1, "MobStack"))
-            entity.nameTag = `§l§e${Utils.formatString(this.ENTITY)} §7x§c1`
-            entity.alwaysShowNameTag = true
+            entity.setStorageEntry("MobStack", new ShortTag(1, "MobStack"))
+            entity.setNametag(`§l§e${Utils.formatString(this.ENTITY)} §7x§c1`)
+            entity.setNametagAlwaysVisible(true)
+            entity.spawn();
         }
         // Increment existing entity.
         else {
             const entity = entities[0]!
-            const mobStack = entity.nbt.get<ShortTag>("MobStack")?.valueOf()
+            const mobStack = entity.getStorageEntry<ShortTag>("MobStack")?.valueOf()
             if (!mobStack) {
                 entity.kill()
                 return
             }
-            entity.nbt.set("MobStack", new ShortTag(mobStack + 1, "MobStack"))
-            entity.nameTag = `§l§e${Utils.formatString(this.ENTITY)} §7x§c${mobStack + 1}`
-            entity.alwaysShowNameTag = true
+            entity.setStorageEntry("MobStack", new ShortTag(mobStack + 1, "MobStack"))
+            entity.setNametag(`§l§e${Utils.formatString(this.ENTITY)} §7x§c${mobStack + 1}`)
+            entity.setNametagAlwaysVisible(true)
         }
     }
 

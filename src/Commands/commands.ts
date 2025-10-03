@@ -27,6 +27,9 @@ import "./General/vendor"
 import "./General/message"
 import "./General/reply"
 import "./General/buy"
+import "./General/repair"
+import "./General/friend"
+import "./General/break"
 
 /** Island Commands */
 import "./Island/island"

@@ -1,7 +1,7 @@
 import { ItemIdentifier, ItemStack } from "@serenityjs/core";
 import { CompoundTag, ShortTag, StringTag } from "@serenityjs/nbt";
 import { Utils } from "../../Utils/utils";
-import { EnchantmentHandler } from "../../Handlers/Enchantment/handler";
+import { EnchantmentHandler } from "../../Handlers";
 import { SealedTomeConfig } from "../../Configuration/config";
 
 enum EnchantmentSlotDisplay {

@@ -1,5 +1,5 @@
 import { BinaryStream } from "@serenityjs/binarystream";
-import { BlockIdentifier, BlockInventoryTrait, BlockPermutation, Chunk, ItemIdentifier, ItemStack, Structure, TerrainGenerator, World } from "@serenityjs/core";
+import { BlockIdentifier, BlockInventoryTrait, BlockPermutation, Chunk, ItemIdentifier, ItemStack, Structure, TerrainGenerator, VoidGenerator, World } from "@serenityjs/core";
 import { CompoundTag } from "@serenityjs/nbt";
 import { Vector3f } from "@serenityjs/protocol";
 import { readFileSync } from "fs";
@@ -22,13 +22,16 @@ class IslandGenerator extends TerrainGenerator {
         const z = chunk.z
 
         // Create an island in the center chunk.
-        if (x === 3 && z === 3) {
+        //@ts-ignore
+        if (x === 3 && z === 3 && this.dimension.world.properties["isInitialized"] !== true) {
             await this.dimension.placeStructure(
                 IslandGenerator.islandStructure,
                 { x: -5, y: 0, z: -1 },
                 { placeAirBlocks: false }
             );
             this.starterChest()
+            //@ts-ignore
+            this.dimension.world.properties["isInitialized"] = true
         }
     }
 
@@ -46,7 +49,7 @@ class IslandGenerator extends TerrainGenerator {
         inv.addItem(new ItemStack(ItemIdentifier.Potato, { stackSize: 1 }))
         inv.addItem(new ItemStack(ItemIdentifier.Cactus, { stackSize: 1 }))
         inv.addItem(new ItemStack(ItemIdentifier.MelonBlock, { stackSize: 1 }))
-        inv.addItem(new ItemStack(ItemIdentifier.Bread, { stackSize: 9 }))
+        inv.addItem(new ItemStack(ItemIdentifier.Apple, { stackSize: 8 }))
         inv.addItem(new ItemStack(ItemIdentifier.Bone, { stackSize: 1 }))
 
         chestBlock.update()

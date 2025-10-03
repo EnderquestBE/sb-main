@@ -1,7 +1,7 @@
 import { StringEnum, Player } from "@serenityjs/core";
 import { CommandBuilder, CommandOverload } from "../../Classes";
 import { Server } from "../../server";
-import { ChatHandler } from "../../Handlers/Chat/handler"; // Updated import
+import { ChatHandler } from "../../Handlers";
 
 new CommandBuilder("reply", "Replies to the last private message.")
     .setAliases(["r"])

@@ -42,6 +42,7 @@ const ShopBlockCategory = new CategoryBuilder({ id: "blocks", display: { name: "
     .addItem({ id: BlockIdentifier.BrickBlock, price: 1000, transactionSound: "dig.stone" })
     .addItem({ id: BlockIdentifier.Prismarine, price: 1250, transactionSound: "dig.stone" })
     .addItem({ id: BlockIdentifier.DarkPrismarine, price: 1400, transactionSound: "dig.stone" })
+    .addItem({ id: BlockIdentifier.Bedrock, price: 2000, transactionSound: "dig.stone" })
     .addItem({ id: BlockIdentifier.SeaLantern, price: 2800, transactionSound: "random.glass" })
     .addItem({ id: BlockIdentifier.PackedIce, price: 3000, transactionSound: "random.glass" })
     .addItem({ id: BlockIdentifier.BoneBlock, price: 16000, transactionSound: "dig.bone_block" })
