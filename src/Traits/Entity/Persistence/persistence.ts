@@ -8,9 +8,12 @@ class EntityPersistenceTrait extends EntityTrait {
     public static readonly identifier = "persistence";
     public static readonly types = SpawnerEntity.keys.concat([EntityIdentifier.Item]);
 
+    public IS_ITEM: boolean;
+
     public constructor(entity: Entity) {
         super(entity);
         // Set non-save.
+        this.IS_ITEM = entity.identifier === EntityIdentifier.Item;
         this.entity.setStorageEntry("Persistent", new ByteTag(0, "Persistent"))
     }
 
@@ -22,7 +25,7 @@ class EntityPersistenceTrait extends EntityTrait {
                 const spawn = island.getSpawn();
                 if (spawn) this.entity.teleport(new Vector3f(spawn.x + 0.5, spawn.y + 1, spawn.z + 0.5), this.dimension);
             }
-        } else if (this.entity.identifier === EntityIdentifier.Item) {
+        } else if (this.IS_ITEM) {
             if (this.dimension.getBlock(this.entity.position).identifier === BlockIdentifier.Lava) {
                 this.entity.despawn();
             }

@@ -1,4 +1,3 @@
-import { Vector3f } from "@serenityjs/protocol";
 import { Document } from "mongodb";
 import { IslandLimitType } from "./limitType";
 import { IslandLimit } from "./limit";
@@ -47,6 +46,10 @@ interface IslandData extends Document {
    * The world the island is located in.
    */
   world: string
+  /**
+   * The name of the folder the world is stored in.
+   */
+  path: string
   /**
    * List of all island members.
    */

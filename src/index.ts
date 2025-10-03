@@ -1,5 +1,5 @@
 import { Plugin, PluginEvents } from "@serenityjs/plugins";
-import { ActionForm, CustomEntityType, EntityHealthTrait, EntityHitSignal, EntitySpawnedSignal, EntityTraits, LevelDBProvider, Player, PlayerBreakBlockSignal, PlayerChatSignal, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerLevelingTrait, PlayerOpenedContainerSignal, PlayerPlaceBlockSignal, WorldEvent, WorldInitializeSignal } from "@serenityjs/core";
+import { ActionForm, CustomEntityType, EntityHealthTrait, EntityHitSignal, EntitySpawnedSignal, LevelDBProvider, Player, PlayerBreakBlockSignal, PlayerChatSignal, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerLevelingTrait, PlayerOpenedContainerSignal, PlayerPlaceBlockSignal, WorldEvent, WorldInitializeSignal } from "@serenityjs/core";
 import { BlockHandler, BoundaryHandler, ChatHandler, IslandPerkUnlocks, LeaderboardHandler, NametagHandler, PermissionsHandler, PlayerHud, ServerTaskHandler, SpawnerHandler } from "./Handlers";
 import { IslandGenerator } from "./Classes/Island/generator";
 import { PlayerEnum } from "./Classes/Command/Enums/player";
@@ -14,9 +14,12 @@ import { DiscordClient } from "./Discord";
 import { ModerationManager } from "./Classes/Data/Moderation";
 import { resolve } from "node:path";
 import { rmdir } from "node:fs/promises";
-import { BlockTraits, ItemTraits } from "./Traits";
+import { BlockTraits, ItemTraits, EntityTraits } from "./Traits";
 import { PlayerCommandCooldownTrait, PlayerListCustomTrait } from "./Traits/Entity/Player";
 import { EntityStackTrait } from "./Traits/Entity/traits";
+import { ContainerType } from "@serenityjs/protocol";
+import { EntityPersistenceTrait } from "./Traits/Entity/Persistence/persistence";
+
 
 /**
  * @IMPORTS
@@ -33,7 +36,6 @@ import "./Configuration/Morph/morph"
 
 import "./Commands/commands"
 import "./Traits/Block/Liquid/liquidInteraction"
-import { ContainerType } from "@serenityjs/protocol";
 
 const envArg = process.argv.find(arg => arg.startsWith('--env='));
 const isDevEnvironment = envArg === '--env=development';
@@ -156,7 +158,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
         if (island.getOnlineOwners().length <= 1) {
           try {
             //@ts-ignore
-            LevelDBProvider.loadWorld(this.serenity, island.getWorldId())
+            LevelDBProvider.loadWorld(this.serenity, island.getWorldPath())
           } catch (e) {
             player.disconnect("§cFailed to load your data. Please try again later.");
             return;
@@ -173,7 +175,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     // Update nametag.
     NametagHandler.format(player)
     // Add username to player enum.
-    PlayerEnum.options.push(player.username)
+    PlayerEnum.update(this.serenity);
     // Update player count.
     Server.updatePlayerCount();
     // Show welcome form.
@@ -243,9 +245,8 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
       this.logger.info(`Removed session for player ${player.username}.`);
       // Show chat leave message.
       ChatHandler.onLeave(player, this.serenity)
-      // Remove username from player enum.  
-      if (PlayerEnum.options.some((x) => x === player.username))
-        PlayerEnum.options.splice(PlayerEnum.options.indexOf(player.username), 1)
+      // Remove username from player enum.
+      PlayerEnum.update(this.serenity);
       // Update player count.
       Server.updatePlayerCount();
       resolve();
@@ -258,6 +259,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     world.entityPalette.registerTrait(PlayerListCustomTrait)
     world.entityPalette.registerTrait(PlayerCommandCooldownTrait)
     world.entityPalette.registerTrait(EntitySlapperTrait)
+    world.entityPalette.registerTrait(EntityPersistenceTrait)
     if (world.identifier.startsWith("sb_")) {
       // Register traits.
       for (let trait of BlockTraits) {

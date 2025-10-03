@@ -1,7 +1,7 @@
 import { Serenity } from "@serenityjs/core";
-import { EntityPersistenceTrait } from "../../Traits/Entity/traits";
 import { ChatHandler } from "../Chat/handler";
 import { Tips } from "../../Configuration/config";
+import { EntityPersistenceTrait } from "../../Traits/Entity/Persistence/persistence";
 
 class ServerTaskHandler {
     private static serenity: Serenity;

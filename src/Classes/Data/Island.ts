@@ -1,5 +1,5 @@
 import { Vector3f } from "@serenityjs/protocol";
-import { Player, World } from "@serenityjs/core";
+import { Player, World, WorldProperties } from "@serenityjs/core";
 import { UpdateFilter } from "mongodb";
 import { DataManager } from "./Manager";
 import { IslandDatabase } from "../Database/Collections/Island";
@@ -9,6 +9,8 @@ import { Logger, LoggerColors } from "@serenityjs/logger";
 import { IslandLevel, PlayerDatabase } from "..";
 import { IslandLimitUnlocks } from "../../Handlers";
 import { IslandPerkUnlocks } from "../../Handlers";
+import { resolve } from "node:path";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 
 /**
  * @name Island
@@ -86,6 +88,7 @@ class Island extends DataManager<IslandData, IslandDatabase> {
       height: 32,
       spawn: new Vector3f(0.5, 5, 0.5),
       world: world,
+      path: world,
       members: [],
       helpers: [],
       admins: [],
@@ -128,6 +131,7 @@ class Island extends DataManager<IslandData, IslandDatabase> {
   public getHeight(): number { return this.data.height; }
   public getSpawn(): Vector3f { return new Vector3f(this.data.spawn.x, this.data.spawn.y, this.data.spawn.z); }
   public getWorldId(): string { return this.data.world; }
+  public getWorldPath(): string { return this.data.path; }
   public getWorld(): World | null { return Server.instance.getWorld(this.getWorldId()); }
   public getMembers(): PlayerInfo[] { return this.data.members; }
   public getHelpers(): PlayerInfo[] { return this.data.helpers; }
@@ -491,6 +495,7 @@ class Island extends DataManager<IslandData, IslandDatabase> {
   */
   public async setName(name: string): Promise<OperationResult> {
     const oldName = this.getName();
+    const oldWorldId = this.getWorldId();
     const newWorldId = `sb_${name}`;
 
     // Double check to make sure the world doesn't already exist.
@@ -498,26 +503,42 @@ class Island extends DataManager<IslandData, IslandDatabase> {
       return { success: false, reason: "An island with a similar name already exists, causing a world conflict." };
     }
 
-    // Change world identifier.
-    const world = Server.instance.getWorld(this.getWorldId())
-    if (!world) {
-      return { success: false, reason: "Could not find the island's world to rename." };
+    // Change world identifier if it is online.
+    const world = Server.instance.getWorld(oldWorldId);
+    if (world) {
+      //@ts-ignore
+      world.identifier = newWorldId
+      world.properties.identifier = newWorldId
+      Server.instance.worlds.delete(oldWorldId)
+      Server.instance.worlds.set(newWorldId, world)
+    } else {
+      // Update world identifier offline.
+      const path = resolve("./worlds", this.getWorldPath());
+      let properties: Partial<WorldProperties> = { identifier: oldWorldId };
+      if (existsSync(resolve(path, "properties.json"))) {
+        // Read the properties of the world.
+        properties = JSON.parse(
+          readFileSync(resolve(path, "properties.json"), "utf-8")
+        );
+
+        properties.identifier = newWorldId;
+
+        writeFileSync(
+          resolve(path, "properties.json"),
+          JSON.stringify(properties, null, 2)
+        );
+      }
     }
 
+    // Update database record.
     const result = await this.updateOne({ $set: { name: name, world: newWorldId } });
     if (!result.success) {
       return { success: false, reason: "Failed to update island name in the database." };
     }
 
-    //@ts-ignore
-    world.identifier = newWorldId
-    world.properties.identifier = newWorldId
-    Server.instance.worlds.delete(oldName)
-    Server.instance.worlds.set(newWorldId, world)
-
     // Update local data.
     this.data.name = name;
-    this.data.world = newWorldId
+    this.data.world = newWorldId;
 
     // Update island name property for island owner player data.
     const owners = [this.data.owner, ...this.data.coowners, ...this.data.admins, ...this.data.helpers, ...this.data.members];
