@@ -76,7 +76,7 @@ export class DiscordClient {
     }
 
     public static async disconnect() {
-        this.logStop();
+        await this.logStop();
         this.client.destroy();
         this.client = null!;
     }
@@ -278,12 +278,12 @@ export class DiscordClient {
         channel.send({ embeds: [embed] });
     }
 
-    public static logStop() {
+    public static async logStop() {
         if (!this.client || isDevEnvironment) return;
         const channel = this.channels.logs;
         if (!channel) return;
         const embed = new EmbedBuilder().setAuthor({ name: `🔸 Restart in progress...` }).setColor("Red").setTimestamp();
-        channel.send({ embeds: [embed] });
+        await channel.send({ embeds: [embed] });
     }
 
     public static registerCommand(command: any, execute: (interaction: ChatInputCommandInteraction) => any) {

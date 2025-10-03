@@ -105,6 +105,10 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
   }
 
   public async onShutDown(): Promise<void> {
+    // Delete developer data.
+    if (isDevEnvironment) {
+      await PlayerDatabase.instance.delete("0000000000000000");
+    }
     // Allow time for player disconnection and other ongoing processes.
     while (this.serenity.players.size > 0) {
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -238,10 +242,6 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
       // Uncache player data.
       player.setTimePlayed(player.getTimePlayed())
       PlayerExtension.removeSession(player);
-      // Remove developer data.
-      if (player.username === "The Palm Healer" && isDevEnvironment) {
-        await PlayerDatabase.instance.delete(player.xuid);
-      }
       this.logger.info(`Removed session for player ${player.username}.`);
       // Show chat leave message.
       ChatHandler.onLeave(player, this.serenity)

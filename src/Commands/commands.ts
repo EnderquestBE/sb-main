@@ -29,7 +29,6 @@ import "./General/vendor"
 import "./General/message"
 import "./General/reply"
 import "./General/buy"
-import "./General/repair"
 import "./General/friend"
 import "./General/break"
 
@@ -41,6 +40,7 @@ import "./Rank/fly"
 import "./Rank/chatsize"
 import "./Rank/sellall"
 import "./Rank/sellallxp"
+import "./Rank/repair"
 
 /** Enchantment Commands */
 import "./Enchantment/merge"
