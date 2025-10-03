@@ -15,7 +15,10 @@ import "./Admin/islandadmin"
 import "./Admin/money"
 import "./Admin/xp"
 import "./Admin/uptime"
-import "./Admin/forcerename"
+
+/** Moderation Commands */
+import "./Moderation/broadcast"
+import "./Moderation/forcerename"
 
 /** General Commands */
 import "./General/settings"

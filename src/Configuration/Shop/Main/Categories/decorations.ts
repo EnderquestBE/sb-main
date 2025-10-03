@@ -88,7 +88,7 @@ const ShopDecorationCategory = new CategoryBuilder({ id: "decoration", display: 
     .addItem({ id: ItemIdentifier.Furnace, price: 800, transactionSound: "dig.stone" })
     .addItem({ id: ItemIdentifier.BlastFurnace, price: 3600, transactionSound: "dig.stone" })
     .addItem({ id: "minecraft:water", price: 2000, transactionSound: "bucket.empty_water" })
-    .addItem({ id: "minecraft:lava", price: 20000, transactionSound: "bucket.empty_lava" })
+    .addItem({ id: "minecraft:lava", price: 4000, transactionSound: "bucket.empty_lava" })
     .addItem({ id: ItemIdentifier.HayBlock, price: 1800, transactionSound: "dig.grass" })
     .addItem({ id: ItemIdentifier.RedMushroomBlock, price: 1600, transactionSound: "dig.stone" })
     .addItem({ id: ItemIdentifier.BrownMushroomBlock, price: 1600, transactionSound: "dig.stone" })

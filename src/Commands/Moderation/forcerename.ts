@@ -56,4 +56,4 @@ new CommandBuilder("forcerename", "Forces a rename of an island.")
             );
         }
     }))
-    .register();
+    .register("Moderation");

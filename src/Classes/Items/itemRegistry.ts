@@ -13,7 +13,7 @@ class CustomItemRegistry {
     public static registerDefault(world: World) {
         world.itemPalette.registerType(...this.types);
         // Add custom items to the shop.
-        ShopScrollCategory.addItem({ id: "Restoration Scroll", item: new Scrolls.RestorationScroll(), price: 5000, currency: "xp", transactionSound: "item.book.page_turn" });
+        ShopScrollCategory.addItem({ id: "Restoration Scroll", item: new Scrolls.RestorationScroll(), price: 10000, currency: "xp", transactionSound: "item.book.page_turn" });
         ShopScrollCategory.addItem({ id: "Binding Scroll", item: new Scrolls.BindingScroll(), price: 15000, currency: "xp", transactionSound: "item.book.page_turn" })
         ShopScrollCategory.addItem({ id: "Temperament Scroll", item: new Scrolls.TemperamentScroll(), price: 20000, currency: "xp", transactionSound: "item.book.page_turn" })
         ShopScrollCategory.addItem({ id: "Refinement Scroll", item: new Scrolls.RefinementScroll(), price: 20000, currency: "xp", transactionSound: "item.book.page_turn" })

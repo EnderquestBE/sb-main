@@ -2,7 +2,6 @@ import {
   BlockIdentifier,
   BlockPermutation,
   BlockTrait,
-  TraitOnTickDetails,
 } from "@serenityjs/core";
 import { Direction } from "../../../Types/types";
 import { FlowSpeed, SourceBlockMap } from "../../../Configuration/Block/liquid";

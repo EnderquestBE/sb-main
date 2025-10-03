@@ -1,6 +1,6 @@
 import { Plugin, PluginEvents } from "@serenityjs/plugins";
 import { ActionForm, CustomEntityType, EntityHealthTrait, EntityHitSignal, EntitySpawnedSignal, LevelDBProvider, Player, PlayerBreakBlockSignal, PlayerChatSignal, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerLevelingTrait, PlayerOpenedContainerSignal, PlayerPlaceBlockSignal, WorldEvent, WorldInitializeSignal } from "@serenityjs/core";
-import { BlockHandler, BoundaryHandler, ChatHandler, IslandPerkUnlocks, LeaderboardHandler, NametagHandler, PermissionsHandler, PlayerHud, ServerTaskHandler, SpawnerHandler } from "./Handlers";
+import { BlockHandler, ChatHandler, IslandPerkUnlocks, LeaderboardHandler, NametagHandler, PermissionsHandler, PlayerHud, ServerTaskHandler, SpawnerHandler } from "./Handlers";
 import { IslandGenerator } from "./Classes/Island/generator";
 import { PlayerEnum } from "./Classes/Command/Enums/player";
 import { PlayerExtension } from "./extensions/player";
@@ -36,6 +36,7 @@ import "./Configuration/Morph/morph"
 
 import "./Commands/commands"
 import "./Traits/Block/Liquid/liquidInteraction"
+import { PlayerBoundaryTrait } from "./Traits/Entity/Boundary/boundary";
 
 const envArg = process.argv.find(arg => arg.startsWith('--env='));
 const isDevEnvironment = envArg === '--env=development';
@@ -73,7 +74,6 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     // Start hud runtime.
     this.serenity.on(WorldEvent.WorldTick, async (event) => {
       PlayerHud.runtime(event)
-      BoundaryHandler.runtime(event)
     })
   }
 
@@ -254,14 +254,16 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
   }
 
   public onWorldInitialize({ world }: WorldInitializeSignal): void {
-    // Register island block traits.
-    world.entityPalette.unregisterTrait(EntityHealthTrait)
+    // Register global player traits.
     world.entityPalette.registerTrait(PlayerListCustomTrait)
     world.entityPalette.registerTrait(PlayerCommandCooldownTrait)
+    world.entityPalette.registerTrait(PlayerBoundaryTrait);
+    // Register global entity traits.
+    world.entityPalette.unregisterTrait(EntityHealthTrait)
     world.entityPalette.registerTrait(EntitySlapperTrait)
     world.entityPalette.registerTrait(EntityPersistenceTrait)
     if (world.identifier.startsWith("sb_")) {
-      // Register traits.
+      // Register island block, item, and entity traits.
       for (let trait of BlockTraits) {
         world.blockPalette.registerTrait(trait);
       }
@@ -271,10 +273,12 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
       for (let trait of EntityTraits) {
         world.entityPalette.registerTrait(trait)
       }
+      // Register custom item types.
       CustomItemRegistry.registerAll(world);
     }
     // Initialize hub slappers.
     if (world.identifier === "default") {
+      // Register global custom item types.
       CustomItemRegistry.registerDefault(world);
       setTimeout(() => {
         // Initialize slappers.

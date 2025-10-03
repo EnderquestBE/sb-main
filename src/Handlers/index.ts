@@ -1,9 +1,6 @@
 /* Block */
 export * from "./Block/handler";
 
-/* Boundary */
-export * from "./Boundary/handler";
-
 /* Chat */
 export * from "./Chat/handler";
 

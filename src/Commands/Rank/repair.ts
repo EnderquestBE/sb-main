@@ -23,7 +23,7 @@ new CommandBuilder("repair", "Repairs your held equipment for money.")
             if (durability.getDamage() === 0) return player.error("This item does not need to be repaired.");
 
             // Calculate repair cost based on
-            const cost = Math.ceil((durability.getDamage() * (amount / 100)) * 28);
+            const cost = Math.ceil((durability.getDamage() * (amount / 100)) * 42);
             if (player.getMoney() < cost) return player.error(`It costs §6$${Utils.formatInt(cost)} §cto repair that item${amount < 100 ? ` for §e${amount}%%§c` : ""}.`);
 
             durability.setDamage(0);
