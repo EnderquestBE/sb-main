@@ -14,6 +14,7 @@ import "./Admin/playeradmin"
 import "./Admin/islandadmin"
 import "./Admin/money"
 import "./Admin/xp"
+import "./Admin/uptime"
 
 /** General Commands */
 import "./General/settings"
