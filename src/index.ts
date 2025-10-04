@@ -1,6 +1,6 @@
 import { Plugin, PluginEvents } from "@serenityjs/plugins";
 import { ActionForm, CustomEntityType, EntityHealthTrait, EntityHitSignal, EntitySpawnedSignal, LevelDBProvider, Player, PlayerBreakBlockSignal, PlayerChatSignal, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerLevelingTrait, PlayerOpenedContainerSignal, PlayerPlaceBlockSignal, WorldEvent, WorldInitializeSignal } from "@serenityjs/core";
-import { BlockHandler, ChatHandler, IslandPerkUnlocks, LeaderboardHandler, NametagHandler, PermissionsHandler, PlayerHud, ServerTaskHandler, SpawnerHandler } from "./Handlers";
+import { BlockHandler, ChatHandler, IslandPerkUnlocks, LeaderboardHandler, NametagHandler, PermissionsHandler, PlayerHud, ServerTaskHandler, SpawnerHandler, HologramHandler } from "./Handlers";
 import { IslandGenerator } from "./Classes/Island/generator";
 import { PlayerEnum } from "./Classes/Command/Enums/player";
 import { PlayerExtension } from "./extensions/player";
@@ -19,12 +19,14 @@ import { PlayerCommandCooldownTrait, PlayerListCustomTrait } from "./Traits/Enti
 import { EntityStackTrait } from "./Traits/Entity/traits";
 import { ContainerType } from "@serenityjs/protocol";
 import { EntityPersistenceTrait } from "./Traits/Entity/Persistence/persistence";
+import { PlayerBoundaryTrait } from "./Traits/Entity/Boundary/boundary";
 
 
 /**
  * @IMPORTS
  */
 import "./Traits"
+import "./Classes/Items/itemRegistry";
 import "./CustomEnchantments/enchantments"
 import "./Handlers/Enchantment/handler"
 import "./extensions/itemStack"
@@ -36,7 +38,8 @@ import "./Configuration/Morph/morph"
 
 import "./Commands/commands"
 import "./Traits/Block/Liquid/liquidInteraction"
-import { PlayerBoundaryTrait } from "./Traits/Entity/Boundary/boundary";
+import { EntityClientRenderTrait } from "./Traits/Entity/Slapper/clientRender";
+import { DEFAULT_PLAYER_DATA } from "./Configuration/config";
 
 const envArg = process.argv.find(arg => arg.startsWith('--env='));
 const isDevEnvironment = envArg === '--env=development';
@@ -85,6 +88,26 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     new ModerationDatabase(this.database);
     // Initialize leaderboards.
     LeaderboardHandler.initialize(this.serenity.getWorld());
+    // Initialize holograms.
+    HologramHandler.initialize(this.serenity.getWorld());
+    // Delete developer data.
+    if (isDevEnvironment) {
+      await PlayerDatabase.instance.delete("0000000000000000");
+    }
+    // Update missing player data properties if applicable.
+    const players = await PlayerDatabase.instance.collection.find({}).toArray() as any[];
+    for (const player of players) {
+      let updated = false;
+      for (const key of Object.keys(DEFAULT_PLAYER_DATA)) {
+        if (player[key] === undefined) {
+          (player as any)[key] = (DEFAULT_PLAYER_DATA as any)[key];
+          updated = true;
+        }
+      }
+      if (updated) {
+        await PlayerDatabase.instance.update(player.xuid, player);
+      }
+    }
   }
 
   public onStartUp(): void {
@@ -105,10 +128,6 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
   }
 
   public async onShutDown(): Promise<void> {
-    // Delete developer data.
-    if (isDevEnvironment) {
-      await PlayerDatabase.instance.delete("0000000000000000");
-    }
     // Allow time for player disconnection and other ongoing processes.
     while (this.serenity.players.size > 0) {
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -160,11 +179,10 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
       if (island) {
         // Load island world from storage.
         if (island.getOnlineOwners().length <= 1) {
-          try {
-            //@ts-ignore
-            LevelDBProvider.loadWorld(this.serenity, island.getWorldPath())
-          } catch (e) {
-            player.disconnect("§cFailed to load your data. Please try again later.");
+          //@ts-ignore
+          const world = await LevelDBProvider.loadWorld(this.serenity, island.getWorldId());
+          if (!world) {
+            player.disconnect("§cFailed to join. Please try again later.");
             return;
           }
         }
@@ -262,16 +280,18 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     world.entityPalette.unregisterTrait(EntityHealthTrait)
     world.entityPalette.registerTrait(EntitySlapperTrait)
     world.entityPalette.registerTrait(EntityPersistenceTrait)
+    world.entityPalette.registerTrait(EntityClientRenderTrait)
+    // Register global item traits.
+    for (let trait of EntityTraits) {
+      world.entityPalette.registerTrait(trait)
+    }
     if (world.identifier.startsWith("sb_")) {
-      // Register island block, item, and entity traits.
+      // Register island block and entity traits.
       for (let trait of BlockTraits) {
         world.blockPalette.registerTrait(trait);
       }
       for (let trait of ItemTraits) {
         world.itemPalette.registerTrait(trait)
-      }
-      for (let trait of EntityTraits) {
-        world.entityPalette.registerTrait(trait)
       }
       // Register custom item types.
       CustomItemRegistry.registerAll(world);
@@ -316,12 +336,13 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
   }
 
   public beforePlayerInteractWithBlock(event: PlayerInteractWithBlockSignal): boolean {
-    return PermissionsHandler.onInteract(event)
+    if (event.itemStack?.hasDynamicProperty("bypassInteract")) return true;
+    return PermissionsHandler.onInteract(event);
   }
 
   public beforePlayerOpenedContainer(event: PlayerOpenedContainerSignal): boolean {
-    if (event.container.type === ContainerType.Inventory) return true
-    else return PermissionsHandler.onContainerOpen(event)
+    if (event.container.type === ContainerType.Inventory) return true;
+    else return PermissionsHandler.onContainerOpen(event);
   }
 
   public beforeEntityHit(event: EntityHitSignal): boolean {

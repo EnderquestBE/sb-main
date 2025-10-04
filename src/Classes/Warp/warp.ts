@@ -37,6 +37,7 @@ class Warp {
 
     public static registerAll() {
         new Warp(WarpLocation.SPAWN, { name: "Spawn", location: new Vector3f(0.5, 67, 0.5), world: "default", commandAliases: ["spawn", "hub", "lobby"] })
+        new Warp(WarpLocation.CRATES, { name: "Crates", location: new Vector3f(-66.5, 70, -127.5), world: "default", commandAliases: ["crates"] })
     }
 
     public static to(player: Player, id: keyof typeof WarpLocation) {

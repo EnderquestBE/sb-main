@@ -40,10 +40,10 @@ class TooltipBar {
             elements.push(`§2[Points: §f${0}§7/§f${150}§2]`);
             elements.push(`§d[Size: §f${island.getSize()} Blocks§d]`);
         } else {
-            elements.push(`§b[GT: §f${player.username}§a]`);
+            elements.push(`§b[GT: §f${player.username}§b]`);
             elements.push(`§e[Players: §f${Server.playerCount}§7/§f${20}§e]`);
             elements.push(`§6[Balance: §f$${Utils.formatInt(player.getMoney())}§6]`);
-            elements.push(`§b[Rank: ${player.getPrimaryRank().displayName}§b]`);
+            elements.push(`§a[Rank: ${player.getPrimaryRank().displayName}§a]`);
             if (island) {
                 elements.push(`§2[Island: §f${island.getName()}§2]`);
                 elements.push(`§e[Level: §f${island.getLevel()}§e]`);

@@ -1,5 +1,6 @@
 import { PERMISSION_INTEGER, PlayerRank } from "../../../Configuration/config";
 import { Setting } from "../../../Configuration/Settings/settings";
+import { PlayerStatCriteria } from "./stats";
 
 interface PlayerData {
   /**
@@ -49,6 +50,10 @@ interface PlayerData {
    * The amount of time in seconds the user has spent on the server.
    */
   timePlayed: number
+  /**
+   * Criteria-based stats.
+   */
+  stats: PlayerStatCriteria;
   /**
    * The date the player was last seen online.
    */

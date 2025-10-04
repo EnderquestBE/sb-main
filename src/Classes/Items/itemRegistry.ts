@@ -1,14 +1,17 @@
 import { World } from "@serenityjs/core";
+import "./Keys/seasonal";
 import * as Scrolls from "./Scrolls"
 import * as Stashes from "./Stashes"
+import * as CrateKeys from "./Keys"
 import { ShopScrollCategory, ShopXPCategory } from "../../Configuration/Shop/Main/Categories/xp";
 import { MainShop } from "../../Configuration/Shop/Main/main";
 
 const ScrollTypes = [Scrolls.BindingScrollType, Scrolls.ExpulsionScrollType, Scrolls.MasteryScrollType, Scrolls.RefinementScrollType, Scrolls.RestorationScrollType, Scrolls.TemperamentScrollType];
 const StashTypes = [Stashes.CommonStashType, Stashes.RareStashType, Stashes.EpicStashType, Stashes.LegendaryStashType, Stashes.DivineStashType];
+const CrateKeyTypes = [CrateKeys.CommonCrateKeyType, CrateKeys.RareCrateKeyType, CrateKeys.EpicCrateKeyType, CrateKeys.LegendaryCrateKeyType, CrateKeys.DivineCrateKeyType, CrateKeys.VoterCrateKeyType, CrateKeys.SeasonalCrateKeyType];
 
 class CustomItemRegistry {
-    public static readonly types = [...ScrollTypes, ...StashTypes];
+    public static readonly types = [...ScrollTypes, ...StashTypes, ...CrateKeyTypes];
 
     public static registerDefault(world: World) {
         world.itemPalette.registerType(...this.types);

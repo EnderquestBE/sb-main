@@ -1,7 +1,7 @@
 
 import { Player } from "@serenityjs/core";
 import { Island, PlayerDatabase, PlayerSession } from "../Classes";
-import { OperationResult, PlayerData, RankInfo } from "../Types/types";
+import { OperationResult, PlayerData, PlayerStatCriteria, RankInfo } from "../Types/types";
 import { ChatSource, DEFAULT_PLAYER_DATA, PERMISSION_INTEGER } from "../Configuration/config";
 import { PlayerRank, RANKS } from "../Configuration/Ranks/ranks";
 import { Setting } from "../Configuration/Settings/settings";
@@ -19,6 +19,10 @@ declare module "@serenityjs/core" {
 
     getTimePlayed(): number
     setTimePlayed(value: number): Promise<OperationResult>
+    getCriteria(stat: keyof PlayerStatCriteria): number
+    incrementCriteria(stat: keyof PlayerStatCriteria, value?: number): Promise<OperationResult>
+    decrementCriteria(stat: keyof PlayerStatCriteria, value?: number): Promise<OperationResult>
+    updateCriteria(stat: keyof PlayerStatCriteria, value: number): Promise<OperationResult>
 
     // Data
     getDataString(): string
@@ -130,6 +134,29 @@ Player.prototype.setTimePlayed = function (this: Player, value: number): Promise
   const session = PlayerExtension.getSession(this);
   if (!session) return PlayerExtension["NO_SESSION_RESULT"]
   return session.setTimePlayed(value);
+}
+
+Player.prototype.getCriteria = function (this: Player, stat: keyof PlayerStatCriteria): number {
+  const session = PlayerExtension.getSession(this);
+  return session ? session.getCriteria(stat) : 0;
+}
+
+Player.prototype.incrementCriteria = function (this: Player, stat: keyof PlayerStatCriteria, value: number = 1): Promise<OperationResult> {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return PlayerExtension["NO_SESSION_RESULT"]
+  return session.incrementCriteria(stat, value);
+}
+
+Player.prototype.decrementCriteria = function (this: Player, stat: keyof PlayerStatCriteria, value: number = 1): Promise<OperationResult> {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return PlayerExtension["NO_SESSION_RESULT"]
+  return session.decrementCriteria(stat, value);
+}
+
+Player.prototype.updateCriteria = function (this: Player, stat: keyof PlayerStatCriteria, value: number): Promise<OperationResult> {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return PlayerExtension["NO_SESSION_RESULT"]
+  return session.updateCriteria(stat, value);
 }
 
 // Data

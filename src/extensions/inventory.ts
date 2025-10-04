@@ -1,6 +1,8 @@
 import {
   EntityInventoryTrait,
+  ItemIdentifier,
   ItemStack,
+  ItemType,
   Player,
 } from "@serenityjs/core";
 
@@ -20,17 +22,32 @@ class PlayerInventory {
 
   public readonly giveItem = (item: string, amount: number) => {
     const { container } = this.player.getTrait(EntityInventoryTrait);
-    const itemStack = new ItemStack(item)
+    const maxStackSize = ItemType.get(item)?.components?.getMaxStackSize() || 64;
     let giveCount = amount;
-    while (giveCount > 0) {
-      if (giveCount > 64) {
-        itemStack.stackSize = 64;
-        container.addItem(itemStack);
-        giveCount -= 64;
-      } else {
-        itemStack.stackSize = giveCount;
-        container.addItem(itemStack);
-        break;
+    if (maxStackSize === 1) {
+      const itemStack = () => { return new ItemStack(item, { stackSize: 1 }) };
+      while (giveCount > 0) {
+        const stack = itemStack();
+        stack.isStackable = false;
+        container.addItem(stack);
+        giveCount--;
+      }
+      return;
+    } else {
+      const itemStack = () => { return new ItemStack(item) };
+      while (giveCount > 0) {
+        if (giveCount > maxStackSize) {
+          const stack = itemStack();
+          stack.stackSize = maxStackSize;
+          container.addItem(stack);
+          giveCount -= maxStackSize;
+        } else {
+          const stack = itemStack();
+          stack.stackSize = giveCount;
+          stack.isStackable = giveCount > 1;
+          container.addItem(stack);
+          break;
+        }
       }
     }
   };

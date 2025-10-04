@@ -274,7 +274,7 @@ export class DiscordClient {
         if (!this.client || isDevEnvironment) return;
         const channel = this.channels.logs;
         if (!channel) return;
-        const embed = new EmbedBuilder().setAuthor({ name: `✅ Server has started.` }).setColor("Green").setTimestamp();
+        const embed = new EmbedBuilder().setAuthor({ name: `✅ Server has started.` }).setColor("DarkGreen").setTimestamp();
         channel.send({ embeds: [embed] });
     }
 
@@ -282,7 +282,7 @@ export class DiscordClient {
         if (!this.client || isDevEnvironment) return;
         const channel = this.channels.logs;
         if (!channel) return;
-        const embed = new EmbedBuilder().setAuthor({ name: `🔸 Restart in progress...` }).setColor("Red").setTimestamp();
+        const embed = new EmbedBuilder().setAuthor({ name: `🔸 Restart in progress...` }).setColor("DarkOrange").setTimestamp();
         await channel.send({ embeds: [embed] });
     }
 

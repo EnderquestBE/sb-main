@@ -6,11 +6,10 @@ import { Server } from "../../server";
 
 class Scorebar {
     public static TITLE = "§l§dEnder§eQuest §bSB";
-    public static DISCORD = "§➲   §d» §9discord.ender.quest §d«";
     private static readonly S_GT = " §d➲ §bGT: §f";
     private static readonly S_PLAYERS = " §d➲ §ePlayers: §f";
     private static readonly S_BALANCE = " §d➲ §6Balance: §f$";
-    private static readonly S_XP = " §d➲ §cXP: §f";
+    private static readonly S_XP = " §d➲ §aXP: §f";
     private static readonly S_PING = " §d➲ §3Ping: §f";
     private static readonly S_ISLAND_STATS = "§b❖ Island Stats ❖";
     private static readonly S_ISLAND_NAME = " §b匚 §eIsland: §f";
@@ -24,13 +23,14 @@ class Scorebar {
     private static readonly S_TIME = " §b匚 §6Time: §f";
     private static readonly S_KDR = " §b匚 §cK: §f0 §9D: §f0 §5R: §f0";
     private static readonly S_TIP_ISLAND = "§d➤ §7Try using §6/is help§7.";
-    private static readonly S_TIP_HUB = "§d➤ §7Use §6/hud §7to disable.";
+    private static readonly S_TIP_HUB = " §d➤ §7Use §6/hud §7to disable.";
     private static readonly S_NO_ISLAND = " §b匚 §2Island: §f§e/is create";
     private static readonly S_NO_LEVEL = " §b匚 §eLevel: §f--";
 
-    public static update(player: Player, island: Island | null) {
+    public static update(player: Player, island: Island | null, tip: string) {
         // Generate random objective id.
         const objective = Math.random().toString(36).substring(2, 9);
+
 
         // Create display packet.
         const displayPacket = new SetDisplayObjectivePacket();
@@ -41,9 +41,8 @@ class Scorebar {
         displayPacket.sortOrder = ObjectiveSortOrder.Descending;
 
         const scores: ScoreEntry[] = [];
-        let scoreIndex = 13;
+        let scoreIndex = 12;
 
-        scores.push({ scoreboardId: ScoreboardIdentity.IDENTIFIER++, objectiveName: objective, score: scoreIndex--, identityType: ScoreboardIdentityType.FakePlayer, actorUniqueId: null, customName: this.DISCORD });
         scores.push({ scoreboardId: ScoreboardIdentity.IDENTIFIER++, objectiveName: objective, score: scoreIndex--, identityType: ScoreboardIdentityType.FakePlayer, actorUniqueId: null, customName: `${this.S_GT}${player.username}` });
         scores.push({ scoreboardId: ScoreboardIdentity.IDENTIFIER++, objectiveName: objective, score: scoreIndex--, identityType: ScoreboardIdentityType.FakePlayer, actorUniqueId: null, customName: `${this.S_PLAYERS}${Server.playerCount}§7/§f20` });
         scores.push({ scoreboardId: ScoreboardIdentity.IDENTIFIER++, objectiveName: objective, score: scoreIndex--, identityType: ScoreboardIdentityType.FakePlayer, actorUniqueId: null, customName: `${this.S_BALANCE}${Utils.formatInt(player.getMoney())}` });
@@ -63,7 +62,7 @@ class Scorebar {
             scores.push({ scoreboardId: ScoreboardIdentity.IDENTIFIER++, objectiveName: objective, score: scoreIndex--, identityType: ScoreboardIdentityType.FakePlayer, actorUniqueId: null, customName: `${this.S_ISLAND_POINTS}${pointsForLevel}§7/§f${pointsNeeded}` });
 
             scores.push({ scoreboardId: ScoreboardIdentity.IDENTIFIER++, objectiveName: objective, score: scoreIndex--, identityType: ScoreboardIdentityType.FakePlayer, actorUniqueId: null, customName: `${this.S_ISLAND_SIZE}${island.getSize()} Blocks` });
-            scores.push({ scoreboardId: ScoreboardIdentity.IDENTIFIER++, objectiveName: objective, score: scoreIndex--, identityType: ScoreboardIdentityType.FakePlayer, actorUniqueId: null, customName: this.S_TIP_ISLAND });
+            scores.push({ scoreboardId: ScoreboardIdentity.IDENTIFIER++, objectiveName: objective, score: scoreIndex--, identityType: ScoreboardIdentityType.FakePlayer, actorUniqueId: null, customName: tip === "default" ? this.S_TIP_ISLAND : tip });
         } else {
             //@ts-ignore
             scores.push({ scoreboardId: ScoreboardIdentity.IDENTIFIER++, objectiveName: objective, score: scoreIndex--, identityType: ScoreboardIdentityType.FakePlayer, actorUniqueId: null, customName: `${this.S_PING}${player.connection.ping}ms` });
@@ -79,7 +78,7 @@ class Scorebar {
             }
             scores.push({ scoreboardId: ScoreboardIdentity.IDENTIFIER++, objectiveName: objective, score: scoreIndex--, identityType: ScoreboardIdentityType.FakePlayer, actorUniqueId: null, customName: `${this.S_TIME}${Utils.formatDuration(player.getTimePlayed())}` });
             scores.push({ scoreboardId: ScoreboardIdentity.IDENTIFIER++, objectiveName: objective, score: scoreIndex--, identityType: ScoreboardIdentityType.FakePlayer, actorUniqueId: null, customName: this.S_KDR });
-            scores.push({ scoreboardId: ScoreboardIdentity.IDENTIFIER++, objectiveName: objective, score: scoreIndex--, identityType: ScoreboardIdentityType.FakePlayer, actorUniqueId: null, customName: this.S_TIP_HUB });
+            scores.push({ scoreboardId: ScoreboardIdentity.IDENTIFIER++, objectiveName: objective, score: scoreIndex--, identityType: ScoreboardIdentityType.FakePlayer, actorUniqueId: null, customName: tip === "default" ? this.S_TIP_HUB : tip });
         }
 
         const scorePacket = new SetScorePacket();

@@ -21,6 +21,15 @@ const DEFAULT_PLAYER_DATA: PlayerData = {
         showXpOverlay: true
     },
     timePlayed: 0,
+    stats: {
+        kills: 0,
+        deaths: 0,
+        ratio: 0,
+        blocksMined: 0,
+        blocksPlaced: 0,
+        cropsFarmed: 0,
+        mobsSlayed: 0,
+    },
     lastSeen: new Date(),
     firstSeen: new Date(),
     lastUpdated: new Date(),

@@ -139,6 +139,9 @@ class BlockCropTrait extends BlockTrait {
             // Add island points.
             const points = this.harvestPoints()
             if (points > 0 && island) island.addPoints(points)
+
+            // Increment player statistic.
+            player.incrementCriteria("cropsFarmed", 1)
         }
 
         // Decrement island limit.

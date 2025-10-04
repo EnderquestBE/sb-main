@@ -73,6 +73,9 @@ class SpawnerEntity {
             player.addXp(xpAmount);
             if (xpAmount && player.getSetting("showXpOverlay")) player.onScreenDisplay.setActionBar(`§l§e>> §aCollected §d${xpAmount} §6XP §e<<§r`);
         }
+
+        // Increment player statistic.
+        player.incrementCriteria("mobsSlayed", 1);
     }
 
     public static _processRange(value: [number, number] | number, looting: number = 0): number {

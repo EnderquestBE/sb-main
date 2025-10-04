@@ -11,6 +11,7 @@ new CommandBuilder("sellallxp", "Sells all items in your inventory.").setAliases
         const inv = player.getTrait(EntityInventoryTrait).container
         const items = inv.storage.entries();
 
+        let total = 0;
         for (const [slot, item] of items) {
             if (!item) continue;
             const sellInfo = SellableItems.get(item.type.identifier as any);
@@ -18,9 +19,10 @@ new CommandBuilder("sellallxp", "Sells all items in your inventory.").setAliases
 
             const amount = item.stackSize;
             const value = sellInfo.xp * amount;
+            total += value;
             player.inventory.clearItem(item.type.identifier, amount);
-            player.addXp(value);
             player.info(`§eSold §a${Utils.formatString(item.type.identifier)} §7x§c${amount} §efor §a${Utils.formatInt(value)} XP §eat §3${Utils.formatInt(sellInfo.xp)} XP §eeach.`);
         }
+        if (total > 0) player.addXp(Math.floor(total));
     })
 ).register("Rank")

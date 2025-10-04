@@ -12,3 +12,6 @@ export * from "./Enchantment/sealedTome"
 
 /* Stash */
 export * from "./Stash/stash"
+
+/* Crate */
+export * from "./Custom/crateKey"

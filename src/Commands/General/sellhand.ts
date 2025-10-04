@@ -22,7 +22,7 @@ new CommandBuilder("sellhand", "Sells the item in your hand.")
             }
 
             const amount = item.stackSize;
-            const value = sellInfo.money * amount;
+            const value = Math.floor(sellInfo.money * amount);
             inv.clearSlot(player.getSelectedSlot());
             player.addMoney(value);
             player.info(`§eSold §a${Utils.formatString(item.type.identifier)} §7x§c${amount} §efor §6$${Utils.formatInt(value)} §eat §3$${Utils.formatInt(sellInfo.money)} §eeach.`);

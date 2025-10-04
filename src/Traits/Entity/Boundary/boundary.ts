@@ -2,7 +2,7 @@ import { EntityIdentifier, EntityTrait, Player, TraitOnTickDetails } from "@sere
 import { Vector3f } from "@serenityjs/protocol";
 import { Warp } from "../../../Classes";
 class PlayerBoundaryTrait extends EntityTrait {
-    public static readonly identifier = "persistence";
+    public static readonly identifier = "boundary";
     public static readonly types = [EntityIdentifier.Player];
 
     declare public readonly entity: Player;

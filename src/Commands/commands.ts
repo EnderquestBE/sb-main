@@ -15,6 +15,8 @@ import "./Admin/islandadmin"
 import "./Admin/money"
 import "./Admin/xp"
 import "./Admin/uptime"
+import "./Admin/setcrate"
+import "./Admin/key"
 
 /** Moderation Commands */
 import "./Moderation/broadcast"
@@ -34,6 +36,7 @@ import "./General/reply"
 import "./General/buy"
 import "./General/friend"
 import "./General/break"
+import "./General/discord"
 
 /** Island Commands */
 import "./Island/island"

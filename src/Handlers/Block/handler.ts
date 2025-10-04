@@ -36,6 +36,11 @@ class BlockHandler {
         [BlockIdentifier.GoldOre, ItemIdentifier.GoldIngot]
     ])
 
+    private static cropBlocks = new Set([
+        BlockIdentifier.Pumpkin,
+        BlockIdentifier.MelonBlock
+    ])
+
     // Message to show if the player's inventory is full.
     private static readonly INV_FULL = "§cYour inventory is full!";
 
@@ -45,6 +50,8 @@ class BlockHandler {
     public static onBreak(player: Player, itemStack: ItemStack | null, ...blocks: Block[]): void {
         const island = player.getWorldIsland();
         if (!island) return;
+        if (blocks.some((x) => this.cropBlocks.has(x.identifier))) player.incrementCriteria("cropsFarmed", 1);
+        else player.incrementCriteria("blocksMined", 1);
 
         for (const block of blocks) {
             // If block has a custom implementation, return.
@@ -121,6 +128,8 @@ class BlockHandler {
     public static onPlace({ player, block }: PlayerPlaceBlockSignal): void {
         const island = player.getWorldIsland();
         if (!island) return;
+
+        player.incrementCriteria("blocksPlaced", 1);
 
         const points = BlockPointValues[block.identifier]?.place?.points;
         if (points) {

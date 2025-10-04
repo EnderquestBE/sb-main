@@ -92,6 +92,22 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
     return this.updateOne({ $set: { timePlayed: value } });
   }
 
+  public getCriteria(stat: keyof PlayerData["stats"]): number {
+    return this.data.stats[stat] || 0;
+  }
+
+  public incrementCriteria(stat: keyof PlayerData["stats"], value: number = 1): Promise<OperationResult> {
+    return this.updateOne({ $inc: { [`stats.${stat}`]: value } });
+  }
+
+  public decrementCriteria(stat: keyof PlayerData["stats"], value: number = 1): Promise<OperationResult> {
+    return this.updateOne({ $inc: { [`stats.${stat}`]: -value } });
+  }
+
+  public updateCriteria(stat: keyof PlayerData["stats"], value: number): Promise<OperationResult> {
+    return this.updateOne({ $set: { [`stats.${stat}`]: value } });
+  }
+
   // Data
   public getDataString(): string {
     return JSON.stringify(this.data);

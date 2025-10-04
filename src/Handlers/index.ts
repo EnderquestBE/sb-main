@@ -33,3 +33,6 @@ export * from "./Spawner/spawner";
 
 /* Stash */
 export * from "./Stash/handler";
+
+/* Hologram */
+export * from "./Hologram/handler";
