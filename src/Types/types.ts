@@ -26,3 +26,5 @@ export * from "./Enchantment/types"
 export * from "./Moderation/types"
 /* Crate */
 export * from "./Crate/identifier"
+/* Guide */
+export * from "./Guide"

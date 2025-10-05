@@ -1,7 +1,6 @@
 import { Player } from "@serenityjs/core";
 import { CommandBuilder, CommandOverload, PlayerEnum } from "../../Classes";
 import { Server } from "../../server";
-import { Utils } from "../../Utils/utils";
 import { ShowProfilePacket } from "@serenityjs/protocol";
 
 new CommandBuilder("friend", "Send a friend request to another player.")

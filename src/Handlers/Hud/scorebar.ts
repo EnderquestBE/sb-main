@@ -21,7 +21,7 @@ class Scorebar {
     private static readonly S_YOUR_STATS = "§b❖ Your Stats ❖";
     private static readonly S_RANK = " §b匚 §aRank: ";
     private static readonly S_TIME = " §b匚 §6Time: §f";
-    private static readonly S_KDR = " §b匚 §cK: §f0 §9D: §f0 §5R: §f0";
+    private static readonly S_KDR = " §b匚 ";
     private static readonly S_TIP_ISLAND = "§d➤ §7Try using §6/is help§7.";
     private static readonly S_TIP_HUB = " §d➤ §7Use §6/hud §7to disable.";
     private static readonly S_NO_ISLAND = " §b匚 §2Island: §f§e/is create";
@@ -77,7 +77,8 @@ class Scorebar {
                 scores.push({ scoreboardId: ScoreboardIdentity.IDENTIFIER++, objectiveName: objective, score: scoreIndex--, identityType: ScoreboardIdentityType.FakePlayer, actorUniqueId: null, customName: this.S_NO_LEVEL });
             }
             scores.push({ scoreboardId: ScoreboardIdentity.IDENTIFIER++, objectiveName: objective, score: scoreIndex--, identityType: ScoreboardIdentityType.FakePlayer, actorUniqueId: null, customName: `${this.S_TIME}${Utils.formatDuration(player.getTimePlayed())}` });
-            scores.push({ scoreboardId: ScoreboardIdentity.IDENTIFIER++, objectiveName: objective, score: scoreIndex--, identityType: ScoreboardIdentityType.FakePlayer, actorUniqueId: null, customName: this.S_KDR });
+            const { kills, deaths, ratio } = player.getAllCriteria();
+            scores.push({ scoreboardId: ScoreboardIdentity.IDENTIFIER++, objectiveName: objective, score: scoreIndex--, identityType: ScoreboardIdentityType.FakePlayer, actorUniqueId: null, customName: `${this.S_KDR}§cK: §f${kills} §9D: §f${deaths} §5R: §f${ratio}` });
             scores.push({ scoreboardId: ScoreboardIdentity.IDENTIFIER++, objectiveName: objective, score: scoreIndex--, identityType: ScoreboardIdentityType.FakePlayer, actorUniqueId: null, customName: tip === "default" ? this.S_TIP_HUB : tip });
         }
 

@@ -37,6 +37,7 @@ import "./General/buy"
 import "./General/friend"
 import "./General/break"
 import "./General/discord"
+import "./General/guide"
 
 /** Island Commands */
 import "./Island/island"

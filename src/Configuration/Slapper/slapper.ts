@@ -4,24 +4,24 @@ import { SlapperShopGeometry } from "./Geometry/shop";
 import { SlapperVisitGeometry } from "./Geometry/visit";
 import { SlapperTeleportGeometry } from "./Geometry/teleport";
 import { MainShop } from "../Shop/Main/main";
+import { PalmGeometry } from "../Morph/Geometry/palm";
 
 /* From left (Quests) to right (Kits) */
 
 /* LEFT SIDE */
 
-// Quests
-/*
+// Guide
 Slapper.registerSlapper({
-    identifier: "slapper:quests",
-    name: "§l§5Quests§r",
+    identifier: "slapper:guide",
+    name: "§l§eGuide§r",
     position: new Vector3f(-18.5, 66, -6.5),
-    skinURL: "https://drive.usercontent.google.com/u/0/uc?id=1srKfcocAmmPpCRqCUoS6pUYrMkYXJ0kb&export=download",
+    texture: "top_hat_chicken_shirt.png",
+    skinOptions: { geometry: PalmGeometry, geometryKey: "geometry.palm" },
     rotation: new Rotation(-90, 0, -90),
     function: (player) => {
-        player.info("§7This feature is coming soon!")
+        player.executeCommand("guides")
     }
 })
-*/
 
 // Auction House
 /*

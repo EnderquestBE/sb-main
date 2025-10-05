@@ -19,6 +19,7 @@ declare module "@serenityjs/core" {
 
     getTimePlayed(): number
     setTimePlayed(value: number): Promise<OperationResult>
+    getAllCriteria(): { [key in keyof PlayerStatCriteria]: number }
     getCriteria(stat: keyof PlayerStatCriteria): number
     incrementCriteria(stat: keyof PlayerStatCriteria, value?: number): Promise<OperationResult>
     decrementCriteria(stat: keyof PlayerStatCriteria, value?: number): Promise<OperationResult>
@@ -134,6 +135,11 @@ Player.prototype.setTimePlayed = function (this: Player, value: number): Promise
   const session = PlayerExtension.getSession(this);
   if (!session) return PlayerExtension["NO_SESSION_RESULT"]
   return session.setTimePlayed(value);
+}
+
+Player.prototype.getAllCriteria = function (this: Player): { [key in keyof PlayerStatCriteria]: number } {
+  const session = PlayerExtension.getSession(this);
+  return session ? session.getAllCriteria() : { ...DEFAULT_PLAYER_DATA.stats };
 }
 
 Player.prototype.getCriteria = function (this: Player, stat: keyof PlayerStatCriteria): number {

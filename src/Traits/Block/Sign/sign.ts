@@ -22,6 +22,13 @@ class BlockSpecialSignTrait extends BlockTrait {
         BlockIdentifier.WallSign
     ];
 
+    private static readonly BLACKLISTED_COMMANDS = new Set([
+        "is delete",
+        "island delete",
+        "sb delete",
+        "skyblock delete"
+    ])
+
     public constructor(block: Block) {
         super(block);
     }
@@ -52,6 +59,10 @@ class BlockSpecialSignTrait extends BlockTrait {
                 try {
                     if (!player.getTrait(PlayerCommandExecutorTrait).hasCommand(text.split(" ")[0]!.slice(1))) {
                         player.error("Unknown command executed. Please make sure the command exists, and that you have permission to use it.")
+                        return false;
+                    }
+                    if (BlockSpecialSignTrait.BLACKLISTED_COMMANDS.has(text.slice(1).toLowerCase())) {
+                        player.error("This command cannot be used on signs.")
                         return false;
                     }
                     player.executeCommand(text)

@@ -92,6 +92,10 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
     return this.updateOne({ $set: { timePlayed: value } });
   }
 
+  public getAllCriteria(): { [key in keyof PlayerData["stats"]]: number } {
+    return this.data.stats;
+  }
+
   public getCriteria(stat: keyof PlayerData["stats"]): number {
     return this.data.stats[stat] || 0;
   }

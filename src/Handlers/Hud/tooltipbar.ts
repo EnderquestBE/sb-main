@@ -1,6 +1,6 @@
 import { Player } from "@serenityjs/core";
 import { Utils } from "../../Utils/utils";
-import { Island } from "../../Classes";
+import { Island, IslandLevel } from "../../Classes";
 import { Server } from "../../server";
 
 class TooltipBar {
@@ -37,7 +37,11 @@ class TooltipBar {
             elements.push(`§6[Owner: §f${island.getOwner().username}§6]`);
             elements.push(`§c[Bank: §f$${Utils.formatInt(island.getBankBalance())}§c]`);
             elements.push(`§a[Level: §f${island.getLevel()}§a]`);
-            elements.push(`§2[Points: §f${0}§7/§f${150}§2]`);
+            const totalPoints = island.getPoints();
+            const currentLevel = IslandLevel.fromPoints(totalPoints);
+            const pointsForLevel = totalPoints - IslandLevel.toPoints(currentLevel - 1);
+            const pointsNeeded = 150 * currentLevel;
+            elements.push(`§2[Points: §f${pointsForLevel}§7/§f${pointsNeeded}§2]`);
             elements.push(`§d[Size: §f${island.getSize()} Blocks§d]`);
         } else {
             elements.push(`§b[GT: §f${player.username}§b]`);
@@ -52,7 +56,8 @@ class TooltipBar {
                 elements.push("§e[Level: §f--§e]");
             }
             elements.push(`§6[Time: §f${Utils.formatDuration(player.getTimePlayed())}§6]`);
-            elements.push(`§c[K: §f0 §9D: §f0 §5R: §f0§c]`);
+            const { kills, deaths, ratio } = player.getAllCriteria();
+            elements.push(`§c[K: §f${kills} §9D: §f${deaths} §5R: §f${ratio}§c]`);
         }
 
         const finalLines: string[] = [this.centerTooltipText(this.TOOLTIP_TITLE)];

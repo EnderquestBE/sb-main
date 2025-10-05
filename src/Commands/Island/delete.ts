@@ -46,7 +46,8 @@ const IslandDeleteCommand = new CommandOverload(
                 return player.error("Only the island owner can delete the island.")
             }
 
-            const world = player.world
+            const world = island.getWorld();
+            if (!world) return player.error("Error: Island world not found.");
             const serenity = world.serenity
 
             const players = world.getPlayers()
