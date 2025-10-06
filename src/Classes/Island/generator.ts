@@ -1,5 +1,5 @@
 import { BinaryStream } from "@serenityjs/binarystream";
-import { BlockIdentifier, BlockInventoryTrait, BlockPermutation, Chunk, ItemIdentifier, ItemStack, Structure, TerrainGenerator, VoidGenerator, World } from "@serenityjs/core";
+import { BlockChestTrait, BlockIdentifier, BlockPermutation, Chunk, ItemIdentifier, ItemStack, Structure, TerrainGenerator, VoidGenerator, World } from "@serenityjs/core";
 import { CompoundTag } from "@serenityjs/nbt";
 import { Vector3f } from "@serenityjs/protocol";
 import { readFileSync } from "fs";
@@ -39,7 +39,7 @@ class IslandGenerator extends TerrainGenerator {
         const chestBlock = this.dimension.getBlock(new Vector3f(-2, 3, 3))
         chestBlock.setPermutation(BlockPermutation.resolve(BlockIdentifier.Chest))
         chestBlock.setState("minecraft:cardinal_direction", "east")
-        const inv = (chestBlock.getTrait(BlockInventoryTrait) ?? chestBlock.addTrait(BlockInventoryTrait)).container
+        const inv = (chestBlock.getTrait(BlockChestTrait) ?? chestBlock.addTrait(BlockChestTrait)).container
         inv.addItem(new ItemStack("minecraft:water", { stackSize: 1 }))
         inv.addItem(new ItemStack("minecraft:lava", { stackSize: 1 }))
         inv.addItem(new ItemStack(ItemIdentifier.BeetrootSeeds, { stackSize: 2 }))

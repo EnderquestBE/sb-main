@@ -9,7 +9,7 @@ enum ClientRenderPreset {
 
 const ClientRenderBehavior: { [key in ClientRenderPreset]: (player: Player, metadata: Array<DataItem>) => Array<DataItem> } = {
     [ClientRenderPreset.Stats]: (player, metadata) => {
-        const text = `§e======= §lYour Stats§r§e =======\n§bName: §f${player.username}\n§aRank: §f${player.getPrimaryRank().displayName}§r\n§6Balance: §f$${player.getMoney()}\n§cXP: §f${player.getXp()}\n§dTime Played: §f${Utils.formatDuration(player.getTimePlayed())}\n§bBlocks Mined: §f${player.getCriteria("blocksMined")}\n§aBlocks Placed: §f${player.getCriteria("blocksPlaced")}\n§eCrops Farmed: §f${player.getCriteria("cropsFarmed")}\n§4Mobs Slain: §f${player.getCriteria("mobsSlayed")}\n§cKills: §f${player.getCriteria("kills")}\n§9Deaths: §f${player.getCriteria("deaths")}\n\n`
+        const text = `§e======= §lYour Stats§r§e =======\n§bName: §f${player.username}\n§aRank: §f${player.getPrimaryRank().displayName}§r\n§6Balance: §f$${Utils.formatInt(player.getMoney())}\n§cXP: §f${player.getXp()}\n§dTime Played: §f${Utils.formatDuration(player.getTimePlayed())}\n§bBlocks Mined: §f${player.getCriteria("blocksMined")}\n§aBlocks Placed: §f${player.getCriteria("blocksPlaced")}\n§eCrops Farmed: §f${player.getCriteria("cropsFarmed")}\n§4Mobs Slain: §f${player.getCriteria("mobsSlayed")}\n§cKills: §f${player.getCriteria("kills")}\n§9Deaths: §f${player.getCriteria("deaths")}\n\n`
         const name = metadata.find((x) => x.identifier === ActorDataId.Name);
         if (!name) {
             metadata.push(new DataItem(ActorDataId.Name, ActorDataType.String, text));

@@ -21,7 +21,6 @@ import { ContainerType } from "@serenityjs/protocol";
 import { EntityPersistenceTrait } from "./Traits/Entity/Persistence/persistence";
 import { PlayerBoundaryTrait } from "./Traits/Entity/Boundary/boundary";
 
-
 /**
  * @IMPORTS
  */
