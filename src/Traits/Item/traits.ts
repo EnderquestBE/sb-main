@@ -2,7 +2,7 @@
 export * from "./Seed/seed"
 
 /* Equipment */
-export * from "./Equipment/hoe"
+export * from "./Equipment/action"
 
 /* Spawner */
 export * from "./Spawner/spawner"

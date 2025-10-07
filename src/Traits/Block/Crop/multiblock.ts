@@ -40,23 +40,23 @@ class BlockMultiBlockCropTrait extends BlockTrait {
 
     public onPlace({ origin }: BlockPlacementOptions): boolean {
         // Check if a player is responsible for placement.
-        if (!origin || !origin.isPlayer()) return false
+        if (!origin || !origin.isPlayer()) return false;
 
         // Get data for the island the crop is on.
         const island = Island.loadSync(this.islandName)
-        if (!island) return false
+        if (!island) return false;
 
         // Check if the crop has been unlocked for the island.
         if (island.getLevel() < CropLevelRequirement[this.block.identifier]!) {
             origin.error(`Island has not unlocked this crop yet.\n§6Use §e/is crops §6to see when it unlocks.`)
-            return false
+            return false;
         }
 
         // Check if the limit has been reached.
         if (island.isLimitReached("crops")) {
             const limit = island.getLimit("crops")
             origin.error(`Island has reached the crop limit §8(§4${limit.max}§8)§c.\n§dUse §e/is expand §dto increase it.`)
-            return false
+            return false;
         }
 
         // Increment island limit.
