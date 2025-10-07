@@ -40,7 +40,7 @@ const IslandStatsCommand = new CommandOverload({
                 `§fHelpers§8[§6${island.getMembers().length}§7/§c${members.max}§8]§f: §a${island.getHelpers().map(x => x.username).join(", ")}`,
                 `§fHomes§8[§6${island.getHomes().length}§7/§c${homes.max}§8]§f: §2${island.getHomes().map(x => x.name).join(", ")}`,
                 `§fSize: §d${island.getSize()} Blocks`,
-                `§fUnlocks: §eSpawner: §f${spawners.amount}/${spawners.max} §7(§f${Math.floor((spawners.amount / spawners.max) * 1000) / 10}§6%§7) §eHopper: §f${hoppers.amount}/${hoppers.max} §7(§f${Math.floor((hoppers.amount / hoppers.max) * 1000) / 10}§6%§7) §eCrops: §f${crops.amount}/${crops.max} §7(§f${Math.floor((crops.amount / crops.max) * 1000) / 10}§6%§7)`
+                `§fUnlocks: §eSpawner: §f${spawners.amount}/${spawners.max} §7(§f${Math.floor((spawners.amount / spawners.max) * 1000) / 10}§6%%§7) §eHopper: §f${hoppers.amount}/${hoppers.max} §7(§f${Math.floor((hoppers.amount / hoppers.max) * 1000) / 10}§6%%§7) §eCrops: §f${crops.amount}/${crops.max} §7(§f${Math.floor((crops.amount / crops.max) * 1000) / 10}§6%%§7)`
             ];
             player.sendMessage(bridgeTop + " §eISLAND INFO §f" + bridgeTop);
             player.sendMessage(values.join("\n"));
