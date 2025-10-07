@@ -73,7 +73,7 @@ class ChatHandler {
         return `${player.getChatSize() ? "" : "§f➙ "}${island ? `§7~${this.chooseIslandLevelColor(level)}${level}§7~ §f*${island.getData().owner.xuid === player.xuid ? "*" : ""} §5${island.getName()} ` : ""}${player.getActiveRanks().reverse().map((x) => `§7[${x.displayName}§7]`).join("")} §a${player.username} §7» ${Color[player.getChatColor() as keyof typeof Color]}${message}`
     }
 
-    private static chooseIslandLevelColor(level: number) {
+    public static chooseIslandLevelColor(level: number) {
         if (level < 10) return "§f"
         else if (level < 20) return "§4"
         else if (level < 50) return "§6"

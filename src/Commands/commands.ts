@@ -38,6 +38,8 @@ import "./General/friend"
 import "./General/break"
 import "./General/discord"
 import "./General/guide"
+import "./General/topmoney"
+import "./General/topxp"
 
 /** Island Commands */
 import "./Island/island"

@@ -28,6 +28,7 @@ import { IslandRenameCommand } from "./rename";
 import { IslandSetHomeCommand } from "./sethome";
 import { IslandSetSpawnCommand } from "./setspawn";
 import { IslandStatsCommand } from "./stats";
+import { IslandTopCommand } from "./top";
 import { IslandTransferCommand } from "./transfer";
 import { IslandUnbanCommand } from "./unban";
 import { IslandVisitCommand } from "./visit";
@@ -66,6 +67,7 @@ new CommandBuilder("island", "Create an island.").setAliases(["is", "skyblock", 
   .addOverload(IslandDelHomeCommand)
   .addOverload(IslandPerksCommand)
   .addOverload(IslandCropsCommand)
+  .addOverload(IslandTopCommand)
   .addOverload(IslandGoCommand)
 
   .addOverload(IslandHelpCommand)
