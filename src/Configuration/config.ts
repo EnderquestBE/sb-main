@@ -53,3 +53,6 @@ export * from "./Crate"
 
 /* Guide */
 export * from "./Guides"
+
+/* Staff */
+export * from "./Staff/permissions"

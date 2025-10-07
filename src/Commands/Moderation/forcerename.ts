@@ -5,7 +5,7 @@ import { Server } from "../../server";
 import { Filter } from "mongodb";
 
 new CommandBuilder("forcerename", "Forces a rename of an island.")
-    .setPermissions(["serenity.operator"])
+    .setPermissions(["mod.forcerename"])
     .addOverload(new CommandOverload({
         player: StringEnum,
         name: StringEnum

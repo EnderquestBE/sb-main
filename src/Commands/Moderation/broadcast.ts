@@ -1,6 +1,7 @@
 import { StringEnum } from "@serenityjs/core";
 import { CommandBuilder, CommandOverload } from "../../Classes";
 import { ChatHandler } from "../../Handlers";
+
 new CommandBuilder("broadcast", "Broadcasts a message all players.")
     .setPermissions(["mod.broadcast"])
     .addOverload(new CommandOverload({

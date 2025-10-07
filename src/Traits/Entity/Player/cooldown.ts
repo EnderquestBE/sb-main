@@ -16,24 +16,30 @@ class PlayerCommandCooldownTrait extends PlayerTrait {
         "sellhand",
         "sh",
         "sellhandxp",
-        "shxp"
+        "shxp",
+        "compress",
+        "break",
+        "breaker"
     ])
 
     private nextCommand = 0;
 
     public onCommand(state: CommandExecutionState): boolean | void {
         if (!state.command) return false;
-        if (PlayerCommandCooldownTrait.EXEMPT_COMMANDS.has(state.command.name)) return true;
-        // Implement cooldown.
-        if (this.nextCommand > Date.now()) {
-            this.entity.info(
-                `§cYou are on cooldown. Please wait §4${Math.ceil(
-                    (this.nextCommand - Date.now()) / 1000
-                )} §cseconds.`,
-            )
-            return false;
+        //@ts-ignore
+        if (this.player._commandCooldown !== true) {
+            if (PlayerCommandCooldownTrait.EXEMPT_COMMANDS.has(state.command.name)) return true;
+            // Implement cooldown.
+            if (this.nextCommand > Date.now()) {
+                this.entity.info(
+                    `§cYou are on cooldown. Please wait §4${Math.ceil(
+                        (this.nextCommand - Date.now()) / 1000
+                    )} §cseconds.`,
+                )
+                return false;
+            }
+            this.nextCommand = Date.now() + PlayerCommandCooldownTrait.COMMAND_COOLDOWN;
         }
-        this.nextCommand = Date.now() + PlayerCommandCooldownTrait.COMMAND_COOLDOWN;
         return true;
     }
 

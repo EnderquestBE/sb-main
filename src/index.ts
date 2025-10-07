@@ -38,7 +38,7 @@ import "./Configuration/Morph/morph"
 import "./Commands/commands"
 import "./Traits/Block/Liquid/liquidInteraction"
 import { EntityClientRenderTrait } from "./Traits/Entity/Slapper/clientRender";
-import { DEFAULT_PLAYER_DATA } from "./Configuration/config";
+import { DEFAULT_PLAYER_DATA, STAFF_PERMISSIONS } from "./Configuration/config";
 
 const envArg = process.argv.find(arg => arg.startsWith('--env='));
 const isDevEnvironment = envArg === '--env=development';
@@ -189,6 +189,15 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
         this.logger.info(`Loaded island §e${islandName}§r into cache for ${player.username}.`);
       } else {
         this.logger.error(`§cFailed to load island data for ${player.username}.`)
+      }
+    }
+    // Apply staff permissions.
+    const permissionInt = isDevEnvironment ? 5 : player.getPermission();
+    const permissions = STAFF_PERMISSIONS.get(permissionInt);
+    console.log(permissionInt)
+    if (permissions && permissions.length > 0) {
+      for (const perm of permissions) {
+        player.addPermission(perm);
       }
     }
     // Show chat join message.
