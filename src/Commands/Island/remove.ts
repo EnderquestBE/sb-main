@@ -35,6 +35,7 @@ const IslandRemoveCommand = new CommandOverload({
             if (island.isOwner(target.xuid)) {
                 target.setIslandName("")
             }
+            target.unsetMemberOfIsland(island.getName());
             player.info(`§aSuccessfully removed §e${target.username}§a from your island.`);
             target.info(`§cYou are no longer a member of the §e${island.getName()} §cisland.`);
         });

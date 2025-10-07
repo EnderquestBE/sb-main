@@ -77,6 +77,8 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
   public getIslandName(): string { return this.data.island; }
   public getIsland(): Island | null { return Island.loadSync(this.data.island) }
   public async getIslandAsync(): Promise<Island | null> { return await Island.load(this.data.island) }
+  public getIslandsMemberOf(): string[] { return this.data.memberOf; }
+  public isMemberOfIsland(islandName: string): boolean { return this.data.memberOf.includes(islandName); }
   public getSettings(): { [key in Setting]: string | boolean } { return this.data.settings; }
   public getLastSeen(): Date { return this.data.lastSeen; }
   public getLastUpdated(): Date { return this.data.lastUpdated; }
@@ -267,6 +269,20 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
    */
   public async setIslandName(islandName: string): Promise<OperationResult> {
     return this.updateOne({ $set: { island: islandName } });
+  }
+
+  /**
+   * Adds an island to the list of islands a player is a member of.
+   * @param islandName The name of the island to add the player to.
+   */
+  public async setMemberOfIsland(islandName: string): Promise<OperationResult> {
+    if (this.isMemberOfIsland(islandName)) return { success: true };
+    return this._addToArray('memberOf', islandName);
+  }
+
+  public async unsetMemberOfIsland(islandName: string): Promise<OperationResult> {
+    if (!this.isMemberOfIsland(islandName)) return { success: true };
+    return this._removeFromArrayByValue('memberOf', islandName);
   }
 
   /**

@@ -38,6 +38,7 @@ const IslandLeaveCommand = new CommandOverload({
                     if (island.isOwner(player.xuid)) {
                         player.setIslandName("")
                     }
+                    player.unsetMemberOfIsland(island.getName());
                     player.info(`§cYou are no longer a member of the §e${island.getName()} §cisland.`);
 
                     const owners = island.getOnlineOwners();

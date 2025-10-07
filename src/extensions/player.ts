@@ -74,6 +74,10 @@ declare module "@serenityjs/core" {
     isWorldIsland(): boolean;
     getWorldIsland(): Island | null;
     getWorldIslandAsync(): Promise<Island | null>
+    getIslandsMemberOf(): string[];
+    isMemberOfIsland(islandName: string): boolean;
+    setMemberOfIsland(islandName: string): Promise<OperationResult>;
+    unsetMemberOfIsland(islandName: string): Promise<OperationResult>;
 
     // Settings
     getSettings(): { [key in Setting]: string | boolean };
@@ -376,6 +380,24 @@ Player.prototype.getWorldIsland = function (this: Player): Island | null {
 }
 Player.prototype.getWorldIslandAsync = function (this: Player): Promise<Island | null> {
   return Island.load(this.world.identifier.substring(3))
+}
+Player.prototype.getIslandsMemberOf = function (this: Player): string[] {
+  const session = PlayerExtension.getSession(this);
+  return session ? session.getIslandsMemberOf() : [];
+}
+Player.prototype.isMemberOfIsland = function (this: Player, islandName: string): boolean {
+  const session = PlayerExtension.getSession(this);
+  return session ? session.isMemberOfIsland(islandName) : false;
+}
+Player.prototype.setMemberOfIsland = async function (this: Player, islandName: string): Promise<OperationResult> {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return PlayerExtension['NO_SESSION_RESULT'];
+  return session.setMemberOfIsland(islandName);
+}
+Player.prototype.unsetMemberOfIsland = async function (this: Player, islandName: string): Promise<OperationResult> {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return PlayerExtension['NO_SESSION_RESULT'];
+  return session.unsetMemberOfIsland(islandName);
 }
 
 // Settings

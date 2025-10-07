@@ -18,6 +18,7 @@ import { IslandInviteCommand } from "./invite";
 import { IslandKickCommand } from "./kick";
 import { IslandLeaveCommand } from "./leave";
 import { IslandLimitCommand } from "./limit";
+import { IslandListCommand } from "./list";
 import { IslandLockCommand } from "./lock";
 import { IslandMakeOwnerCommand } from "./makeowner";
 import { IslandPerksCommand } from "./perks";
@@ -68,6 +69,7 @@ new CommandBuilder("island", "Create an island.").setAliases(["is", "skyblock", 
   .addOverload(IslandPerksCommand)
   .addOverload(IslandCropsCommand)
   .addOverload(IslandTopCommand)
+  .addOverload(IslandListCommand)
   .addOverload(IslandGoCommand)
 
   .addOverload(IslandHelpCommand)

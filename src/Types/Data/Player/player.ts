@@ -39,9 +39,13 @@ interface PlayerData {
    */
   chatSize: boolean
   /**
-   * The island UUID the player currently belongs to.
+   * The island name the player currently belongs to.
    */
   island: string
+  /**
+   * List of islands the player is a member of.
+   */
+  memberOf: string[];
   /**
    * User setting values to remember for the player.
    */

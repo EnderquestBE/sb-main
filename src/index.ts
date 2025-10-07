@@ -194,7 +194,6 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     // Apply staff permissions.
     const permissionInt = isDevEnvironment ? 5 : player.getPermission();
     const permissions = STAFF_PERMISSIONS.get(permissionInt);
-    console.log(permissionInt)
     if (permissions && permissions.length > 0) {
       for (const perm of permissions) {
         player.addPermission(perm);

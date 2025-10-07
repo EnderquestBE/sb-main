@@ -33,6 +33,7 @@ const IslandAcceptCommand = new CommandOverload({
                 }
                 player.info(`§eYou are now a member of the §a${island.getName()}§e island.`);
                 requester.info(`§e${player.username} §ahas accepted your invitation!`);
+                player.setMemberOfIsland(island.getName());
                 IslandInvites.remove(player, requester);
             });
         } else if (type === "coowner") {
@@ -49,6 +50,7 @@ const IslandAcceptCommand = new CommandOverload({
                     }
                     player.info(`§6You have been §dpromoted §6to ${IslandRoleDisplay.coowner}§6 on island §e${island.getName()}§6.`);
                     requester.info(`§6${player.username} §eis now a ${IslandRoleDisplay.coowner} §eof your island.`);
+                    if (!player.isMemberOfIsland(island.getName())) player.setMemberOfIsland(island.getName());
                     IslandInvites.remove(player, requester);
                 });
             })
