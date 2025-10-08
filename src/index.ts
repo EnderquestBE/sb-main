@@ -40,11 +40,6 @@ import "./Traits/Block/Liquid/liquidInteraction"
 import { EntityClientRenderTrait } from "./Traits/Entity/Slapper/clientRender";
 import { DEFAULT_PLAYER_DATA, STAFF_PERMISSIONS } from "./Configuration/config";
 
-const envArg = process.argv.find(arg => arg.startsWith('--env='));
-const isDevEnvironment = envArg === '--env=development';
-
-export { isDevEnvironment }
-
 class EnderquestPlugin extends Plugin implements PluginEvents {
 
   private database!: DatabaseService;
@@ -89,10 +84,6 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     LeaderboardHandler.initialize(this.serenity.getWorld());
     // Initialize holograms.
     HologramHandler.initialize(this.serenity.getWorld());
-    // Delete developer data.
-    if (isDevEnvironment) {
-      await PlayerDatabase.instance.delete("0000000000000000");
-    }
     // Update missing player data properties if applicable.
     const players = await PlayerDatabase.instance.collection.find({}).toArray() as any[];
     for (const player of players) {
@@ -156,10 +147,6 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     // Custom developer code.
     if (player.username === "The Palm Healer") {
       MorphManager.morph(player, "palm");
-      if (isDevEnvironment) {
-        //@ts-ignore
-        player.xuid = "0000000000000000";
-      }
     }
     // Load player data.
     const session = await PlayerExtension.loadSession(player);
@@ -192,7 +179,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
       }
     }
     // Apply staff permissions.
-    const permissionInt = isDevEnvironment ? 5 : player.getPermission();
+    const permissionInt = player.getPermission();
     const permissions = STAFF_PERMISSIONS.get(permissionInt);
     if (permissions && permissions.length > 0) {
       for (const perm of permissions) {
@@ -254,12 +241,6 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
               // Unload island from storage.
               this.serenity.unregisterWorld(world);
             }
-          }
-          if (player.username === "The Palm Healer" && isDevEnvironment) {
-            // Remove developer data.
-            await IslandDatabase.instance.delete(islandName);
-            this.serenity.worlds.delete(worldId)
-            rmdir(resolve(`./worlds/${worldId}`), { recursive: true })
           }
           this.logger.info(`Unloaded island §e${islandName}§r from cache.`)
         }
