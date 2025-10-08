@@ -1,7 +1,7 @@
 import { MongoClient, Db, Collection } from 'mongodb';
 import { Logger, LoggerColors } from '@serenityjs/logger';
 import { IslandData, ModerationData, PlayerData, VendorData } from '../../Types/types';
-import { CONNECTION_STRING, DATABASE_NAME } from '../../../config';
+import { CONNECTION_STRING, DATABASE_NAME } from '../../config';
 
 class DatabaseService {
 

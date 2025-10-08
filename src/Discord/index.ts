@@ -6,7 +6,7 @@ import { Utils } from "../Utils/utils";
 import { FormApplication } from "./Applications/form";
 import { Applications } from "./Applications/applications";
 import { ModerationManager } from "../Classes/Data/Moderation";
-import { isDevEnvironment } from "../../config";
+import { isDevEnvironment } from "../config";
 
 export class DiscordClient {
 

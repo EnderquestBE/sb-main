@@ -13,7 +13,6 @@ import { MorphManager } from "./Classes/Morph";
 import { DiscordClient } from "./Discord";
 import { ModerationManager } from "./Classes/Data/Moderation";
 import { resolve } from "node:path";
-import { rmdir } from "node:fs/promises";
 import { BlockTraits, ItemTraits, EntityTraits } from "./Traits";
 import { PlayerCommandCooldownTrait, PlayerListCustomTrait } from "./Traits/Entity/Player";
 import { EntityStackTrait } from "./Traits/Entity/traits";
@@ -24,6 +23,7 @@ import { PlayerBoundaryTrait } from "./Traits/Entity/Boundary/boundary";
 /**
  * @IMPORTS
  */
+import "./config"
 import "./Traits"
 import "./Classes/Items/itemRegistry";
 import "./CustomEnchantments/enchantments"
@@ -226,7 +226,6 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
       if (islandName) {
         const island = await Island.load(islandName);
         if (island) {
-          const worldId = island.getWorldId();
           if (island.getOnlineOwners().length === 0) {
             // Unload island.
             const world = island.getWorld();
