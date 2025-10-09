@@ -28,7 +28,7 @@ new CommandBuilder("binding", "Uses a Binding Scroll to increase strength of an 
 
             player.getTrait(EntityInventoryTrait).container.setItem(player.getSelectedSlot(), heldItem);
 
-            player.info(`${heldItem.getDisplayName()} §6CE strength increased from §e${currentStrength}%§6 to §c${newStrength}%§6.`);
+            player.info(`${heldItem.getDisplayName()} §6CE strength increased from §e${currentStrength}%%§6 to §c${newStrength}%%§6.`);
             player.playSound("block.cartography_table.use");
         })
     )

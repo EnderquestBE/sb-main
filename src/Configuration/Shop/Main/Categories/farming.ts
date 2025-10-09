@@ -8,5 +8,6 @@ const ShopFarmingCategory = new CategoryBuilder({ id: "farming", display: { name
     .addItem({ id: ItemIdentifier.Potato, price: 195, transactionSound: "dig.wood" })
     .addItem({ id: ItemIdentifier.PumpkinSeeds, price: 225, transactionSound: "dig.wood" })
     .addItem({ id: ItemIdentifier.MelonSeeds, price: 275, transactionSound: "dig.wood" })
+    .addItem({ id: ItemIdentifier.OakSapling, price: 750, transactionSound: "dig.wood" })
 
 export { ShopFarmingCategory };

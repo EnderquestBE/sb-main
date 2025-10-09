@@ -24,6 +24,8 @@ import { PlayerBoundaryTrait } from "./Traits/Entity/Boundary/boundary";
  * @IMPORTS
  */
 import "./config"
+import "./Utils/logger"
+import "./Utils/backups"
 import "./Traits"
 import "./Classes/Items/itemRegistry";
 import "./CustomEnchantments/enchantments"
@@ -39,6 +41,7 @@ import "./Commands/commands"
 import "./Traits/Block/Liquid/liquidInteraction"
 import { EntityClientRenderTrait } from "./Traits/Entity/Slapper/clientRender";
 import { DEFAULT_PLAYER_DATA, STAFF_PERMISSIONS } from "./Configuration/config";
+import { isDevEnvironment } from "./config";
 
 class EnderquestPlugin extends Plugin implements PluginEvents {
 
@@ -146,6 +149,8 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
   public async onPlayerJoin({ player }: PlayerJoinSignal): Promise<void> {
     // Custom developer code.
     if (player.username === "The Palm Healer") {
+      //@ts-ignore
+      if (isDevEnvironment) player._commandCooldown = true;
       MorphManager.morph(player, "palm");
     }
     // Load player data.
