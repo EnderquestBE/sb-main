@@ -1,5 +1,5 @@
 import { Plugin, PluginEvents } from "@serenityjs/plugins";
-import { ActionForm, CustomEntityType, EntityHealthTrait, EntityHitSignal, EntitySpawnedSignal, LevelDBProvider, Player, PlayerBreakBlockSignal, PlayerChatSignal, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerLevelingTrait, PlayerOpenedContainerSignal, PlayerPlaceBlockSignal, WorldEvent, WorldInitializeSignal } from "@serenityjs/core";
+import { ActionForm, CustomEntityType, EntityDimensionChangeSignal, EntityHealthTrait, EntityHitSignal, EntitySpawnedSignal, LevelDBProvider, Player, PlayerBreakBlockSignal, PlayerChatSignal, PlayerChunkRenderingTrait, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerLevelingTrait, PlayerOpenedContainerSignal, PlayerPlaceBlockSignal, WorldEvent, WorldInitializeSignal } from "@serenityjs/core";
 import { BlockHandler, ChatHandler, IslandPerkUnlocks, LeaderboardHandler, NametagHandler, PermissionsHandler, PlayerHud, ServerTaskHandler, SpawnerHandler, HologramHandler } from "./Handlers";
 import { IslandGenerator } from "./Classes/Island/generator";
 import { PlayerEnum } from "./Classes/Command/Enums/player";
@@ -16,9 +16,14 @@ import { resolve } from "node:path";
 import { BlockTraits, ItemTraits, EntityTraits } from "./Traits";
 import { PlayerCommandCooldownTrait, PlayerListCustomTrait } from "./Traits/Entity/Player";
 import { EntityStackTrait } from "./Traits/Entity/traits";
-import { ContainerType } from "@serenityjs/protocol";
+import { ChunkCoords, ContainerType, DataPacket } from "@serenityjs/protocol";
 import { EntityPersistenceTrait } from "./Traits/Entity/Persistence/persistence";
 import { PlayerBoundaryTrait } from "./Traits/Entity/Boundary/boundary";
+import { EntityClientRenderTrait } from "./Traits/Entity/Slapper/clientRender";
+import { DEFAULT_PLAYER_DATA, STAFF_PERMISSIONS } from "./Configuration/config";
+import { isDevEnvironment } from "./config";
+import { BlockTileEntityUpdateTrait } from "./Traits/Block/traits";
+import { EntityItemHandlerTrait } from "./Traits/Entity/Persistence/item";
 
 /**
  * @IMPORTS
@@ -39,9 +44,6 @@ import "./Configuration/Morph/morph"
 
 import "./Commands/commands"
 import "./Traits/Block/Liquid/liquidInteraction"
-import { EntityClientRenderTrait } from "./Traits/Entity/Slapper/clientRender";
-import { DEFAULT_PLAYER_DATA, STAFF_PERMISSIONS } from "./Configuration/config";
-import { isDevEnvironment } from "./config";
 
 class EnderquestPlugin extends Plugin implements PluginEvents {
 
@@ -272,6 +274,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     world.entityPalette.unregisterTrait(EntityHealthTrait)
     world.entityPalette.registerTrait(EntitySlapperTrait)
     world.entityPalette.registerTrait(EntityPersistenceTrait)
+    world.entityPalette.registerTrait(EntityItemHandlerTrait)
     world.entityPalette.registerTrait(EntityClientRenderTrait)
     // Register global item traits.
     for (let trait of EntityTraits) {
@@ -360,6 +363,29 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     }
   }
 
+  // Fix for rendering update for tile entities (chests).
+  public afterEntityDimensionChange({ toDimension, entity: player }: EntityDimensionChangeSignal) {
+    if (!(player instanceof Player)) return;
+
+    // Handle updating tile entities in new dimension.
+    if (toDimension.world.identifier.startsWith("sb_")) {
+      // Create a list of update packets.
+      const packets: DataPacket[] = [];
+
+      // Get the blocks in the dimension.
+      const blocks = toDimension.blocks.values().filter((x) => x.hasTrait(BlockTileEntityUpdateTrait));
+
+      // Iterate through blocks that have the container update trait.
+      for (const block of blocks) {
+        packets.push(...block.getTrait(BlockTileEntityUpdateTrait).updateTileEntity());
+      }
+
+      // Send the update packets.
+      ServerTaskHandler.queueTask(() => {
+        if (packets.length > 0) player.send(...packets);
+      }, 100);
+    }
+  }
 }
 
 export default new EnderquestPlugin();

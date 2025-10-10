@@ -33,7 +33,7 @@ const IslandRandomVisitCommand = new CommandOverload({
                 islandNames.splice(index, 1)
                 return chooseRandomIsland()
             }
-            island.teleport(player)
+            if (!island.teleport(player)) return;
             player.info(
                 `§eYou have been teleported to island §a${island.getName()}§e's spawn!`
             );

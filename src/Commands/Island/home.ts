@@ -29,7 +29,7 @@ const IslandHomeCommand = new CommandOverload({
         const home = island.getHome(homeName.result!);
         if (!home) return player.error("There are no island homes by that name.");
 
-        island.teleport(player);
+        if (!island.teleport(player)) return;
         const { x, y, z } = home.location
         player.teleport(new Vector3f(x, y, z));
         player.info(`§eYou have been teleported to home §d${home.name} §eon §a${island.getName()}§e.`);

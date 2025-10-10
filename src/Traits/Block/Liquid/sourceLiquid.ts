@@ -5,7 +5,7 @@ import {
   TraitOnTickDetails,
 } from "@serenityjs/core";
 import { Direction, LiquidType } from "../../../Types/types";
-import { FlowingBlockMap, FlowSpeed, LiquidBlockMap } from "../../../Configuration/Block/liquid";
+import { FlowingBlockMap, FlowSpeed, LiquidBlockMap } from "../../../Configuration/Block";
 import { FlowingLiquidType } from "../../../Types/Block/liquid";
 import { ServerTaskHandler } from "../../../Handlers";
 

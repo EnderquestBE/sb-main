@@ -56,3 +56,6 @@ export * from "./Guides"
 
 /* Staff */
 export * from "./Staff/permissions"
+
+/* Block */
+export * from "./Block"

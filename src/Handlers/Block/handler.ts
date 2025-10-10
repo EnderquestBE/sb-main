@@ -13,8 +13,8 @@ import { BlockPointValues } from "../../Configuration/Point/point";
 import { Utils } from "../../Utils/utils";
 import { Enchantment, Gamemode } from "@serenityjs/protocol";
 import { Logger, LoggerColors } from "@serenityjs/logger";
-import { BlockOverrideMap } from "../../Configuration/Block/overrides";
 import { StashHandler } from "../Stash/handler";
+import { BlockOverrideMap } from "../../Configuration/Block";
 
 type ValueOrRange = number | [number, number];
 

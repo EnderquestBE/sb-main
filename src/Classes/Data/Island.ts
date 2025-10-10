@@ -158,8 +158,15 @@ class Island extends DataManager<IslandData, IslandDatabase> {
   }
 
   // Warp
-  public teleport(player: Player) {
-    player.teleport(this.getSpawn(), Server.instance.getWorld(this.getWorldId())!.getDimension())
+  public teleport(player: Player): boolean {
+    const dimension = Server.instance.getWorld(this.getWorldId())!.getDimension()
+    //@ts-ignore
+    if (!dimension.isLoaded) {
+      player.error("This island is still being loaded, please wait a few seconds and try again.");
+      return false;
+    }
+    player.teleport(this.getSpawn(), dimension);
+    return true;
   }
 
   /**

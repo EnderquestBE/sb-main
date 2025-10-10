@@ -20,7 +20,7 @@ class SpawnerHandler {
 
     public static readonly MAX_LEVEL = 5; // Max level a spawner can be upgraded to.
 
-    public static readonly SPEEDS = [10, 8, 6, 4, 2]; // In seconds.
+    public static readonly SPEEDS = [12, 10, 8, 6, 4]; // In seconds.
 
     public static readonly PRICES = [750000, 1500000, 3750000, 6000000];
 

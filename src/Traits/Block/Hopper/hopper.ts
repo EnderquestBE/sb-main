@@ -1,5 +1,7 @@
 import {
     Block,
+    BlockChestTrait,
+    BlockDestroyOptions,
     BlockIdentifier,
     BlockPlacementOptions,
     BlockTrait,
@@ -31,6 +33,30 @@ class BlockHopperTrait extends BlockTrait {
         this.islandName = this.dimension.world.identifier.slice(3)
     }
 
+    public onUpdate() {
+        // Check if the hopper is still connected to a chest.
+        const chestTag = this.block.getStorageEntry<CompoundTag>("ConnectedChest");
+        if (!chestTag) return;
+        const x = chestTag.get<IntTag>("x")?.valueOf()!;
+        const y = chestTag.get<IntTag>("y")?.valueOf()!;
+        const z = chestTag.get<IntTag>("z")?.valueOf()!;
+        const chestBlock = this.dimension.getBlock({ x, y, z });
+        if (!chestBlock || !chestBlock.hasTrait(BlockChestTrait)) {
+            this.block.deleteStorageEntry("ConnectedChest");
+            this.block.sendStorageUpdate();
+
+            // Alert the nearest player.
+            const player = this.dimension.getPlayers().reduce((closest, player) => {
+                const closestDistance = closest ? closest.position.distance(this.block.position) : Infinity;
+                const playerDistance = player.position.distance(this.block.position);
+                return playerDistance < closestDistance ? player : closest;
+            }, null as Player | null);
+            if (player && player.position.distance(this.block.position) < 7) {
+                player.info("§cHopper is no longer connected to a chest.");
+            }
+        }
+    }
+
     public onPlace({ origin: player, clickedFace }: BlockPlacementOptions): boolean {
         // Check if a player is responsible for placement.
         if (!(player instanceof Player)) return false;
@@ -46,19 +72,47 @@ class BlockHopperTrait extends BlockTrait {
             return false;
         }
 
-        // Increment island limit.
-        if (island) island.incrementLimit("hoppers", 1)
-
         // Set hopper direction.
         if (player.isSneaking && clickedFace) {
-            const block = this.block.face(BlockHopperTrait.invertedBlockFace(clickedFace));
+            let block = this.block.face(BlockHopperTrait.invertedBlockFace(clickedFace));
+            // Hopper connecting to chest.
             if (block.identifier === BlockIdentifier.Chest) {
+                // Get the parent for paired chests.
+                const chestTrait = block.getTrait(BlockChestTrait);
+                if (chestTrait && chestTrait.isPaired() && !chestTrait.getIsPairParent()) {
+                    block = this.dimension.getBlock(chestTrait.getPaired()!);
+                }
+
+                // Check if the block is already connected to a hopper.
+                if (block.hasStorageEntry("ConnectedHopper")) {
+                    player.error("That chest is already connected to a hopper.");
+                    return false;
+                }
+
+                // Set the hopper direction to face into the chest.
                 this.block.setState("facing_direction", BlockHopperTrait.invertedBlockFace(clickedFace))
+
+                // Store the location of the chest on the hopper.
                 const chestTag = new CompoundTag();
                 chestTag.set("x", new IntTag(block.position.x));
                 chestTag.set("y", new IntTag(block.position.y));
                 chestTag.set("z", new IntTag(block.position.z));
+
+                // Store the location of the hopper on the chest.
+
+                const hopperTag = new CompoundTag();
+                hopperTag.set("x", new IntTag(this.block.position.x));
+                hopperTag.set("y", new IntTag(this.block.position.y));
+                hopperTag.set("z", new IntTag(this.block.position.z));
+
                 this.block.setStorageEntry("ConnectedChest", chestTag);
+                block.setStorageEntry("ConnectedHopper", hopperTag);
+
+                // Alert the player.
+                player.info("§aHopper has been connected to a chest.");
+
+                // Increment island limit.
+                if (island) island.incrementLimit("hoppers", 1)
             } else {
                 this.block.setState("facing_direction", 0)
                 this.block.setState("toggle_bit", false)
@@ -67,6 +121,7 @@ class BlockHopperTrait extends BlockTrait {
             this.block.setState("facing_direction", 0)
             this.block.setState("toggle_bit", false)
         }
+
         this.block.update();
         // Allow placement.
         return true
@@ -76,12 +131,29 @@ class BlockHopperTrait extends BlockTrait {
         return false;
     }
 
-    public onBreak(): boolean | void {
-        // Get data for the island the crop is on.
-        const island = Island.loadSync(this.islandName)
+    public onBreak({ origin: player }: BlockDestroyOptions): boolean | void {
+        // Unlink from connected chest.
+        const chestTag = this.block.getStorageEntry<CompoundTag>("ConnectedChest");
+        if (chestTag) {
+            const x = chestTag.get<IntTag>("x")?.valueOf()!;
+            const y = chestTag.get<IntTag>("y")?.valueOf()!;
+            const z = chestTag.get<IntTag>("z")?.valueOf()!;
+            const chestBlock = this.dimension.getBlock({ x, y, z });
 
-        // Decrement island limit.
-        if (island) island.decrementLimit("hoppers", 1)
+            if (chestBlock) {
+                chestBlock.deleteStorageEntry("ConnectedHopper");
+                chestBlock.sendStorageUpdate();
+
+                // Get data for the island the crop is on.
+                const island = Island.loadSync(this.islandName)
+
+                // Decrement island limit.
+                if (island) island.decrementLimit("hoppers", 1)
+
+                // Alert the player.
+                if (player?.isPlayer()) player.info("§cHopper removed.");
+            }
+        }
     }
 }
 

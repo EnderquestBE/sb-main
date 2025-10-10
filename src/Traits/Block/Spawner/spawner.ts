@@ -50,7 +50,7 @@ class BlockSpawnerTrait extends BlockTrait {
         form.button1 = "Upgrade"
         form.button2 = "Close"
 
-        if (player.pendingForms.size > 0) return
+        if (player.pendingForms.size > 0) return;
 
         form.show(player, (result, error) => {
             if (error || !result) return
@@ -71,8 +71,6 @@ class BlockSpawnerTrait extends BlockTrait {
             player.info(`§6Upgraded §l${SpawnerColorMap[this.ENTITY as keyof typeof SpawnerColorMap] ?? "§5"}${Utils.formatString(this.ENTITY)} §dSpawner §r§6to level §e${Utils.toRomanNumeral(this.LEVEL)}§6.`)
             player.playSound("mob.zombie.woodbreak", { position: this.block.position, volume: 0.5, pitch: 0.75 })
         })
-
-        // Upgrade form.
     }
 
     public onTick(details: TraitOnTickDetails): void {
@@ -83,9 +81,9 @@ class BlockSpawnerTrait extends BlockTrait {
 
         // Spawn a new entity if it doesn't exist.
         if (entities.length === 0) {
-            // Spawn entity at a random position 2-5 blocks from the spawner.
+            // Spawn entity at a random position 2-4 blocks from the spawner.
             const angle = Math.random() * Math.PI * 2
-            const distance = Math.random() * 3 + 2
+            const distance = Math.random() * 2 + 2
             const spawnPos = new Vector3f(
                 x + Math.cos(angle) * distance,
                 y + 0.5,

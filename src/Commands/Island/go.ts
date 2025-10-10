@@ -18,7 +18,7 @@ const IslandGoCommand = new CommandOverload({
                 `You don't have an island! Use /is create <name> to create one.`
             );
 
-        island.teleport(player)
+        if (!island.teleport(player)) return;
 
         player.info(
             `§aYou have been teleported to your island §e${island.getName()}§a spawn successfully!`

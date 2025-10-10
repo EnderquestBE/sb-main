@@ -72,7 +72,7 @@ const IslandHomesCommand = new CommandOverload({
             if (error || result === null) return;
             const selectedHome = homes[result];
             if (selectedHome) {
-                island.teleport(player);
+                if (!island.teleport(player)) return;
                 player.teleport(new Vector3f(selectedHome.location.x, selectedHome.location.y, selectedHome.location.z));
                 player.info(`§eYou have been teleported to home §d${selectedHome.name} §eon §a${island.getName()}§e.`);
             }

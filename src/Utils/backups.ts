@@ -34,7 +34,7 @@ function logMessage(message: string, level: 'info' | 'error' = 'info') {
         BackupLogger.info(message);
     }
 
-    appendFileSync(LOG_FILE, message);
+    appendFileSync(LOG_FILE, message + '\n');
 }
 
 async function copyDir(src: string, dest: string) {

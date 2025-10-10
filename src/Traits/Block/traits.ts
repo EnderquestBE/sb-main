@@ -20,3 +20,6 @@ export * from "./Drops"
 
 /* Hopper */
 export * from "./Hopper/hopper"
+
+/* Container */
+export * from "./TileEntity/update"

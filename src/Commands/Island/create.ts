@@ -28,7 +28,7 @@ const IslandCreateCommand = new CommandOverload(
                         identifier: worldKey,
                         dimensions: [{
                             identifier: "overworld",
-                            viewDistance: 8,
+                            viewDistance: 2,
                             simulationDistance: 4,
                             generator: IslandGenerator.identifier
                         }],

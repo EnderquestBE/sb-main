@@ -6,9 +6,9 @@ import {
 } from "@serenityjs/core";
 import { WeightedSelector } from "../../../Utils/weightedSelection";
 import { Direction } from "../../../Types/types";
-import { SourceBlockMap } from "../../../Configuration/Block/liquid";
+import { SourceBlockMap } from "../../../Configuration/Block";
 import { FlowingLiquidType } from "../../../Types/Block/liquid";
-import { OreGeneratorDistribution } from "../../../Configuration/Block/oreDistribution";
+import { OreGeneratorDistribution } from "../../../Configuration/Block";
 
 const OreSelector = new WeightedSelector<BlockIdentifier>(
   OreGeneratorDistribution

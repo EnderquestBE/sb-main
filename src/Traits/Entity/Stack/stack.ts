@@ -3,6 +3,7 @@ import { ByteTag, ShortTag } from "@serenityjs/nbt";
 import { Utils } from "../../../Utils/utils";
 import { ActorDamageCause, ActorEvent, ActorEventPacket, AnimateId, AnimatePacket, AttributeName, Enchantment } from "@serenityjs/protocol";
 import { SpawnerEntity, EnchantmentHandler } from "../../../Handlers";
+import { EntityFlammableTrait } from "../traits";
 
 class EntityStackTrait extends EntityAttributeTrait {
     public static readonly identifier = "stack";
@@ -37,32 +38,60 @@ class EntityStackTrait extends EntityAttributeTrait {
     }
 
     public onDamage(
-        damager: Entity
+        damager?: Entity,
+        damage?: number
     ): void {
-        if (!damager.isPlayer()) return
+        if (damager && !(damager instanceof Player)) return;
 
         // Calculate damage to do.
-        let amount = 1
-        const combat = damager.getTrait(PlayerCombatTrait)
-        if (combat.isOnCooldown) return
-        const critical = !combat.isOnCriticalCooldown && !damager.onGround
-        amount = combat.getCalculatedDamage()
+        let amount = damage ?? 0;
+        if (damager) {
+            const combat = damager.getTrait(PlayerCombatTrait)
+            if (combat.isOnCooldown) return
+            const critical = !combat.isOnCriticalCooldown && !damager.onGround
+            amount = combat.getCalculatedDamage()
 
-        // Get enchantment bonuses.
-        const item = damager.getHeldItem()
-        if (item) {
-            const enchantable = item.getTrait(ItemStackEnchantableTrait)
-            if (enchantable) {
-                const enchantments = enchantable.getEnchantments()
-                for (const [id, level] of enchantments) {
-                    if (id === Enchantment.BaneOfArthropods && this.isArthropod)
-                        amount += 2.5 * level
-                    else if (id === Enchantment.Smite && this.isUndead)
-                        amount += 2.5 * level
-                    else if (id === Enchantment.Sharpness)
-                        amount += 1 + (level - 1) * 0.5
+            // Get enchantment bonuses.
+            const item = damager.getHeldItem()
+            if (item) {
+                const enchantable = item.getTrait(ItemStackEnchantableTrait)
+                if (enchantable) {
+                    const enchantments = enchantable.getEnchantments()
+                    for (const [id, level] of enchantments) {
+                        // Apply fire aspect.
+                        if (id === Enchantment.FireAspect)
+                            if (this.entity.hasTrait(EntityFlammableTrait))
+                                this.entity.getTrait(EntityFlammableTrait).setOnFire(Math.floor(level / 2) + 1);
+                        // Apply damage enchantments.
+                        if (id === Enchantment.BaneOfArthropods && this.isArthropod)
+                            amount += 2.5 * level
+                        else if (id === Enchantment.Smite && this.isUndead)
+                            amount += 2.5 * level
+                        else if (id === Enchantment.Sharpness)
+                            amount += 1 + (level - 1) * 0.5
+                    }
                 }
             }
+
+            if (critical) {
+                // Create a new animate packet for the critical hit.
+                const packet = new AnimatePacket();
+
+                // Set the properties of the animate packet.
+                packet.id = AnimateId.CriticalHit;
+                packet.runtimeEntityId = this.entity.runtimeId;
+                packet.boatRowingTime = null;
+
+                // Broadcast the animate packet to the dimension of the player.
+                damager.dimension.broadcast(packet);
+
+                // Start the critical cooldown
+                combat.startCriticalCooldown();
+            }
+            combat.startCooldown();
+
+            // Handle custom enchantments on entity hit.
+            EnchantmentHandler.onEntityHurt(damager, this.entity, amount);
         }
 
         // Calculate the new health value
@@ -74,33 +103,13 @@ class EntityStackTrait extends EntityAttributeTrait {
         packet.event = ActorEvent.Hurt;
         packet.data = ActorDamageCause.EntityAttack;
 
-        if (critical) {
-            // Create a new animate packet for the critical hit.
-            const packet = new AnimatePacket();
-
-            // Set the properties of the animate packet.
-            packet.id = AnimateId.CriticalHit;
-            packet.runtimeEntityId = this.entity.runtimeId;
-            packet.boatRowingTime = null;
-
-            // Broadcast the animate packet to the dimension of the player.
-            damager.dimension.broadcast(packet);
-
-            // Start the critical cooldown
-            combat.startCriticalCooldown();
-        }
-        combat.startCooldown();
-
         // Broadcast the packet to all players
         this.entity.dimension.broadcast(packet);
 
         if (this.currentValue === 1 && this.aliveState === true) {
             this.aliveState = false;
-            this.onKill(damager)
+            this.onKill(damager);
         }
-
-        // Handle custom enchantments on entity hit.
-        EnchantmentHandler.onEntityHurt(damager, this.entity, amount);
     }
 
     public onSpawn(details: EntitySpawnOptions): void {
@@ -118,6 +127,9 @@ class EntityStackTrait extends EntityAttributeTrait {
     }
 
     public onKill(player?: Player): void {
+        // Handle loot.
+        SpawnerEntity.onKill(this.entity, player);
+        // Handle decrement.
         const stack = this.entity.getStorageEntry<ShortTag>("MobStack")?.valueOf()
         if (stack && stack > 1) {
             this.entity.setStorageEntry("MobStack", new ShortTag(stack - 1, "MobStack"))
@@ -126,11 +138,8 @@ class EntityStackTrait extends EntityAttributeTrait {
             this.currentValue = this.defaultValue;
             this.aliveState = true;
         } else {
-            this.entity.kill()
+            this.entity.kill();
         }
-        // Give player loot.
-        if (player)
-            SpawnerEntity.onKill(player, this.entity.identifier)
     }
 }
 
