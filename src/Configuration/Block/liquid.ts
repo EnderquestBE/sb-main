@@ -32,8 +32,8 @@ const SourceBlockMap: {
 const FlowSpeed: {
   [key in LiquidType | FlowingLiquidType]: number;
 } = {
-  [BlockIdentifier.Water]: 5,
-  [BlockIdentifier.FlowingWater]: 5,
+  [BlockIdentifier.Water]: 15,
+  [BlockIdentifier.FlowingWater]: 15,
   [BlockIdentifier.Lava]: 30,
   [BlockIdentifier.FlowingLava]: 30,
 };
