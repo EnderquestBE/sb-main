@@ -86,6 +86,8 @@ class FlowingLiquidBlockTrait extends BlockTrait {
     }
     if (!this.isSustained) return;
     if (Number(details.currentTick) % this.FLOW_SPEED > 0) return;
+    // Don't flow unless the source is on a solid block.
+    if (!this.block.below(1).isSolid) return;
     const depth = this.block.getState("liquid_depth") as number + 1;
     if (depth < MAX_LIQUID_DEPTH) this.flowToSides(depth);
     //this.flowDownward(this.FLOWING_BLOCK_TYPE, this.FLOW_SPEED);
@@ -107,6 +109,7 @@ class FlowingLiquidBlockTrait extends BlockTrait {
 
         flowBlock.setState("liquid_depth", depth);
       } else {
+        if (!flowBlock.below(1).isSolid) continue;
         if (!island.isInBounds(BlockPosition.toVector3f(flowBlock.position))) continue;
 
         flowBlock.setPermutation(
