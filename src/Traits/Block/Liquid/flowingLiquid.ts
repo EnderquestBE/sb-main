@@ -8,6 +8,8 @@ import { Direction } from "../../../Types/types";
 import { FlowSpeed, SourceBlockMap } from "../../../Configuration/Block";
 import { FlowingLiquidType, LiquidType } from "../../../Types/Block/liquid";
 import { ServerTaskHandler } from "../../../Handlers";
+import { Island } from "../../../Classes";
+import { BlockPosition } from "@serenityjs/protocol";
 
 const directions: Direction[] = ["north", "west", "east", "south"];
 
@@ -21,11 +23,13 @@ class FlowingLiquidBlockTrait extends BlockTrait {
 
   public SOURCE_TYPE!: LiquidType;
 
-  public FLOW_SPEED: number = Infinity;
+  public FLOW_SPEED: number = 5;
 
   public isFirstTick: boolean = true;
 
   public isSustained: boolean = false;
+
+  public islandName: string = this.dimension.world.identifier.slice(3);
 
   public onAdd(): void {
     this.SOURCE_TYPE =
@@ -48,6 +52,7 @@ class FlowingLiquidBlockTrait extends BlockTrait {
       }
     } else {
       */
+
     const currentDepth = this.block.getState("liquid_depth") as number;
 
     this.isSustained = false;
@@ -87,20 +92,29 @@ class FlowingLiquidBlockTrait extends BlockTrait {
   }
 
   public flowToSides(depth: number) {
+    const island = Island.loadSync(this.islandName);
+    if (!island) return;
+
     const flowingBlockType = this.block.identifier;
+
     for (const dir of directions) {
       const flowBlock = this.block[dir](1);
       if (flowBlock.identifier !== BlockIdentifier.Air && flowBlock.identifier !== flowingBlockType) continue;
+
       if (flowBlock.identifier === flowingBlockType) {
         const existingDepth = flowBlock.getState("liquid_depth") as number;
         if (existingDepth <= depth) continue;
+
         flowBlock.setState("liquid_depth", depth);
       } else {
+        if (!island.isInBounds(BlockPosition.toVector3f(flowBlock.position))) continue;
+
         flowBlock.setPermutation(
           BlockPermutation.resolve(flowingBlockType, {
             liquid_depth: depth,
           })
         );
+
       }
     }
   }

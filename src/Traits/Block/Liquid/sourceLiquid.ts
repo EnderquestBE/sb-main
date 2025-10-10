@@ -8,6 +8,8 @@ import { Direction, LiquidType } from "../../../Types/types";
 import { FlowingBlockMap, FlowSpeed, LiquidBlockMap } from "../../../Configuration/Block";
 import { FlowingLiquidType } from "../../../Types/Block/liquid";
 import { ServerTaskHandler } from "../../../Handlers";
+import { Island } from "../../../Classes";
+import { BlockPosition } from "@serenityjs/protocol";
 
 const directions: Direction[] = ["north", "west", "east", "south"];
 
@@ -18,6 +20,8 @@ class SourceLiquidBlockTrait extends BlockTrait {
   public FLOW_SPEED: number = Infinity;
 
   public FLOWING_BLOCK_TYPE!: FlowingLiquidType;
+
+  public islandName: string = this.dimension.world.identifier.slice(3);
 
   public onAdd(): void {
     this.FLOW_SPEED = FlowSpeed[this.block.identifier as LiquidType];
@@ -33,9 +37,12 @@ class SourceLiquidBlockTrait extends BlockTrait {
   }
 
   public flowToSides(flowingBlockType: BlockIdentifier) {
+    const island = Island.loadSync(this.islandName);
+    if (!island) return;
     for (const dir of directions) {
       const flowBlock = this.block[dir](1);
       if (flowBlock.identifier !== BlockIdentifier.Air) continue;
+      if (!island.isInBounds(BlockPosition.toVector3f(flowBlock.position))) continue;
       flowBlock.setPermutation(
         BlockPermutation.resolve(flowingBlockType, {
           liquid_depth: 1,
