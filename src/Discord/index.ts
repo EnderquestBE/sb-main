@@ -116,6 +116,7 @@ export class DiscordClient {
                         const embed = ApplicationData.submitEmbed?.(interaction, interaction.fields.fields.map((x) => {
                             return {
                                 question: ApplicationData?.questions![parseInt(x.customId.substring(9))]!.question,
+                                //@ts-ignore
                                 answer: x.value
                             };
                         }));

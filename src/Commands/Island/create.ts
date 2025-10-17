@@ -1,7 +1,6 @@
-import { CustomEnum, Entity, LevelDBProvider, ModalForm, StringEnum } from "@serenityjs/core"
-import { CommandOverload, Island, IslandDatabase, IslandGenerator } from "../../Classes"
+import { CustomEnum, Entity, ModalForm, StringEnum } from "@serenityjs/core"
+import { CommandOverload, Island, IslandDatabase, IslandGenerator, IslandProvider } from "../../Classes"
 import { validifyIslandName } from "../../Utils"
-import { Gamemode } from "@serenityjs/protocol"
 
 class IslandCreateEnum extends CustomEnum {
     public static readonly identifier = "islandCreate"
@@ -24,7 +23,7 @@ const IslandCreateCommand = new CommandOverload(
                     if (!result.success) return player.error(result.message!)
                     const worldKey = `sb_${name}`
                     if (player.world.serenity.getWorld(worldKey)) return
-                    player.world.serenity.createWorld(LevelDBProvider, {
+                    player.world.serenity.createWorldAtProviderTarget(IslandProvider, {
                         identifier: worldKey,
                         dimensions: [{
                             identifier: "overworld",
@@ -32,7 +31,7 @@ const IslandCreateCommand = new CommandOverload(
                             simulationDistance: 4,
                             generator: IslandGenerator.identifier
                         }],
-                        gamemode: Gamemode.Survival,
+                        gamemode: "survival",
                         gamerules: {
                             doEntityDrops: false,
                             doFireTick: false,

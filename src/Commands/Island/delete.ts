@@ -58,7 +58,7 @@ const IslandDeleteCommand = new CommandOverload(
             const name = island.getName()
 
             serenity.worlds.delete(island.getWorldId())
-            rmdir(resolve(`./worlds/${island.getWorldId()}`), { recursive: true })
+            rmdir(resolve(`./islands/${island.getWorldId()}`), { recursive: true })
 
             IslandDatabase.instance.delete(name)
             Island.unload(name)

@@ -23,3 +23,6 @@ export * from "./Hopper/hopper"
 
 /* Container */
 export * from "./TileEntity/update"
+
+/* Interactable */
+export * from "./Interactable/noInteract"

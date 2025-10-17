@@ -46,10 +46,10 @@ class SeasonalCrateKey extends CrateKey {
         }
 
         // Use the earlier date
-        //const expirationDate = in30Days < seasonEnd ? in30Days : seasonEnd;
-        // For testing purposes, set the key to expire in 30 seconds.
-        const expirationDate = new Date(Date.now() + 30 * 1000)
-        const expiration = expirationDate.toISOString()
+        const in30Days = new Date(now);
+        in30Days.setDate(in30Days.getDate() + 30);
+        const expirationDate = in30Days < seasonEnd ? in30Days : seasonEnd;
+        const expiration = expirationDate.toISOString();
         this.nbt.set("Expires", new StringTag(expiration, "Expires"));
         const trait = this.getTrait(ItemCustomCrateKeyTrait) ?? this.addTrait(ItemCustomCrateKeyTrait);
         trait.updateExpiration(expiration);

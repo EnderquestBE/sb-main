@@ -520,7 +520,7 @@ class Island extends DataManager<IslandData, IslandDatabase> {
       Server.instance.worlds.set(newWorldId, world)
     } else {
       // Update world identifier offline.
-      const path = resolve("./worlds", this.getWorldPath());
+      const path = resolve("./islands", this.getWorldPath());
       let properties: Partial<WorldProperties> = { identifier: oldWorldId };
       if (existsSync(resolve(path, "properties.json"))) {
         // Read the properties of the world.

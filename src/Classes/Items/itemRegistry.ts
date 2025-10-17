@@ -1,10 +1,11 @@
-import { World } from "@serenityjs/core";
+import { ItemIdentifier, ItemType, World } from "@serenityjs/core";
 import "./Keys/seasonal";
 import * as Scrolls from "./Scrolls"
 import * as Stashes from "./Stashes"
 import * as CrateKeys from "./Keys"
 import { ShopScrollCategory, ShopXPCategory } from "../../Configuration/Shop/Main/Categories/xp";
 import { MainShop } from "../../Configuration/Shop/Main/main";
+import { ItemKitTrait } from "../../Traits/Item/traits";
 
 const ScrollTypes = [Scrolls.BindingScrollType, Scrolls.ExpulsionScrollType, Scrolls.MasteryScrollType, Scrolls.RefinementScrollType, Scrolls.RestorationScrollType, Scrolls.TemperamentScrollType];
 const StashTypes = [Stashes.CommonStashType, Stashes.RareStashType, Stashes.EpicStashType, Stashes.LegendaryStashType, Stashes.DivineStashType];
@@ -15,6 +16,8 @@ class CustomItemRegistry {
 
     public static registerDefault(world: World) {
         world.itemPalette.registerType(...this.types);
+        // Register kit trait.
+        ItemType.get(ItemIdentifier.Chest)?.registerTrait(ItemKitTrait);
         // Add custom items to the shop.
         ShopScrollCategory.addItem({ id: "Restoration Scroll", item: new Scrolls.RestorationScroll(), price: 10000, currency: "xp", transactionSound: "item.book.page_turn" });
         ShopScrollCategory.addItem({ id: "Binding Scroll", item: new Scrolls.BindingScroll(), price: 15000, currency: "xp", transactionSound: "item.book.page_turn" })

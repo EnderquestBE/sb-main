@@ -50,7 +50,7 @@ export class Expansion {
                     for (const key in changes) {
                         ServerTaskHandler.queueTask(() => {
                             //@ts-ignore
-                            owner.info(`§7» §b${key}§e limit has been increased to §d${changes[key]}§e.`)
+                            owner.info(`§7» §b${key}§e limit has been increased by §d${changes[key]} §eto §a${island.getLimit(key).amount}§e.`)
                         }, i)
                         i += 1250
                     }

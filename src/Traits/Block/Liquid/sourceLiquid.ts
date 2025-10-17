@@ -31,7 +31,8 @@ class SourceLiquidBlockTrait extends BlockTrait {
   public onTick(details: TraitOnTickDetails): void {
     if (Number(details.currentTick) % this.FLOW_SPEED > 0) return;
     // Don't flow unless the source is on a solid block.
-    if (!this.block.below(1).isSolid) return;
+    const below = this.block.below(1);
+    if (!below.isSolid && !below.hasState("liquid_depth")) return;
     const depth = this.block.getState("liquid_depth");
     if (depth && depth !== 8) return;
     this.flowToSides(this.FLOWING_BLOCK_TYPE);
@@ -44,7 +45,8 @@ class SourceLiquidBlockTrait extends BlockTrait {
     for (const dir of directions) {
       const flowBlock = this.block[dir](1);
       if (flowBlock.identifier !== BlockIdentifier.Air) continue;
-      if (!flowBlock.below(1).isSolid) continue;
+      const below = flowBlock.below(1)
+      if (!below.isSolid && !below.hasState("liquid_depth")) continue;
       if (!island.isInBounds(BlockPosition.toVector3f(flowBlock.position))) continue;
       flowBlock.setPermutation(
         BlockPermutation.resolve(flowingBlockType, {

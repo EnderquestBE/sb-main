@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { Filter, IslandDatabase } from "../../Classes";
 
 async function validifyIslandName(name: string, db: IslandDatabase): Promise<{ success: boolean, message?: string }> {
-  if ((await db.get(name)) || existsSync("./worlds/sb_" + name)) {
+  if ((await db.get(name)) || existsSync("./islands/sb_" + name)) {
     return { success: false, message: "That island name is already taken!" }
   } else if (Filter.contains(name)) {
     return { success: false, message: "Island name contains a banned word." }

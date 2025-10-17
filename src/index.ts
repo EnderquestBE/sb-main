@@ -1,10 +1,10 @@
 import { Plugin, PluginEvents } from "@serenityjs/plugins";
-import { ActionForm, CustomEntityType, EntityDimensionChangeSignal, EntityHealthTrait, EntityHitSignal, EntitySpawnedSignal, LevelDBProvider, Player, PlayerBreakBlockSignal, PlayerChatSignal, PlayerChunkRenderingTrait, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerLevelingTrait, PlayerOpenedContainerSignal, PlayerPlaceBlockSignal, WorldEvent, WorldInitializeSignal } from "@serenityjs/core";
+import { ActionForm, CustomEntityType, EntityDimensionChangeSignal, EntityHealthTrait, EntityHitSignal, EntitySpawnedSignal, Player, PlayerBreakBlockSignal, PlayerChatSignal, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerLevelingTrait, PlayerOpenedContainerSignal, PlayerPlaceBlockSignal, WorldEvent, WorldInitializeSignal } from "@serenityjs/core";
 import { BlockHandler, ChatHandler, IslandPerkUnlocks, LeaderboardHandler, NametagHandler, PermissionsHandler, PlayerHud, ServerTaskHandler, SpawnerHandler, HologramHandler } from "./Handlers";
 import { IslandGenerator } from "./Classes/Island/generator";
 import { PlayerEnum } from "./Classes/Command/Enums/player";
 import { PlayerExtension } from "./extensions/player";
-import { CommandBuilder, CustomItemRegistry, DatabaseService, Island, IslandDatabase, ModerationDatabase, PlayerDatabase, Slapper, VendorDatabase, Warp } from "./Classes";
+import { CommandBuilder, CustomItemRegistry, DatabaseService, Island, IslandDatabase, ModerationDatabase, PlayerDatabase, Slapper, VendorDatabase, Warp, IslandProvider } from "./Classes";
 import { Utils } from "./Utils/utils";
 import { registerIslandHelpCommands } from "./Commands/Island/help";
 import { Server } from "./server";
@@ -16,7 +16,7 @@ import { resolve } from "node:path";
 import { BlockTraits, ItemTraits, EntityTraits } from "./Traits";
 import { PlayerCommandCooldownTrait, PlayerListCustomTrait } from "./Traits/Entity/Player";
 import { EntityStackTrait } from "./Traits/Entity/traits";
-import { ChunkCoords, ContainerType, DataPacket } from "@serenityjs/protocol";
+import { ContainerType, DataPacket } from "@serenityjs/protocol";
 import { EntityPersistenceTrait } from "./Traits/Entity/Persistence/persistence";
 import { PlayerBoundaryTrait } from "./Traits/Entity/Boundary/boundary";
 import { EntityClientRenderTrait } from "./Traits/Entity/Slapper/clientRender";
@@ -57,6 +57,8 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     this.database = new DatabaseService()
     // Register database.
     this.registerDBService()
+    // Register island world provider.
+    this.serenity.registerProvider(IslandProvider, { path: "./islands" })
     // Register warp locations and commands.
     Warp.registerAll()
     // Register commands.
@@ -109,8 +111,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     // Set server serenity instance.
     Server.initialize(this.serenity);
     // Register island world generator.
-    this.serenity.registerGenerator(IslandGenerator)
-    IslandGenerator.registerStructure(this.serenity.getWorld())
+    this.serenity.registerGenerator(IslandGenerator);
     // Start server tasks.
     ServerTaskHandler.initialize(this.serenity)
     // Initialize handlers.
@@ -173,7 +174,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
         // Load island world from storage.
         if (island.getOnlineOwners().length <= 1) {
           //@ts-ignore
-          const world = await LevelDBProvider.loadWorld(this.serenity, island.getWorldId());
+          const world = await IslandProvider.loadWorld(this.serenity, island.getWorldPath());
           if (!world) {
             player.disconnect("§cFailed to join. Please try again later.");
             return;
@@ -277,16 +278,16 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     world.entityPalette.registerTrait(EntityItemHandlerTrait)
     world.entityPalette.registerTrait(EntityClientRenderTrait)
     // Register global item traits.
-    for (let trait of EntityTraits) {
+    for (const trait of EntityTraits) {
       world.entityPalette.registerTrait(trait)
+    }
+    for (const trait of ItemTraits) {
+      world.itemPalette.registerTrait(trait)
     }
     if (world.identifier.startsWith("sb_")) {
       // Register island block and entity traits.
-      for (let trait of BlockTraits) {
+      for (const trait of BlockTraits) {
         world.blockPalette.registerTrait(trait);
-      }
-      for (let trait of ItemTraits) {
-        world.itemPalette.registerTrait(trait)
       }
       // Register custom item types.
       CustomItemRegistry.registerAll(world);
@@ -295,7 +296,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     if (world.identifier === "default") {
       // Register global custom item types.
       CustomItemRegistry.registerDefault(world);
-      setTimeout(() => {
+      ServerTaskHandler.queueTask(() => {
         // Initialize slappers.
         const slappers = Slapper.getAll()
         for (const slapper of slappers) {

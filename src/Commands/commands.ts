@@ -22,6 +22,7 @@ import "./Admin/key"
 import "./Moderation/broadcast"
 import "./Moderation/forcerename"
 import "./Moderation/cooldown"
+import "./Moderation/kitcooldown"
 
 /** General Commands */
 import "./General/settings"
@@ -42,6 +43,8 @@ import "./General/guide"
 import "./General/topmoney"
 import "./General/topxp"
 import "./General/compress"
+import "./General/rules"
+import "./General/kit"
 
 /** Island Commands */
 import "./Island/island"

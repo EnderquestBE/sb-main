@@ -1,5 +1,5 @@
 import { BinaryStream } from "@serenityjs/binarystream";
-import { BlockChestTrait, BlockIdentifier, BlockPermutation, Chunk, ItemIdentifier, ItemStack, Structure, TerrainGenerator, VoidGenerator, World } from "@serenityjs/core";
+import { BlockChestTrait, BlockIdentifier, BlockPermutation, Chunk, ItemIdentifier, ItemStack, Structure, TerrainGenerator, World } from "@serenityjs/core";
 import { CompoundTag } from "@serenityjs/nbt";
 import { Vector3f } from "@serenityjs/protocol";
 import { readFileSync } from "fs";
@@ -23,7 +23,7 @@ class IslandGenerator extends TerrainGenerator {
 
         // Create an island in the center chunk.
         //@ts-ignore
-        if (x === 3 && z === 3 && this.dimension.world.properties["isInitialized"] !== true) {
+        if (x === 1 && z === 1 && this.dimension.world.properties["isInitialized"] !== true) {
             await this.dimension.placeStructure(
                 IslandGenerator.islandStructure,
                 { x: -5, y: 0, z: -1 },
