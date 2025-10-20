@@ -1,20 +1,24 @@
-import { DEFAULT_PLAYER_DATA, PERMISSION_INTEGER, PlayerRank, RANKS } from "../../Configuration/config";
-import { OperationResult, PlayerData, RankInfo } from "../../Types/types";
+import { DEFAULT_PLAYER_DATA, DEFAULT_PREMIUM_DATA, PERMISSION_INTEGER, PlayerRank, RANKS } from "../../Configuration/config";
+import { OperationResult, PlayerData, PremiumData, RankInfo, VanityInfo } from "../../Types/types";
 import { DataManager } from "./Manager";
 import { Island } from "./Island";
 import { PlayerDatabase } from "../Database/Collections/Player";
 import { Setting } from "../../Configuration/Settings/settings";
+import { VanityItems } from "../../Configuration/Vanity";
+import { PremiumDatabase } from "../Database";
 
 /**
  * @name PlayerSession
  * Class for manipulating a player's session data.
  */
 class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
-  public createdAt: number
+  public createdAt: number;
+  public premiumData: PremiumData;
 
-  private constructor(initialData: PlayerData, dbManager: PlayerDatabase) {
+  private constructor(initialData: PlayerData, premiumData: PremiumData, dbManager: PlayerDatabase) {
     super(initialData, dbManager);
-    this.createdAt = Date.now()
+    this.createdAt = Date.now();
+    this.premiumData = premiumData;
     this.updateLastSeen();
   }
 
@@ -27,11 +31,19 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
    * @param xuid The XUID of the player to load.
    * @param playerDB The player database manager instance.
    */
-  public static async load(xuid: string, playerDB: PlayerDatabase): Promise<PlayerSession | null> {
+  public static async load(xuid: string, playerDB: PlayerDatabase, premiumDB: PremiumDatabase): Promise<PlayerSession | null> {
     const playerData = await playerDB.get(xuid);
     if (!playerData) return null;
     playerData.settings = { ...DEFAULT_PLAYER_DATA.settings, ...playerData.settings };
-    return new PlayerSession(playerData, playerDB);
+
+    let premiumData = await premiumDB.get(xuid);
+    if (!premiumData) {
+      const newPremiumData: PremiumData = { ...DEFAULT_PREMIUM_DATA, xuid };
+      await premiumDB.create(newPremiumData);
+      premiumData = newPremiumData;
+    }
+
+    return new PlayerSession(playerData, premiumData, playerDB);
   }
 
   /**
@@ -43,7 +55,8 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
   public static async createDefault(
     xuid: string,
     username: string,
-    playerDB: PlayerDatabase
+    playerDB: PlayerDatabase,
+    premiumDB: PremiumDatabase
   ): Promise<PlayerSession> {
     const now = new Date();
     const initialData: PlayerData = structuredClone(DEFAULT_PLAYER_DATA)
@@ -58,7 +71,12 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
       playerDB.delete(xuid);
     }
     await playerDB.create(initialData);
-    return new PlayerSession(initialData, playerDB);
+
+    const initialPremiumData: PremiumData = structuredClone(DEFAULT_PREMIUM_DATA);
+    initialPremiumData.xuid = xuid;
+    await premiumDB.create(initialPremiumData);
+
+    return new PlayerSession(initialData, initialPremiumData, playerDB);
   }
 
   /**
@@ -69,7 +87,7 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
   public getPermission(): PERMISSION_INTEGER { return this.data.permission; }
   public getMoney(): number { return this.data.balance.money; }
   public getXp(): number { return this.data.balance.xp; }
-  public getRankIds(): string[] { return this.data.ranks; }
+  public getRankIds(): string[] { return this.premiumData.ranks; }
   public getPrimaryRank(): RankInfo { return RANKS.get(this.data.activeRanks[0] as PlayerRank)!; }
   public getActiveRanks(): RankInfo[] { return this.data.activeRanks.map(id => RANKS.get(id as PlayerRank)!) }
   public getChatSize(): boolean { return this.data.chatSize }
@@ -83,9 +101,13 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
   public getLastSeen(): Date { return this.data.lastSeen; }
   public getLastUpdated(): Date { return this.data.lastUpdated; }
 
+  public async updateUsername(newUsername: string): Promise<OperationResult> {
+    return this.updateOne({ $set: { username: newUsername } });
+  }
+
   /**
- * Calculates the time played value from stored time played and session duration.
- */
+  * Calculates the time played value from stored time played and session duration.
+  */
   public getTimePlayed(): number {
     return this.data.timePlayed + Math.floor((Date.now() - this.createdAt) / 1000);
   }
@@ -134,7 +156,7 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
    * @param rankId The ID of the rank to check.
    */
   public hasRank(rankId: keyof typeof PlayerRank): boolean {
-    return this.data.ranks.includes(rankId);
+    return this.premiumData.ranks.includes(rankId);
   }
 
   /**
@@ -211,12 +233,71 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
   }
 
   /**
+     * Unlocks a vanity item for the player.
+     * @param vanityId The ID of the vanity item to unlock.
+     */
+  public async unlockVanity(vanityId: string): Promise<OperationResult> {
+    const premiumDB = PremiumDatabase.instance;
+    const result = await premiumDB.updateOne(this.getXuid(), { $addToSet: { vanity: vanityId } });
+    if (result.modifiedCount > 0) {
+      this.premiumData.vanity.push(vanityId);
+      return { success: true };
+    }
+    return { success: false };
+  }
+
+  /**
+   * Unlocks all vanity items for the player.
+   */
+  public async unlockAllVanity(): Promise<OperationResult> {
+    const premiumDB = PremiumDatabase.instance;
+    const allVanityIds = VanityItems.keys().toArray();
+    const newVanity = allVanityIds.filter(id => !this.premiumData.vanity.includes(id));
+    if (newVanity.length === 0) {
+      return { success: false, reason: "Player already owns all vanity items." };
+    }
+    const result = await premiumDB.updateOne(this.getXuid(), { $addToSet: { vanity: { $each: newVanity } } });
+    if (result.modifiedCount > 0) {
+      this.premiumData.vanity.push(...newVanity);
+      return { success: true };
+    }
+    return { success: false };
+  }
+
+  /**
+   * Revokes a vanity item from the player.
+   * @param vanityId The ID of the vanity item to revoke.
+   */
+  public async revokeVanity(vanityId: string): Promise<OperationResult> {
+    const premiumDB = PremiumDatabase.instance;
+    const result = await premiumDB.updateOne(this.getXuid(), { $pull: { vanity: vanityId } });
+    if (result.modifiedCount > 0) {
+      this.premiumData.vanity = this.premiumData.vanity.filter(v => v !== vanityId);
+      return { success: true };
+    }
+    return { success: false };
+  }
+
+  /**
+   * Gets the list of vanity items owned by the player.
+   */
+  public getOwnedVanity(): VanityInfo[] {
+    return this.premiumData.vanity.map(vanityId => VanityItems.get(vanityId)).filter((x): x is VanityInfo => x !== undefined);
+  }
+
+  /**
    * Gives a player a new rank.
    * @param rankId The ID of the rank to give.
    */
   public async addRank(rankId: keyof typeof PlayerRank): Promise<OperationResult> {
-    if (this.hasRank(rankId)) return { success: false, reason: "Player already has this rank." };
-    return this._addToArray('ranks', rankId);
+    if (this.premiumData.ranks.includes(rankId)) return { success: false, reason: "Player already has this rank." };
+    const premiumDB = PremiumDatabase.instance;
+    const result = await premiumDB.updateOne(this.getXuid(), { $addToSet: { ranks: rankId } });
+    if (result.modifiedCount > 0) {
+      this.premiumData.ranks.push(rankId);
+      return { success: true };
+    }
+    return { success: false };
   }
 
   /**
@@ -224,10 +305,15 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
    * @param rankId The ID of the rank to remove.
    */
   public async removeRank(rankId: keyof typeof PlayerRank): Promise<OperationResult> {
-    if (!this.hasRank(rankId)) return { success: true };
-    return this._removeFromArrayByValue('ranks', rankId);
+    if (!this.premiumData.ranks.includes(rankId)) return { success: true };
+    const premiumDB = PremiumDatabase.instance;
+    const result = await premiumDB.updateOne(this.getXuid(), { $pull: { ranks: rankId } });
+    if (result.modifiedCount > 0) {
+      this.premiumData.ranks = this.premiumData.ranks.filter(r => r !== rankId);
+      return { success: true };
+    }
+    return { success: false };
   }
-
   /**
    * Pushes a rank to the player's active ranks.
    * @param rankId The ID of the rank to push.
@@ -261,6 +347,53 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
    */
   public async setChatColor(color: string): Promise<OperationResult> {
     return this.updateOne({ $set: { chatColor: color } });
+  }
+
+  // Vanity
+
+  /**
+   * Equips a vanity item to the specified slot.
+   * @param slot The slot number (1-3).
+   * @param vanityId The ID of the vanity item to equip.
+   */
+  public async equipVanity(slot: 1 | 2 | 3, vanityId: string): Promise<OperationResult> {
+    // Not implemented yet.
+    return this.updateOne({ $set: { [`equippedVanity.${slot}`]: vanityId } });
+  }
+
+  /**
+  * Unequips a vanity item from the specified slot.
+  * @param slot The slot number (1-3).
+  */
+  public async unequipVanity(slot: 1 | 2 | 3): Promise<OperationResult> {
+    // Not implemented yet.
+    return this.updateOne({ $set: { [`equippedVanity.${slot}`]: null } });
+  }
+
+  /**
+   * Gets the vanity item equipped in the specified slot.
+   * @param slot The slot number (1-3).
+   */
+  public getVanity(slot: 1 | 2 | 3): VanityInfo | null {
+    return this.data.equippedVanity[slot] ? VanityItems.get(this.data.equippedVanity[slot]!) || null : null;
+  }
+
+  /**
+   * Gets all vanity items equipped by the player.
+   */
+  public getEquippedVanity(): (VanityInfo | null)[] {
+    return [this.getVanity(1), this.getVanity(2), this.getVanity(3)];
+  }
+
+  /**
+   * Gets the index of a vanity item in the player's owned vanity list.
+   * @param vanityId The ID of the vanity item.
+   */
+  public indexOfVanity(vanityId: string): 1 | 2 | 3 | -1 {
+    if (this.data.equippedVanity[1] === vanityId) return 1;
+    if (this.data.equippedVanity[2] === vanityId) return 2;
+    if (this.data.equippedVanity[3] === vanityId) return 3;
+    return -1;
   }
 
   /**

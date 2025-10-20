@@ -1,5 +1,5 @@
 import { Player } from "@serenityjs/core"
-import { Island } from "../.."
+import { Island } from "../../Classes"
 
 interface IslandPerkType {
     id: string, // The ID associated with the perk.
@@ -18,7 +18,7 @@ class IslandPerkUnlocks {
                 id: "flight",
                 name: "Flight",
                 unlock: {
-                    permissions: ["island.fly"]
+                    permissions: ["rank.fly"]
                 },
                 level: 100
             }

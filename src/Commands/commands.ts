@@ -23,6 +23,7 @@ import "./Moderation/broadcast"
 import "./Moderation/forcerename"
 import "./Moderation/cooldown"
 import "./Moderation/kitcooldown"
+import "./Moderation/vanity"
 
 /** General Commands */
 import "./General/settings"
@@ -45,6 +46,7 @@ import "./General/topxp"
 import "./General/compress"
 import "./General/rules"
 import "./General/kit"
+import "./General/wardrobe"
 
 /** Island Commands */
 import "./Island/island"

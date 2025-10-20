@@ -1,7 +1,7 @@
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { GuideCategory, GuideEntry } from "../../Types/Guide";
 import { GuideCategories, GuideEntries } from "./guide";
-import { basename, resolve } from "node:path";
+import { resolve } from "node:path";
 
 const guidesDirectory = resolve("./guides")
 

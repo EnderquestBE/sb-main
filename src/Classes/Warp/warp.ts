@@ -2,7 +2,8 @@ import { Entity, Player } from "@serenityjs/core";
 import { ServerWarp } from "../../Types/types";
 import { WarpLocation } from "../../Configuration/Warp/warpLocation";
 import { CommandBuilder, CommandOverload } from "..";
-import { Vector3f } from "@serenityjs/protocol";
+import { AbilityIndex, Gamemode, Vector3f } from "@serenityjs/protocol";
+import { ServerTaskHandler } from "../../Handlers";
 
 class Warp {
     private static readonly _warps: Map<keyof typeof WarpLocation, ServerWarp> = new Map();
@@ -25,11 +26,9 @@ class Warp {
         if (warp.commandAliases && warp.commandAliases.length > 0) {
             new CommandBuilder(warp.commandAliases[0]!, `Warp to ${warp.name}.`).setAliases(warp.commandAliases.slice(1)).addOverload(
                 new CommandOverload({
-                }).onCallback((origin) => {
-                    if (!(origin instanceof Entity) || !origin.isPlayer()) return
-                    origin.teleport(warp.location, origin.world.serenity.getWorld(warp.world)!.getDimension())
-                    origin.info(`§eWarping to §a${warp.name}§e...`)
-                    origin.info("§eWarp complete!")
+                }).onCallback((player) => {
+                    if (!(player instanceof Player)) return;
+                    Warp.to(player, id);
                 })
             ).register("Warps")
         }
@@ -41,8 +40,11 @@ class Warp {
     }
 
     public static to(player: Player, id: keyof typeof WarpLocation) {
+        player.disableFlight();
+
         const warp = this._warps.get(id)!
         player.teleport(warp.location, player.world.serenity.getWorld(warp.world)!.getDimension())
+
         player.info(`§eWarping to §a${warp.name}§e...`)
         player.info("§eWarp complete!")
     }

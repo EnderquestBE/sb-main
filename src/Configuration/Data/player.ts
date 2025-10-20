@@ -1,4 +1,4 @@
-import { PlayerData } from "../../Types/types";
+import { PlayerData, PremiumData } from "../../Types/types";
 import { PERMISSION_INTEGER } from "../Permissions/player";
 import { PlayerRank } from "../Ranks/ranks";
 
@@ -11,7 +11,6 @@ const DEFAULT_PLAYER_DATA: PlayerData = {
         money: 100, // Starting money
         xp: 0
     },
-    ranks: [PlayerRank.GUEST],
     activeRanks: [PlayerRank.GUEST],
     chatColor: "White",
     chatSize: false,
@@ -31,9 +30,20 @@ const DEFAULT_PLAYER_DATA: PlayerData = {
         cropsFarmed: 0,
         mobsSlayed: 0,
     },
+    equippedVanity: {
+        1: null,
+        2: null,
+        3: null
+    },
     lastSeen: new Date(),
     firstSeen: new Date(),
     lastUpdated: new Date(),
 };
 
-export { DEFAULT_PLAYER_DATA }
+const DEFAULT_PREMIUM_DATA: PremiumData = {
+    xuid: "",
+    ranks: [PlayerRank.GUEST],
+    vanity: [],
+}
+
+export { DEFAULT_PLAYER_DATA, DEFAULT_PREMIUM_DATA }

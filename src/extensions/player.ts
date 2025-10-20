@@ -1,12 +1,12 @@
 
-import { Player } from "@serenityjs/core";
-import { Island, PlayerDatabase, PlayerSession } from "../Classes";
-import { OperationResult, PlayerData, PlayerStatCriteria, RankInfo } from "../Types/types";
+import { Player, PlayerCommandExecutorTrait } from "@serenityjs/core";
+import { Island, PlayerDatabase, PlayerSession, PremiumDatabase, VanitySkin } from "../Classes";
+import { OperationResult, PlayerData, PlayerStatCriteria, RankInfo, VanityInfo } from "../Types/types";
 import { ChatSource, DEFAULT_PLAYER_DATA, PERMISSION_INTEGER } from "../Configuration/config";
 import { PlayerRank, RANKS } from "../Configuration/Ranks/ranks";
 import { Setting } from "../Configuration/Settings/settings";
 import { PlayerInventory } from "./inventory";
-import { DeviceOS, EquipmentSlot } from "@serenityjs/protocol";
+import { AbilityIndex, DeviceOS, EquipmentSlot, Gamemode } from "@serenityjs/protocol";
 
 const sessionSymbol = Symbol("player-session");
 
@@ -17,6 +17,7 @@ declare module "@serenityjs/core" {
 
     getDevice(): string;
 
+    updateUsername(): Promise<OperationResult>;
     getTimePlayed(): number
     setTimePlayed(value: number): Promise<OperationResult>
     getAllCriteria(): { [key in keyof PlayerStatCriteria]: number }
@@ -66,6 +67,18 @@ declare module "@serenityjs/core" {
     getChatColor(): string;
     setChatColor(color: string): Promise<OperationResult>;
 
+    // Vanity
+    equipVanity(slot: 1 | 2 | 3, vanityId: string): void;
+    unequipVanity(slot: 1 | 2 | 3): void;
+    getVanity(slot: 1 | 2 | 3): VanityInfo | null;
+    getEquippedVanity(): (VanityInfo | null)[];
+    indexOfVanity(vanityId: string): 1 | 2 | 3 | -1;
+    unlockVanity(vanityId: string): void;
+    unlockAllVanity(): void;
+    revokeVanity(vanityId: string): void;
+    getOwnedVanity(): VanityInfo[];
+    updateVanity(): void;
+
     // Island
     getIsland(): Island | null;
     getIslandAsync(): Promise<Island | null>
@@ -84,6 +97,8 @@ declare module "@serenityjs/core" {
     getSetting(key: keyof typeof Setting): string | boolean | undefined
     setSetting(key: keyof typeof Setting, value: string | boolean): Promise<OperationResult>;
     hasSetting(key: string): boolean;
+
+    disableFlight(): void;
 
     // While Equipped Check
     whileEquippedCheck: { [key in EquipmentSlot]: NodeJS.Timeout | null }
@@ -107,7 +122,7 @@ class PlayerExtension {
   }
 
   public static async loadSession(player: Player): Promise<PlayerSession | null> {
-    const session = await PlayerSession.load(player.xuid, PlayerDatabase.instance);
+    const session = await PlayerSession.load(player.xuid, PlayerDatabase.instance, PremiumDatabase.instance);
     if (session) {
       PlayerExtension.setSession(player, session);
     }
@@ -115,7 +130,7 @@ class PlayerExtension {
   }
 
   public static async createSession(player: Player): Promise<PlayerSession> {
-    const session = await PlayerSession.createDefault(player.xuid, player.username, PlayerDatabase.instance);
+    const session = await PlayerSession.createDefault(player.xuid, player.username, PlayerDatabase.instance, PremiumDatabase.instance);
     PlayerExtension.setSession(player, session);
     return session;
   }
@@ -129,6 +144,12 @@ Player.prototype.getDevice = function (this: Player): string {
   const device = DeviceOS[this.clientSystemInfo.os];
   return device;
 }
+
+Player.prototype.updateUsername = async function (this: Player): Promise<OperationResult> {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return PlayerExtension["NO_SESSION_RESULT"]
+  return session.updateUsername(this.username);
+};
 
 Player.prototype.getTimePlayed = function (this: Player): number {
   const session = PlayerExtension.getSession(this);
@@ -330,6 +351,8 @@ Player.prototype.updateRanks = function (this: Player): void {
     newPermissions.push(...rank.permissions)
   }
   this.permissions.permissions = newPermissions
+  // Send available commands.
+  this.getTrait(PlayerCommandExecutorTrait).sendAvailableCommands();
   // Set chat color.
   this.setChatColor(ranks[0]!.color)
 }
@@ -350,6 +373,60 @@ Player.prototype.setChatColor = async function (this: Player, color: string): Pr
   const session = PlayerExtension.getSession(this);
   if (!session) return PlayerExtension['NO_SESSION_RESULT'];
   return session.setChatColor(color);
+}
+
+// Vanity
+Player.prototype.equipVanity = function (this: Player, slot: 1 | 2 | 3, vanityId: string): void {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return;
+  session.equipVanity(slot, vanityId).then(() => {
+    this.updateVanity();
+  });
+}
+Player.prototype.unequipVanity = function (this: Player, slot: 1 | 2 | 3): void {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return;
+  session.unequipVanity(slot).then(() => {
+    this.updateVanity();
+  });
+}
+Player.prototype.getVanity = function (this: Player, slot: 1 | 2 | 3): VanityInfo | null {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return null;
+  return session.getVanity(slot);
+}
+Player.prototype.getEquippedVanity = function (this: Player): (VanityInfo | null)[] {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return [];
+  return session.getEquippedVanity();
+}
+Player.prototype.indexOfVanity = function (this: Player, vanityId: string): 1 | 2 | 3 | -1 {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return -1;
+  return session.indexOfVanity(vanityId);
+}
+Player.prototype.unlockVanity = function (this: Player, vanityId: string): void {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return;
+  session.unlockVanity(vanityId);
+}
+Player.prototype.unlockAllVanity = function (this: Player): void {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return;
+  session.unlockAllVanity();
+}
+Player.prototype.revokeVanity = function (this: Player, vanityId: string): void {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return;
+  session.revokeVanity(vanityId);
+}
+Player.prototype.getOwnedVanity = function (this: Player): VanityInfo[] {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return [];
+  return session.getOwnedVanity();
+}
+Player.prototype.updateVanity = function (this: Player): void {
+  VanitySkin.create(this);
 }
 
 // Island
@@ -417,6 +494,16 @@ Player.prototype.setSetting = async function (this: Player, key: string, value: 
 Player.prototype.hasSetting = function (this: Player, key: string): boolean {
   const session = PlayerExtension.getSession(this);
   return session ? session.hasSetting(key) : false;
+}
+Player.prototype.disableFlight = function (this: Player): void {
+  const canFly = !this.abilities.getAbility(AbilityIndex.MayFly);
+  if (canFly === false) {
+    this.abilities.setAbility(AbilityIndex.MayFly, canFly);
+    this.setGamemode(Gamemode.Adventure);
+    setTimeout(() => {
+      this.setGamemode(Gamemode.Survival);
+    }, 1);
+  }
 }
 
 // While Equipped Check

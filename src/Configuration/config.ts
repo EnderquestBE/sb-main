@@ -59,3 +59,6 @@ export * from "./Staff/permissions"
 
 /* Block */
 export * from "./Block"
+
+/* Vanity */
+import "./Vanity";

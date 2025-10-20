@@ -23,10 +23,6 @@ interface PlayerData {
     xp: number;
   }
   /**
-   * List of rank IDs that a player owns.
-   */
-  ranks: (keyof typeof PlayerRank)[]
-  /**
    * The ranks the player is currently using.
    */
   activeRanks: (keyof typeof PlayerRank)[]
@@ -50,6 +46,14 @@ interface PlayerData {
    * User setting values to remember for the player.
    */
   settings: { [key in Setting]: string | boolean };
+  /**
+   * The vanity items the player has equipped.
+   */
+  equippedVanity: {
+    1: string | null; // Vanity item ID for slot 1
+    2: string | null; // Vanity item ID for slot 2
+    3: string | null; // Vanity item ID for slot 3
+  };
   /**
    * The amount of time in seconds the user has spent on the server.
    */

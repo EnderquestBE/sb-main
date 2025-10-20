@@ -115,5 +115,6 @@ const ShopDecorationCategory = new CategoryBuilder({ id: "decoration", display: 
     .addItem({ id: ItemIdentifier.Target, price: 6500, transactionSound: "dig.grass" })
     .addItem({ id: "minecraft:stonecutter", price: 1350, transactionSound: "dig.stone" })
     .addItem({ id: ItemIdentifier.Smoker, price: 1600, transactionSound: "dig.stone" })
+    .addItem({ id: ItemIdentifier.Beacon, price: 16000, transactionSound: "random.glass" });
 
 export { ShopDecorationCategory };

@@ -28,3 +28,7 @@ export * from "./Moderation/types"
 export * from "./Crate/identifier"
 /* Guide */
 export * from "./Guide"
+/* Vanity */
+export * from "./Vanity/vanity"
+/* Geometry */
+export * from "./Geometry/geometry"

@@ -1,14 +1,28 @@
-import { Entity } from "@serenityjs/core";
+import { Player } from "@serenityjs/core";
 import { CommandBuilder, CommandOverload } from "../../Classes"
-import { AbilityIndex } from "@serenityjs/protocol";
+import { AbilityIndex, Gamemode } from "@serenityjs/protocol";
+import { ServerTaskHandler } from "../../Handlers";
 
-new CommandBuilder("fly", "Toggles flight on islands.").setPermissions(["island.fly", "rank.fly"]).addOverload(
+new CommandBuilder("fly", "Toggles flight on islands.").setPermissions(["rank.fly"]).addOverload(
     new CommandOverload({
-    }).onCallback((origin) => {
-        if (!(origin instanceof Entity) || !origin.isPlayer()) return;
+    }).onCallback((player) => {
+        if (!(player instanceof Player)) return;
 
-        origin.abilities.setAbility(AbilityIndex.MayFly, !origin.abilities.getAbility(AbilityIndex.MayFly));
+        if (!player.isWorldIsland()) {
+            player.error("You can only activate flight on islands.");
+            return;
+        }
 
-        origin.info(`§eFlight §f>> ${origin.abilities.getAbility(AbilityIndex.MayFly) ? "§aON" : "§cOFF"}`)
+        const canFly = !player.abilities.getAbility(AbilityIndex.MayFly)
+        player.abilities.setAbility(AbilityIndex.MayFly, canFly);
+
+        if (!canFly) {
+            player.setGamemode(Gamemode.Adventure);
+            ServerTaskHandler.queueTask(() => {
+                player.setGamemode(Gamemode.Survival);
+            }, 1);
+        }
+
+        player.info(`§eFlight §f>> ${canFly ? "§aON" : "§cOFF"}`)
     })
 ).register("Rank")

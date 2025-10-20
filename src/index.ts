@@ -4,7 +4,7 @@ import { BlockHandler, ChatHandler, IslandPerkUnlocks, LeaderboardHandler, Namet
 import { IslandGenerator } from "./Classes/Island/generator";
 import { PlayerEnum } from "./Classes/Command/Enums/player";
 import { PlayerExtension } from "./extensions/player";
-import { CommandBuilder, CustomItemRegistry, DatabaseService, Island, IslandDatabase, ModerationDatabase, PlayerDatabase, Slapper, VendorDatabase, Warp, IslandProvider } from "./Classes";
+import { CommandBuilder, CustomItemRegistry, DatabaseService, Island, IslandDatabase, ModerationDatabase, PlayerDatabase, Slapper, VendorDatabase, Warp, IslandProvider, PremiumDatabase } from "./Classes";
 import { Utils } from "./Utils/utils";
 import { registerIslandHelpCommands } from "./Commands/Island/help";
 import { Server } from "./server";
@@ -20,7 +20,7 @@ import { ContainerType, DataPacket } from "@serenityjs/protocol";
 import { EntityPersistenceTrait } from "./Traits/Entity/Persistence/persistence";
 import { PlayerBoundaryTrait } from "./Traits/Entity/Boundary/boundary";
 import { EntityClientRenderTrait } from "./Traits/Entity/Slapper/clientRender";
-import { DEFAULT_PLAYER_DATA, STAFF_PERMISSIONS } from "./Configuration/config";
+import { DEFAULT_PLAYER_DATA, DEFAULT_PREMIUM_DATA, PlayerRank, STAFF_PERMISSIONS } from "./Configuration/config";
 import { isDevEnvironment } from "./config";
 import { BlockTileEntityUpdateTrait } from "./Traits/Block/traits";
 import { EntityItemHandlerTrait } from "./Traits/Entity/Persistence/item";
@@ -84,6 +84,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
   private async registerDBService() {
     await this.database.connect();
     new PlayerDatabase(this.database);
+    new PremiumDatabase(this.database);
     new IslandDatabase(this.database);
     new VendorDatabase(this.database);
     new ModerationDatabase(this.database);
@@ -103,6 +104,26 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
       }
       if (updated) {
         await PlayerDatabase.instance.update(player.xuid, player);
+      }
+      // Update premium data.
+      const premiumData = await PremiumDatabase.instance.getByUsername(player.username);
+      if (!premiumData) {
+        await PremiumDatabase.instance.create({
+          xuid: player.xuid,
+          ranks: [PlayerRank.GUEST],
+          vanity: []
+        });
+      } else {
+        let premiumUpdated = false;
+        for (const key of Object.keys(DEFAULT_PREMIUM_DATA)) {
+          if ((premiumData as any)[key] === undefined) {
+            (premiumData as any)[key] = (DEFAULT_PREMIUM_DATA as any)[key];
+            premiumUpdated = true;
+          }
+        }
+        if (premiumUpdated) {
+          await PremiumDatabase.instance.update(premiumData!.xuid, premiumData!);
+        }
       }
     }
   }
@@ -154,7 +175,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     if (player.username === "The Palm Healer") {
       //@ts-ignore
       if (isDevEnvironment) player._commandCooldown = true;
-      MorphManager.morph(player, "palm");
+      else MorphManager.morph(player, "palm");
     }
     // Load player data.
     const session = await PlayerExtension.loadSession(player);
@@ -162,6 +183,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
       await PlayerExtension.createSession(player);
       this.logger.info(`Created new session for player ${player.username}.`);
     } else {
+      player.updateUsername();
       this.logger.info(`Loaded session for player ${player.username}.`);
     }
 
@@ -194,6 +216,10 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
         player.addPermission(perm);
       }
     }
+    // Update rank permissions.
+    player.updateRanks();
+    // Disable flight if active from previous session.
+    player.disableFlight();
     // Show chat join message.
     ChatHandler.onJoin(player, this.serenity)
     // Update nametag.
@@ -218,6 +244,10 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     // Update XP.
     const leveling = player.getTrait(PlayerLevelingTrait) ?? player.addTrait(PlayerLevelingTrait)
     leveling.setExperience(player.getXp());
+    ServerTaskHandler.queueTask(() => {
+      // Load vanity data.
+      player.updateVanity();
+    }, 2000);
   }
 
   public async onPlayerLeave({ player }: PlayerLeaveSignal): Promise<void> {

@@ -1,6 +1,6 @@
 import { MongoClient, Db, Collection } from 'mongodb';
 import { Logger, LoggerColors } from '@serenityjs/logger';
-import { IslandData, ModerationData, PlayerData, VendorData } from '../../Types/types';
+import { IslandData, ModerationData, PlayerData, PremiumData, VendorData } from '../../Types/types';
 import { CONNECTION_STRING, DATABASE_NAME } from '../../config';
 
 class DatabaseService {
@@ -9,6 +9,7 @@ class DatabaseService {
   private db!: Db;
 
   private _players!: Collection<PlayerData>;
+  private _premium!: Collection<PremiumData>;
   private _islands!: Collection<IslandData>;
   private _vendors!: Collection<VendorData>;
   private _moderation!: Collection<ModerationData>;
@@ -29,6 +30,7 @@ class DatabaseService {
       this.db = this.client.db(DATABASE_NAME);
 
       this._players = this.db.collection<PlayerData>('players');
+      this._premium = this.db.collection<PremiumData>('premium');
       this._islands = this.db.collection<IslandData>('islands');
       this._vendors = this.db.collection<VendorData>('vendors');
       this._moderation = this.db.collection<ModerationData>('moderation');
@@ -50,6 +52,10 @@ class DatabaseService {
 
   public get players(): Collection<PlayerData> {
     return this._players;
+  }
+
+  public get premium(): Collection<PremiumData> {
+    return this._premium;
   }
 
   public get islands(): Collection<IslandData> {
