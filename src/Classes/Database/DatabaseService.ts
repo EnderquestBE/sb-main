@@ -1,6 +1,6 @@
 import { MongoClient, Db, Collection } from 'mongodb';
 import { Logger, LoggerColors } from '@serenityjs/logger';
-import { IslandData, ModerationData, PlayerData, PremiumData, VendorData } from '../../Types/types';
+import { GlobalServerData, IslandData, PlayerData, PremiumData, VendorData } from '../../Types/types';
 import { CONNECTION_STRING, DATABASE_NAME } from '../../config';
 
 class DatabaseService {
@@ -12,7 +12,7 @@ class DatabaseService {
   private _premium!: Collection<PremiumData>;
   private _islands!: Collection<IslandData>;
   private _vendors!: Collection<VendorData>;
-  private _moderation!: Collection<ModerationData>;
+  private _global!: Collection<GlobalServerData>;
 
   public logger = new Logger("Database Service", LoggerColors.Yellow)
 
@@ -33,7 +33,7 @@ class DatabaseService {
       this._premium = this.db.collection<PremiumData>('premium');
       this._islands = this.db.collection<IslandData>('islands');
       this._vendors = this.db.collection<VendorData>('vendors');
-      this._moderation = this.db.collection<ModerationData>('moderation');
+      this._global = this.db.collection<GlobalServerData>('global');
 
       this.logger.success("Database connection has been established.")
     } catch (error) {
@@ -66,8 +66,8 @@ class DatabaseService {
     return this._vendors;
   }
 
-  public get moderation(): Collection<ModerationData> {
-    return this._moderation;
+  public get global(): Collection<GlobalServerData> {
+    return this._global;
   }
 }
 

@@ -4,14 +4,13 @@ import { BlockHandler, ChatHandler, IslandPerkUnlocks, LeaderboardHandler, Namet
 import { IslandGenerator } from "./Classes/Island/generator";
 import { PlayerEnum } from "./Classes/Command/Enums/player";
 import { PlayerExtension } from "./extensions/player";
-import { CommandBuilder, CustomItemRegistry, DatabaseService, Island, IslandDatabase, ModerationDatabase, PlayerDatabase, Slapper, VendorDatabase, Warp, IslandProvider, PremiumDatabase } from "./Classes";
+import { CommandBuilder, CustomItemRegistry, DatabaseService, Island, IslandDatabase, PlayerDatabase, Slapper, VendorDatabase, Warp, IslandProvider, PremiumDatabase, GlobalDatabase, GlobalDataManager } from "./Classes";
 import { Utils } from "./Utils/utils";
 import { registerIslandHelpCommands } from "./Commands/Island/help";
 import { Server } from "./server";
 import { EntitySlapperTrait } from "./Traits/Entity/Slapper/slapper";
 import { MorphManager } from "./Classes/Morph";
 import { DiscordClient } from "./Discord";
-import { ModerationManager } from "./Classes/Data/Moderation";
 import { resolve } from "node:path";
 import { BlockTraits, ItemTraits, EntityTraits } from "./Traits";
 import { PlayerCommandCooldownTrait, PlayerListCustomTrait } from "./Traits/Entity/Player";
@@ -87,7 +86,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     new PremiumDatabase(this.database);
     new IslandDatabase(this.database);
     new VendorDatabase(this.database);
-    new ModerationDatabase(this.database);
+    new GlobalDatabase(this.database);
     // Initialize leaderboards.
     LeaderboardHandler.initialize(this.serenity.getWorld());
     // Initialize holograms.
@@ -106,7 +105,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
         await PlayerDatabase.instance.update(player.xuid, player);
       }
       // Update premium data.
-      const premiumData = await PremiumDatabase.instance.getByUsername(player.username);
+      const premiumData = await PremiumDatabase.instance.getByXUID(player.xuid);
       if (!premiumData) {
         await PremiumDatabase.instance.create({
           xuid: player.xuid,
@@ -163,7 +162,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
 
   public beforePlayerJoin({ player }: PlayerJoinSignal): boolean {
     // Manage whitelist.
-    if (!ModerationManager.instance.isWhitelisted(player)) {
+    if (!GlobalDataManager.instance.isWhitelisted(player)) {
       player.disconnect("§cThe server is currently closed for play testing.\n§dIf you are interested, join our discord:\n§9https://discord.ender.quest")
       return false;
     }

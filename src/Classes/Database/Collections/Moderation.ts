@@ -1,20 +1,20 @@
-import { ModerationData } from "../../../Types/types";
-import { ModerationManager } from "../../Data/Moderation";
+import { GlobalServerData } from "../../../Types/types";
+import { GlobalDataManager } from "../..";
 import { CollectionManager } from "../CollectionManager";
 import { DatabaseService } from "../DatabaseService";
 
 /**
- * Manages database for moderation.
+ * Manages database for global server data, such as moderation.
  */
-export class ModerationDatabase extends CollectionManager<ModerationData> {
+class GlobalDatabase extends CollectionManager<GlobalServerData> {
 
-    public static instance: ModerationDatabase;
+    public static instance: GlobalDatabase;
 
     constructor(dbs: DatabaseService) {
-        super(dbs.moderation, "moderation");
-        ModerationDatabase.instance = this;
-        ModerationManager.initialize();
+        super(dbs.global, "global");
+        GlobalDatabase.instance = this;
+        GlobalDataManager.initialize();
     }
 }
 
-export { ModerationData }
+export { GlobalDatabase };

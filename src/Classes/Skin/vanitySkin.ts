@@ -52,15 +52,74 @@ async function augmentSkinAndUV(
 
 function augmentGeometry(
     basePlayerGeometry: GeometryDefinition,
+    formatVersion: string,
+    geometryKey: string,
+    textureFormat: "modern" | "legacy",
     vanityItems: (VanityInfo | null)[]
 ): MinecraftGeometryFile {
     // Copy player's base geometry.
     const finalGeometry = JSON.parse(JSON.stringify(basePlayerGeometry));
 
+    // Fix legacy format if necessary.
+    if (textureFormat === "legacy") {
+        // Handle simple UV.
+        const leftArm = finalGeometry.bones.find((b: any) => b.name === "leftArm");
+        leftArm.cubes = [
+            {
+                "origin": [4, 12, -2],
+                "size": [4, 12, 4],
+                "uv": {
+                    "north": { "uv": [48, 20], "uv_size": [-4, 12] },
+                    "east": { "uv": [52, 20], "uv_size": [-4, 12] },
+                    "south": { "uv": [56, 20], "uv_size": [-4, 12] },
+                    "west": { "uv": [44, 20], "uv_size": [-4, 12] },
+                    "up": { "uv": [44, 16], "uv_size": [4, 4] },
+                    "down": { "uv": [48, 20], "uv_size": [4, -4] }
+                }
+            }
+        ];
+        const leftLeg = finalGeometry.bones.find((b: any) => b.name === "leftLeg");
+        leftLeg.cubes = [
+            {
+                "origin": [-0.1, 0, -2],
+                "size": [4, 12, 4],
+                "uv": {
+                    "north": { "uv": [8, 20], "uv_size": [-4, 12] },
+                    "east": { "uv": [8, 20], "uv_size": [4, 12] },
+                    "south": { "uv": [16, 20], "uv_size": [-4, 12] },
+                    "west": { "uv": [4, 20], "uv_size": [-4, 12] },
+                    "up": { "uv": [4, 16], "uv_size": [4, 4] },
+                    "down": { "uv": [8, 20], "uv_size": [4, -4] }
+                }
+            }
+        ];
+    }
+
+    // Get geometry details.
+    let textureWidth, textureHeight: number;
+    switch (formatVersion) {
+        case "1.8.0":
+            textureWidth = finalGeometry.textureheight;
+            textureHeight = finalGeometry.texturewidth;
+            break;
+        default:
+            textureWidth = finalGeometry.description.texture_width;
+            textureHeight = finalGeometry.description.texture_height;
+            break;
+    }
+
     // Set texture size to 128x128.
-    if (finalGeometry.description.texture_width !== 128 || finalGeometry.description.texture_height !== 128) {
-        finalGeometry.description.texture_width = 128;
-        finalGeometry.description.texture_height = 128;
+    if (textureWidth !== 128 || textureHeight !== 128) {
+        switch (formatVersion) {
+            case "1.8.0":
+                finalGeometry.texturewidth = 128;
+                finalGeometry.textureheight = 128;
+                break;
+            default:
+                finalGeometry.description.texture_width = 128;
+                finalGeometry.description.texture_height = 128;
+                break;
+        }
     }
 
     const validVanityItems = vanityItems.filter((v): v is VanityInfo => v !== null);
@@ -76,14 +135,20 @@ function augmentGeometry(
         }
 
         // Get primary geometry definition.
-        const vanityGeoDef = vanityGeometryData['minecraft:geometry'][0];
+        const vanityGeoDef = vanityGeometryData['minecraft:geometry']?.[0];
+        if (!vanityGeoDef) {
+            console.error("Failed to find vanity geometry definition for item:", vanity.id);
+            continue;
+        }
 
         if (vanityIndex < 0 || vanityIndex > 2) {
             throw new Error(`Invalid vanityIndex: ${vanityIndex}. Must be 0, 1, or 2.`);
         }
 
         // Offset UV coordinates for each bone.
-        vanityGeoDef.bones.forEach((bone: any) => {
+        for (const bone of vanityGeoDef.bones) {
+            // Check for suffix flag "-i" to ignore UV adjustment.
+            if (bone.name.endsWith("-i") || bone.parent?.endsWith("-i")) continue;
             // Handle polymeshes UV.
             if (bone.poly_mesh) {
                 const offsets = [
@@ -123,7 +188,7 @@ function augmentGeometry(
                     }
                 });
             }
-        });
+        }
 
         // 5. Verify target parent bone is present.
         const parentBoneExists = finalGeometry.bones.some((bone: any) => bone.name === vanity.bone);
@@ -141,18 +206,18 @@ function augmentGeometry(
             const existingBone = finalGeometry.bones.find((b: any) => b.name === newBone.name.replace(/[-][a-z]$/, ""));
             let skipBone = false;
             if (existingBone) {
-                // Check for suffix '-r', that means this bone should replace the existing bone on the model.
+                // Check for suffix flag '-r', that means this bone should replace the existing bone on the model.
                 if (newBone.name.endsWith("-r")) {
                     finalGeometry.bones = finalGeometry.bones.filter((b: any) => b.name !== existingBone.name);
                     newBone.parent = existingBone.parent;
                     newBone.name = existingBone.name;
                 }
-                // Check for suffix '-a', that means this bone should be attached to the existing bone on the model.
+                // Check for suffix flag '-a', that means this bone should be attached to the existing bone on the model.
                 else if (newBone.name.endsWith("-a")) {
                     newBone.parent = existingBone.name;
                     newBone.name = `${newBone.name}-va${vanityIndex + 1}`;
                 }
-                // Check for suffix '-d', that means this bone should be deconstructed and have its cubes added to the existing bone.
+                // Check for suffix flag '-d', that means this bone should be deconstructed and have its cubes added to the existing bone.
                 else if (newBone.name.endsWith("-d")) {
                     if (newBone.cubes) {
                         if (!existingBone.cubes) {
@@ -179,10 +244,25 @@ function augmentGeometry(
     }
 
     // 7. Return final geometry.
-    return {
-        format_version: "1.12.0",
-        "minecraft:geometry": [finalGeometry]
-    } as MinecraftGeometryFile;
+    switch (formatVersion) {
+        case "1.8.0":
+            return {
+                format_version: "1.12.0",
+                "minecraft:geometry": [{
+                    description: {
+                        identifier: geometryKey,
+                        texture_width: 128,
+                        texture_height: 128
+                    },
+                    ...finalGeometry
+                }],
+            } as MinecraftGeometryFile;
+        default:
+            return {
+                format_version: "1.12.0",
+                "minecraft:geometry": [finalGeometry]
+            } as MinecraftGeometryFile;
+    }
 }
 
 class VanitySkin {
@@ -193,9 +273,12 @@ class VanitySkin {
         const oldIdentifier = serializedSkin.identifier;
         if (serializedSkin.isPersona && !serializedSkin.identifier.endsWith(".vanity")) {
             VanitySkin.steve(player);
+            player.error("Persona skins are not supported on this server, your skin has been reset to default.");
             return;
         }
-        if (serializedSkin.skinImage.width !== 64 || serializedSkin.skinImage.height !== 64) {
+        const textureFormat = serializedSkin.skinImage.height === 64 ? "modern" : "legacy";
+        if (serializedSkin.skinImage.width > 64 || serializedSkin.skinImage.height > 64) {
+            player.error("HD skins are not supported on this server, your skin has been reset to default.");
             VanitySkin.steve(player);
             return;
         }
@@ -218,9 +301,19 @@ class VanitySkin {
         }
         */
         // Create vanity augmented geometry.
-        const newGeometry = augmentGeometry(geometry["minecraft:geometry"].find((x: GeometryDefinition) => x.description.identifier === geometryKey), vanityItems);
+        const formatVersion = geometry.format_version;
+        if (!formatVersion) {
+            console.error("Failed to determine geometry format version for player:", player.username);
+            return;
+        }
+        const geo = formatVersion === "1.8.0" ? geometry[geometryKey] : geometry["minecraft:geometry"].find((x: GeometryDefinition) => x.description.identifier === geometryKey);
+        if (!geo) {
+            console.error("Failed to find player geometry definition for player:", player.username);
+            return;
+        }
+        const newGeometry = augmentGeometry(geo, formatVersion, geometryKey, textureFormat, vanityItems);
         // Construct new serialized skin.
-        const newSkin = new SerializedSkin(identifier, serializedSkin.playFabIdentifier, serializedSkin.resourcePatch, { width: 128, height: 128, data: newSkinImage }, [], serializedSkin.capeImage ?? new SkinImage(0, 0, Buffer.from([])), JSON.stringify(newGeometry), serializedSkin.geometryVersion, "", serializedSkin.capeIdentifier, identifier, serializedSkin.armSize, "#0", [], [], true, true, false, true, true);
+        const newSkin = new SerializedSkin(identifier, serializedSkin.playFabIdentifier, serializedSkin.resourcePatch, { width: 128, height: 128, data: newSkinImage }, [], serializedSkin.capeImage ?? new SkinImage(0, 0, Buffer.from([])), JSON.stringify(newGeometry), geometry.format_version, "", serializedSkin.capeIdentifier, identifier, serializedSkin.armSize, "#0", [], [], true, true, false, true, true);
 
         // Send skin update packet.
         const packet = new PlayerSkinPacket();
@@ -480,10 +573,10 @@ class VanitySkin {
         // Create vanity augmented skin texture.
         const newSkinImage = await augmentSkinAndUV(steveSkinImage, vanityItems);
         // Create vanity augmented geometry.
-        const newGeometry = augmentGeometry(steveGeometry["minecraft:geometry"].find((x: GeometryDefinition) => x.description.identifier === geometryKey)!, vanityItems);
+        const newGeometry = augmentGeometry(steveGeometry["minecraft:geometry"].find((x: GeometryDefinition) => x.description.identifier === geometryKey)!, "1.12.0", geometryKey, "modern", vanityItems);
         // Compile array of vanity item animations.
         const animations = vanityItems.filter((v): v is VanityInfo => v !== null && !!v.animations).flatMap(v => v.animations!) as SkinAnimation[];
-        const newSkin = new SerializedSkin(identifier, serializedSkin.playFabIdentifier, JSON.stringify({ geometry: { default: geometryKey } }), { width: 128, height: 128, data: newSkinImage }, animations ?? [], new SkinImage(0, 0, Buffer.from([])), JSON.stringify(newGeometry), serializedSkin.geometryVersion, "", serializedSkin.capeIdentifier, identifier, serializedSkin.armSize, "#0", [], [], true, true, false, true, true);
+        const newSkin = new SerializedSkin(identifier, serializedSkin.playFabIdentifier, JSON.stringify({ geometry: { default: geometryKey } }), { width: 128, height: 128, data: newSkinImage }, animations ?? [], new SkinImage(0, 0, Buffer.from([])), JSON.stringify(newGeometry), newGeometry.format_version, "", serializedSkin.capeIdentifier, identifier, serializedSkin.armSize, "#0", [], [], true, true, false, true, true);
 
         // Send skin update packet.
         const packet = new PlayerSkinPacket();

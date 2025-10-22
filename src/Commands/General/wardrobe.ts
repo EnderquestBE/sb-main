@@ -50,7 +50,7 @@ function showWardrobeForm(player: Player) {
 function showSlotForm(player: Player, slot: 1 | 2 | 3) {
     const form2 = new ActionForm("Slot " + slot);
     form2.content = "Select an owned vanity item to equip.";
-    const ownedVanity = player.getOwnedVanity();
+    const ownedVanity = player.getOwnedVanity().sort((a, b) => a.name.localeCompare(b.name));
     const equippedVanity = player.getEquippedVanity();
     let entries: VanityInfo[] = [];
     for (const item of ownedVanity) {

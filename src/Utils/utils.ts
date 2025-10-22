@@ -139,6 +139,35 @@ class Utils {
   public static stripColorCodes(text: string): string {
     return text.replace(/§./g, '');
   }
+
+  /**
+   * Parses a duration string into seconds.
+   * Supported formats: "1h", "30m", "2d", "1d3h", "1d 3h", etc.
+   */
+  public static parseDuration(str: string): number | null {
+    const durationRegex = /(\d+(?:\.\d+)?)\s*([smhdSMHD])/g;
+    let match;
+    let durationMs = 0;
+    while ((match = durationRegex.exec(str)) !== null) {
+      const value = parseFloat(match[1] ?? "0");
+      const unit = match[2]?.toLowerCase();
+      switch (unit) {
+        case "s":
+          durationMs += value;
+          break;
+        case "m":
+          durationMs += value * 60;
+          break;
+        case "h":
+          durationMs += value * 60 * 60;
+          break;
+        case "d":
+          durationMs += value * 24 * 60 * 60;
+          break;
+      }
+    }
+    return durationMs > 0 ? durationMs : null;
+  }
 }
 
 export { Utils }

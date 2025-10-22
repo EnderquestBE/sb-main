@@ -73,6 +73,7 @@ declare module "@serenityjs/core" {
     getVanity(slot: 1 | 2 | 3): VanityInfo | null;
     getEquippedVanity(): (VanityInfo | null)[];
     indexOfVanity(vanityId: string): 1 | 2 | 3 | -1;
+    ownsVanity(vanityId: string): boolean;
     unlockVanity(vanityId: string): void;
     unlockAllVanity(): void;
     revokeVanity(vanityId: string): void;
@@ -405,6 +406,11 @@ Player.prototype.indexOfVanity = function (this: Player, vanityId: string): 1 | 
   if (!session) return -1;
   return session.indexOfVanity(vanityId);
 }
+Player.prototype.ownsVanity = function (this: Player, vanityId: string): boolean {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return false;
+  return session.ownsVanity(vanityId);
+}
 Player.prototype.unlockVanity = function (this: Player, vanityId: string): void {
   const session = PlayerExtension.getSession(this);
   if (!session) return;
@@ -418,7 +424,17 @@ Player.prototype.unlockAllVanity = function (this: Player): void {
 Player.prototype.revokeVanity = function (this: Player, vanityId: string): void {
   const session = PlayerExtension.getSession(this);
   if (!session) return;
-  session.revokeVanity(vanityId);
+  session.revokeVanity(vanityId).then(async (result) => {
+    if (result.success) {
+      if (this.getEquippedVanity().some((x) => x && x.id === vanityId)) {
+        // Unequip the vanity.
+        const slot = this.indexOfVanity(vanityId);
+        this.unequipVanity(slot as 1 | 2 | 3);
+        // Update the player's vanity.
+        this.updateVanity();
+      }
+    }
+  })
 }
 Player.prototype.getOwnedVanity = function (this: Player): VanityInfo[] {
   const session = PlayerExtension.getSession(this);

@@ -1,12 +1,10 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, Client, EmbedBuilder, TextChannel } from "discord.js"
-import { BOT_TOKEN } from "./token";
 import { Player } from "@serenityjs/core";
-import { CustomSkin } from "../Classes";
+import { CustomSkin, GlobalDataManager } from "../Classes";
 import { Utils } from "../Utils/utils";
 import { FormApplication } from "./Applications/form";
 import { Applications } from "./Applications/applications";
-import { ModerationManager } from "../Classes/Data/Moderation";
-import { isDevEnvironment } from "../config";
+import { BOT_TOKEN, isDevEnvironment } from "../config";
 
 export class DiscordClient {
 
@@ -152,7 +150,7 @@ export class DiscordClient {
                         }
                         // Add user to whitelist.
                         const gamertag = author?.substring(author.indexOf("(") + 1, author.indexOf(")"))!;
-                        ModerationManager.instance.addToWhitelist(gamertag);
+                        GlobalDataManager.instance.addToWhitelist(gamertag);
 
                         // Mark application as accepted.
                         const accepted = new ButtonBuilder();

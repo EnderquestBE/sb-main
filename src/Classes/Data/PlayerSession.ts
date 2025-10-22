@@ -397,6 +397,14 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
   }
 
   /**
+   * Checks if the player owns a specific vanity item.
+   * @param vanityId The ID of the vanity item.
+   */
+  public ownsVanity(vanityId: string): boolean {
+    return this.premiumData.vanity.includes(vanityId);
+  }
+
+  /**
    * Sets the player's island name.
    * @param islandName The name of the island the player belongs to.
    */

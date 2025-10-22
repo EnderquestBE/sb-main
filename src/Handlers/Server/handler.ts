@@ -2,6 +2,7 @@ import { Serenity } from "@serenityjs/core";
 import { ChatHandler } from "../Chat/handler";
 import { Tips } from "../../Configuration/config";
 import { EntityPersistenceTrait } from "../../Traits/Entity/Persistence/persistence";
+import { Server } from "../../server";
 
 class ServerTaskHandler {
     private static serenity: Serenity;
@@ -58,6 +59,10 @@ class ServerTaskHandler {
         }
     }
 
+    public static queryMultipliersTask() {
+        Server.queryMultipliers();
+    }
+
     public static queueTask(task: () => any, runAfter: number) {
         const timeout = setTimeout(() => {
             task();
@@ -89,6 +94,10 @@ class ServerTaskHandler {
         this.queueIntervalTask(() => {
             this.playerAutoSaveTask();
         }, 600000)
+        // Queue multiplier query task every 5 minutes.
+        this.queueIntervalTask(() => {
+            this.queryMultipliersTask();
+        }, 300000)
     }
 
     public static clearAllTasks() {

@@ -3,16 +3,19 @@ import "./Keys/seasonal";
 import * as Scrolls from "./Scrolls"
 import * as Stashes from "./Stashes"
 import * as CrateKeys from "./Keys"
+export * as Vouchers from "./Vouchers";
 import { ShopScrollCategory, ShopXPCategory } from "../../Configuration/Shop/Main/Categories/xp";
 import { MainShop } from "../../Configuration/Shop/Main/main";
 import { ItemKitTrait } from "../../Traits/Item/traits";
+import { Vouchers } from "./itemRegistry";
 
 const ScrollTypes = [Scrolls.BindingScrollType, Scrolls.ExpulsionScrollType, Scrolls.MasteryScrollType, Scrolls.RefinementScrollType, Scrolls.RestorationScrollType, Scrolls.TemperamentScrollType];
 const StashTypes = [Stashes.CommonStashType, Stashes.RareStashType, Stashes.EpicStashType, Stashes.LegendaryStashType, Stashes.DivineStashType];
 const CrateKeyTypes = [CrateKeys.CommonCrateKeyType, CrateKeys.RareCrateKeyType, CrateKeys.EpicCrateKeyType, CrateKeys.LegendaryCrateKeyType, CrateKeys.DivineCrateKeyType, CrateKeys.VoterCrateKeyType, CrateKeys.SeasonalCrateKeyType];
+const VoucherTypes = [Vouchers.MoneyVoucherType, Vouchers.XPVoucherType, Vouchers.VanityVoucherType];
 
 class CustomItemRegistry {
-    public static readonly types = [...ScrollTypes, ...StashTypes, ...CrateKeyTypes];
+    public static readonly types = [...ScrollTypes, ...StashTypes, ...CrateKeyTypes, ...VoucherTypes];
 
     public static registerDefault(world: World) {
         world.itemPalette.registerType(...this.types);

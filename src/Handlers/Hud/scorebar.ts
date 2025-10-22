@@ -27,7 +27,7 @@ class Scorebar {
     private static readonly S_NO_ISLAND = " §b匚 §2Island: §f§e/is create";
     private static readonly S_NO_LEVEL = " §b匚 §eLevel: §f--";
 
-    public static update(player: Player, island: Island | null, tip: string) {
+    public static update(player: Player, island: Island | null, globalMultiplier: string, tip: string) {
         // Generate random objective id.
         const objective = Math.random().toString(36).substring(2, 9);
 
@@ -44,9 +44,9 @@ class Scorebar {
         let scoreIndex = 12;
 
         scores.push({ scoreboardId: ScoreboardIdentity.IDENTIFIER++, objectiveName: objective, score: scoreIndex--, identityType: ScoreboardIdentityType.FakePlayer, actorUniqueId: null, customName: `${this.S_GT}${player.username}` });
-        scores.push({ scoreboardId: ScoreboardIdentity.IDENTIFIER++, objectiveName: objective, score: scoreIndex--, identityType: ScoreboardIdentityType.FakePlayer, actorUniqueId: null, customName: `${this.S_PLAYERS}${Server.playerCount}§7/§f20` });
-        scores.push({ scoreboardId: ScoreboardIdentity.IDENTIFIER++, objectiveName: objective, score: scoreIndex--, identityType: ScoreboardIdentityType.FakePlayer, actorUniqueId: null, customName: `${this.S_BALANCE}${Utils.formatInt(player.getMoney())}` });
-        scores.push({ scoreboardId: ScoreboardIdentity.IDENTIFIER++, objectiveName: objective, score: scoreIndex--, identityType: ScoreboardIdentityType.FakePlayer, actorUniqueId: null, customName: `${this.S_XP}${Utils.formatInt(player.getTotalXp())}` });
+        scores.push({ scoreboardId: ScoreboardIdentity.IDENTIFIER++, objectiveName: objective, score: scoreIndex--, identityType: ScoreboardIdentityType.FakePlayer, actorUniqueId: null, customName: `${this.S_PLAYERS}${Server.playerCount}§7/§f30` });
+        scores.push({ scoreboardId: ScoreboardIdentity.IDENTIFIER++, objectiveName: objective, score: scoreIndex--, identityType: ScoreboardIdentityType.FakePlayer, actorUniqueId: null, customName: `${this.S_BALANCE}${Utils.formatInt(player.getMoney())} ${globalMultiplier}` });
+        scores.push({ scoreboardId: ScoreboardIdentity.IDENTIFIER++, objectiveName: objective, score: scoreIndex--, identityType: ScoreboardIdentityType.FakePlayer, actorUniqueId: null, customName: `${this.S_XP}${Utils.formatInt(player.getTotalXp())} ${globalMultiplier}` });
 
         if (player.isWorldIsland() && island) {
             scores.push({ scoreboardId: ScoreboardIdentity.IDENTIFIER++, objectiveName: objective, score: scoreIndex--, identityType: ScoreboardIdentityType.FakePlayer, actorUniqueId: null, customName: this.S_ISLAND_STATS });

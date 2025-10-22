@@ -15,10 +15,10 @@ class PremiumDatabase extends CollectionManager<PremiumData> {
     }
 
     /**
-     * Fetches player data using username.
+     * Fetches player data using XUID.
      */
-    public async getByUsername(username: string): Promise<PremiumData | null> {
-        const query = { username: username };
+    public async getByXUID(xuid: string): Promise<PremiumData | null> {
+        const query = { xuid: xuid };
         const player = await this.collection.findOne(query as Filter<PremiumData>) as PremiumData | null;
         return player;
     }

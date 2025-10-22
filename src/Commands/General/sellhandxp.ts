@@ -2,6 +2,7 @@ import { EntityInventoryTrait, Player } from "@serenityjs/core";
 import { CommandBuilder, CommandOverload } from "../../Classes";
 import { SellableItems } from "../../Configuration/config";
 import { Utils } from "../../Utils/utils";
+import { Server } from "../../server";
 
 new CommandBuilder("sellhandxp", "Sells the item in your hand for xp.")
     .setAliases(["shxp"])
@@ -21,11 +22,12 @@ new CommandBuilder("sellhandxp", "Sells the item in your hand for xp.")
                 return player.error("This item cannot be sold.");
             }
 
+            const multiplier = Server.globalMultiplier;
             const amount = item.stackSize;
-            const value = Math.floor(sellInfo.xp * amount);
+            const value = Math.floor(sellInfo.xp * amount * multiplier);
             inv.clearSlot(player.getSelectedSlot());
             player.addXp(value);
-            player.info(`§eSold §a${Utils.formatString(item.type.identifier)} §7x§c${amount} §efor §a${Utils.formatInt(value)} XP §eat §3${Utils.formatInt(sellInfo.xp)} XP §eeach.`);
+            player.info(`§eSold §a${Utils.formatString(item.type.identifier)} §7x§c${amount} §efor §a${Utils.formatInt(value)} XP §eat §3${Utils.formatInt(sellInfo.xp * multiplier)} XP §eeach.`);
         })
     )
     .register("General");

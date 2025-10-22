@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, EmbedBuilder, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import { DiscordClient } from "..";
-import { ModerationManager } from "../../Classes/Data/Moderation";
+import { GlobalDataManager } from "../../Classes/Data/Global";
 import { WhitelistMode } from "../../Types/types";
 
 const DiscordWhitelistCommand = new SlashCommandBuilder()
@@ -68,8 +68,8 @@ async function execute(interaction: ChatInputCommandInteraction) {
 
     switch (subcommand) {
         case "info": {
-            const moderationManager = ModerationManager.instance;
-            const { whitelistMode, permissionLevel, users } = moderationManager;
+            const globalDataManager = GlobalDataManager.instance;
+            const { whitelistMode, permissionLevel, users } = globalDataManager;
             const infoEmbed = new EmbedBuilder()
                 .setColor(10181046)
                 .setTitle("Whitelist Information")
@@ -85,7 +85,7 @@ async function execute(interaction: ChatInputCommandInteraction) {
         }
         case "mode": {
             const mode = interaction.options.getString("mode", true) as WhitelistMode;
-            const result = await ModerationManager.instance.setWhitelistMode(mode);
+            const result = await GlobalDataManager.instance.setWhitelistMode(mode);
 
             if (result.success) {
                 await interaction.reply({ content: `Whitelist mode has been set to **${mode}**.`, flags: "Ephemeral" });
@@ -96,12 +96,12 @@ async function execute(interaction: ChatInputCommandInteraction) {
         }
         case "permission": {
             const level = interaction.options.getInteger("level", true);
-            const moderationManager = ModerationManager.instance;
-            const result = await moderationManager.setWhitelistPermissionLevel(level);
+            const globalDataManager = GlobalDataManager.instance;
+            const result = await globalDataManager.setWhitelistPermissionLevel(level);
 
             if (result.success) {
                 let replyMessage = `Whitelist permission level set to **${level}**.`;
-                if (moderationManager.whitelistMode !== WhitelistMode.RESTRICTED) {
+                if (globalDataManager.whitelistMode !== WhitelistMode.RESTRICTED) {
                     replyMessage += `\n**Warning:** The whitelist mode is not currently set to RESTRICTED. This permission level will not take effect until the mode is changed.`;
                 }
                 await interaction.reply({ content: replyMessage, flags: "Ephemeral" });
@@ -112,7 +112,7 @@ async function execute(interaction: ChatInputCommandInteraction) {
         }
         case "add": {
             const user = interaction.options.getString("user", true);
-            const result = await ModerationManager.instance.addToWhitelist(user);
+            const result = await GlobalDataManager.instance.addToWhitelist(user);
 
             if (result.success) {
                 await interaction.reply({ content: `Successfully whitelisted **${user}**.`, flags: "Ephemeral" });
@@ -123,7 +123,7 @@ async function execute(interaction: ChatInputCommandInteraction) {
         }
         case "remove": {
             const user = interaction.options.getString("user", true);
-            const result = await ModerationManager.instance.removeFromWhitelist(user);
+            const result = await GlobalDataManager.instance.removeFromWhitelist(user);
             if (result.success) {
                 await interaction.reply({ content: `Successfully removed **${user}** from the whitelist.`, flags: "Ephemeral" });
             } else {

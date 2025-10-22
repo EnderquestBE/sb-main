@@ -1,9 +1,9 @@
-import { ModerationData, WhitelistMode } from "../../Types/types";
+import { GlobalServerData, WhitelistMode } from "../../Types/types";
 
 /**
- * The default moderation database configuration.
+ * The default global server database configuration.
  */
-const DEFAULT_MODERATION_DATA: ModerationData = {
+const DEFAULT_SERVER_DATA: GlobalServerData = {
     activeBans: [],
     moderationHistory: {},
     whitelist: {
@@ -13,6 +13,7 @@ const DEFAULT_MODERATION_DATA: ModerationData = {
             permissionLevel: 0,
         },
     },
+    globalMultipliers: []
 };
 
-export { DEFAULT_MODERATION_DATA }
+export { DEFAULT_SERVER_DATA };

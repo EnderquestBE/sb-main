@@ -17,6 +17,7 @@ import "./Admin/xp"
 import "./Admin/uptime"
 import "./Admin/setcrate"
 import "./Admin/key"
+import "./Admin/voucher"
 
 /** Moderation Commands */
 import "./Moderation/broadcast"
@@ -24,6 +25,8 @@ import "./Moderation/forcerename"
 import "./Moderation/cooldown"
 import "./Moderation/kitcooldown"
 import "./Moderation/vanity"
+import "./Moderation/addmultiplier"
+import "./Moderation/managemultipliers"
 
 /** General Commands */
 import "./General/settings"
@@ -47,6 +50,7 @@ import "./General/compress"
 import "./General/rules"
 import "./General/kit"
 import "./General/wardrobe"
+import "./General/multiplier"
 
 /** Island Commands */
 import "./Island/island"

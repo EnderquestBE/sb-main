@@ -1,32 +1,32 @@
-import { BanEntry, ModerationData, ModerationRecordEntry, OperationResult, WhitelistMode } from "../../Types/types";
+import { BanEntry, GlobalServerData, ModerationRecordEntry, Multiplier, OperationResult, WhitelistMode } from "../../Types/types";
 import { DataManager } from "./Manager";
-import { ModerationDatabase } from "../Database";
-import { DEFAULT_MODERATION_DATA } from "../../Configuration/Data";
+import { GlobalDatabase } from "../Database";
+import { DEFAULT_SERVER_DATA } from "../../Configuration/Data";
 import { Player } from "@serenityjs/core";
 import { Server } from "../../server";
 
-class ModerationManager extends DataManager<ModerationData, ModerationDatabase> {
-    public static instance: ModerationManager;
-    public constructor(initialData: ModerationData, dbManager: ModerationDatabase) {
+class GlobalDataManager extends DataManager<GlobalServerData, GlobalDatabase> {
+    public static instance: GlobalDataManager;
+    public constructor(initialData: GlobalServerData, dbManager: GlobalDatabase) {
         super(initialData, dbManager);
     }
 
     public static async initialize(): Promise<void> {
-        if (ModerationManager.instance) {
-            console.warn("ModerationManager is already initialized.");
+        if (GlobalDataManager.instance) {
+            console.warn("GlobalDataManager is already initialized.");
             return;
         }
-        let moderationData = await ModerationDatabase.instance.get("default");
-        if (!moderationData) {
-            const data = { ...DEFAULT_MODERATION_DATA, moderation: "default" };
-            await ModerationDatabase.instance.create(data);
-            moderationData = data;
+        let globalServerData = await GlobalDatabase.instance.get("default");
+        if (!globalServerData) {
+            const data = { ...DEFAULT_SERVER_DATA, global: "default" };
+            await GlobalDatabase.instance.create(data);
+            globalServerData = data;
         }
-        ModerationManager.instance = new ModerationManager(moderationData, ModerationDatabase.instance);
+        GlobalDataManager.instance = new GlobalDataManager(globalServerData!, GlobalDatabase.instance);
         // Log whitelist method.
-        const manager = ModerationManager.instance;
+        const manager = GlobalDataManager.instance;
         Server.logger.info(`§bWhitelist is ${manager.whitelistMode === "OPEN" ? "§cinactive" : "§aactive"} §7(§fMode: §e${manager.whitelistMode}§7)${manager.whitelistMode === "ALLOW" ? `\n§fWhitelisted: §7${manager.users.join(", ")}` : (manager.whitelistMode === "RESTRICTED" ? `\n§cMinimum Permission: §6${manager.permissionLevel}` : "")}`);
-
+        Server.initializeMultipliers();
     }
 
     public get whitelistMode(): WhitelistMode {
@@ -39,6 +39,10 @@ class ModerationManager extends DataManager<ModerationData, ModerationDatabase> 
 
     public get permissionLevel(): number {
         return this.data.whitelist.properties.permissionLevel;
+    }
+
+    public get globalMultipliers(): Multiplier[] {
+        return this.data.globalMultipliers;
     }
 
     /**
@@ -144,7 +148,23 @@ class ModerationManager extends DataManager<ModerationData, ModerationDatabase> 
             return player.getPermission() >= this.permissionLevel;
         } else return false;
     }
+
+    /**
+     * Adds a new global multiplier.
+     * @param multiplier The multiplier to add.
+     */
+    public async addGlobalMultiplier(multiplier: Multiplier): Promise<OperationResult> {
+        return this._addToArray("globalMultipliers", multiplier);
+    }
+
+    /**
+     * Removes a global multiplier by its ID.
+     * @param id The ID of the multiplier to remove.
+     */
+    public async removeGlobalMultiplier(id: string): Promise<OperationResult> {
+        return this._removeFromArrayByField("globalMultipliers", "id", id);
+    }
 }
 
 
-export { ModerationManager };
+export { GlobalDataManager };

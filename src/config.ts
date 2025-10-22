@@ -7,6 +7,8 @@ dotenv.config();
 const CONNECTION_STRING = process.env.CONNECTION_STRING!;
 const DATABASE_NAME = process.env.DATABASE_NAME!;
 
+const BOT_TOKEN = process.env.BOT_TOKEN!;
+
 const isDevEnvironment = process.env.IS_DEV_ENVIRONMENT === 'true';
 
-export { CONNECTION_STRING, DATABASE_NAME, isDevEnvironment };
+export { CONNECTION_STRING, DATABASE_NAME, BOT_TOKEN, isDevEnvironment };
