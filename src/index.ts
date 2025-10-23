@@ -361,7 +361,15 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
   }
 
   public beforePlayerInteractWithBlock(event: PlayerInteractWithBlockSignal): boolean {
-    if (event.itemStack?.hasDynamicProperty("bypassInteract")) return true;
+    if (event.itemStack?.hasDynamicProperty("bypassInteract")) {
+      if (event.itemStack.traits?.size > 0) {
+        for (const trait of event.itemStack.traits.values()) {
+          //@ts-ignore
+          trait.onUseOnBlock?.(event.source, { targetBlock: event.block })
+        }
+      }
+      return false;
+    }
     return PermissionsHandler.onInteract(event);
   }
 

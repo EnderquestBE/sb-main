@@ -11,6 +11,7 @@ abstract class StashItem extends ItemStack {
         this.setDisplayName(`§r§l${name}§r §6Stash`);
         this.setLore(["§r§7Use to open!"]);
         this.nbt.set("Stash", new StringTag(StashType.toString(), "Stash"));
+        this.setDynamicProperty("bypassInteract", true);
     }
 }
 

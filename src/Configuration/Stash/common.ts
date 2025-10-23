@@ -7,9 +7,9 @@ import { CommonCrateKey } from "../../Classes";
 const CommonStashLoot: WeightedItem<StashLoot>[] = [
     { value: { function: giveMoney, amount: [2500, 10000] }, weight: 25 },
     { value: { function: giveXp, amount: [50, 200] }, weight: 20 },
-    { value: { function: giveItemStack.bind({ item: () => SealedTome, args: [EnchantmentRarity.Common] }), amount: [1, 1] }, weight: 15 },
+    { value: { function: giveItemStack.bind({ item: () => SealedTome, args: [EnchantmentRarity.Common] }), amount: [1, 1] }, weight: 10 },
     { value: { function: giveItemStack.bind({ item: () => SealedTome, args: [EnchantmentRarity.Rare] }), amount: [1, 1] }, weight: 5 },
-    { value: { function: giveItemStack.bind({ item: () => CommonCrateKey, args: [] }), amount: [1, 1] }, weight: 5 },
+    { value: { function: giveItemStack.bind({ item: () => CommonCrateKey, args: [] }), amount: [1, 1] }, weight: 5 }
 ];
 
 const CommonStashSelector = new WeightedSelector(CommonStashLoot);

@@ -34,11 +34,15 @@ class ItemCustomStashTrait extends ItemStackTrait {
                 return;
         }
         const loot = LootSelector.select();
-        if (!loot) return player.error("This stash cannot be opened.");
+        if (!loot) {
+            player.error("This stash cannot be opened.");
+            return;
+        }
         this.item.decrementStack();
         const amount = Array.isArray(loot.amount) ? Math.floor(Math.random() * (loot.amount[1] - loot.amount[0] + 1)) + loot.amount[0] : (loot.amount || 1);
         const display = loot.function(player, amount);
         player.info(`§dOpening stash... §eYou received ${display}§e!`);
+        return;
     }
 }
 

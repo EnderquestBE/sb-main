@@ -10,8 +10,8 @@ const LegendaryStashLoot: WeightedItem<StashLoot>[] = [
     { value: { function: giveItemStack.bind({ item: () => SealedTome, args: [EnchantmentRarity.Rare] }), amount: [1, 1] }, weight: 5 },
     { value: { function: giveItemStack.bind({ item: () => SealedTome, args: [EnchantmentRarity.Legendary] }), amount: [1, 1] }, weight: 20 },
     { value: { function: giveItemStack.bind({ item: () => SealedTome, args: [EnchantmentRarity.Exotic] }), amount: [1, 1] }, weight: 10 },
-    { value: { function: giveItemStack.bind({ item: () => LegendaryCrateKey, args: [] }), amount: [1, 2] }, weight: 10 },
-    { value: { function: giveItemStack.bind({ item: () => DivineCrateKey, args: [] }), amount: [1, 1] }, weight: 3 },
+    { value: { function: giveItemStack.bind({ item: () => LegendaryCrateKey, args: [] }), amount: [1, 2] }, weight: 15 },
+    { value: { function: giveItemStack.bind({ item: () => DivineCrateKey, args: [] }), amount: [1, 1] }, weight: 5 },
 ];
 
 const LegendaryStashSelector = new WeightedSelector(LegendaryStashLoot);
