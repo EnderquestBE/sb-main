@@ -11,7 +11,7 @@ const DEFAULT_PLAYER_DATA: PlayerData = {
         money: 100, // Starting money
         xp: 0
     },
-    activeRanks: [PlayerRank.GUEST],
+    nameColor: "Green",
     chatColor: "White",
     chatSize: false,
     island: "",
@@ -42,6 +42,7 @@ const DEFAULT_PLAYER_DATA: PlayerData = {
 
 const DEFAULT_PREMIUM_DATA: PremiumData = {
     xuid: "",
+    activeRanks: [PlayerRank.GUEST],
     ranks: [PlayerRank.GUEST],
     vanity: [],
 }

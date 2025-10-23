@@ -88,9 +88,11 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
   public getMoney(): number { return this.data.balance.money; }
   public getXp(): number { return this.data.balance.xp; }
   public getRankIds(): string[] { return this.premiumData.ranks; }
-  public getPrimaryRank(): RankInfo { return RANKS.get(this.data.activeRanks[0] as PlayerRank)!; }
-  public getActiveRanks(): RankInfo[] { return this.data.activeRanks.map(id => RANKS.get(id as PlayerRank)!) }
+  public getActiveRankIds(): string[] { return this.premiumData.activeRanks; }
+  public getPrimaryRank(): RankInfo { return RANKS.get(this.premiumData.activeRanks[0] as PlayerRank)!; }
+  public getActiveRanks(): RankInfo[] { return this.premiumData.activeRanks.map(id => RANKS.get(id as PlayerRank)!) }
   public getChatSize(): boolean { return this.data.chatSize }
+  public getNameColor(): string { return this.data.nameColor }
   public getChatColor(): string { return this.data.chatColor }
   public getIslandName(): string { return this.data.island; }
   public getIsland(): Island | null { return Island.loadSync(this.data.island) }
@@ -286,6 +288,22 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
   }
 
   /**
+   * Sets the player's primary rank.
+   */
+  public async setPrimaryRank(rankId: keyof typeof PlayerRank): Promise<OperationResult> {
+    if (!this.hasRank(rankId)) {
+      return { success: false, reason: "Player does not own this rank." };
+    }
+    const premiumDB = PremiumDatabase.instance;
+    this.premiumData.activeRanks[0] = rankId;
+    const result = await premiumDB.updateOne(this.getXuid(), { $set: { activeRanks: this.premiumData.activeRanks } });
+    if (result.modifiedCount > 0) {
+      return { success: true };
+    }
+    return { success: false };
+  }
+
+  /**
    * Gives a player a new rank.
    * @param rankId The ID of the rank to give.
    */
@@ -314,23 +332,52 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
     }
     return { success: false };
   }
+
+  /**
+   * Sets the player's active ranks.
+   * @param rankIds The IDs of the ranks to set as active.
+   */
+  public async setActiveRanks(rankIds: (keyof typeof PlayerRank)[]): Promise<OperationResult> {
+    const premiumDB = PremiumDatabase.instance;
+    const result = await premiumDB.updateOne(this.getXuid(), { $set: { activeRanks: rankIds } });
+    if (result.modifiedCount > 0) {
+      this.premiumData.activeRanks = rankIds;
+      return { success: true };
+    }
+    return { success: false };
+  }
+
   /**
    * Pushes a rank to the player's active ranks.
    * @param rankId The ID of the rank to push.
    */
   public async pushActiveRank(rankId: keyof typeof PlayerRank): Promise<OperationResult> {
-    if (!this.hasRank(rankId)) return { success: false, reason: "Player does not own this rank." };
-    return this._addToArray('activeRanks', rankId);
+    if (this.premiumData.activeRanks.includes(rankId)) {
+      return { success: false, reason: "Rank is already active." };
+    }
+    this.premiumData.activeRanks.push(rankId);
+    const premiumDB = PremiumDatabase.instance;
+    const result = await premiumDB.updateOne(this.getXuid(), { $set: { activeRanks: this.premiumData.activeRanks } });
+    if (result.modifiedCount > 0) {
+      return { success: true };
+    }
+    return { success: false };
   }
 
   /**
    * Pops a rank from the player's active ranks.
    */
-  public async popActiveRank(): Promise<OperationResult> {
-    if (this.data.activeRanks.length <= 1) return { success: false, reason: "You must have at least one active rank." };
-    const newRanks = [...this.data.activeRanks];
-    newRanks.pop();
-    return this.updateOne({ $set: { activeRanks: newRanks } });
+  public async popActiveRank(rankId: keyof typeof PlayerRank): Promise<OperationResult> {
+    if (this.premiumData.activeRanks.length <= 1) {
+      return { success: false, reason: "Player must have at least one active rank." };
+    }
+    this.premiumData.activeRanks = this.premiumData.activeRanks.filter(r => r !== rankId);
+    const premiumDB = PremiumDatabase.instance;
+    const result = await premiumDB.updateOne(this.getXuid(), { $set: { activeRanks: this.premiumData.activeRanks } });
+    if (result.modifiedCount > 0) {
+      return { success: true };
+    }
+    return { success: false };
   }
 
   /**
@@ -339,6 +386,14 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
    */
   public async setChatSize(large: boolean): Promise<OperationResult> {
     return this.updateOne({ $set: { chatSize: large } });
+  }
+
+  /**
+   * Sets the player's name color.
+   * @param color The new color.
+   */
+  public async setNameColor(color: string): Promise<OperationResult> {
+    return this.updateOne({ $set: { nameColor: color } });
   }
 
   /**

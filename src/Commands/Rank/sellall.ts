@@ -20,11 +20,12 @@ new CommandBuilder("sellall", "Sells all items in your inventory.").setAliases([
             if (!sellInfo || !sellInfo.money) continue;
 
             const amount = item.stackSize;
-            const value = sellInfo.money * amount * multiplier;
+            const value = Math.floor(sellInfo.money * amount * multiplier);
             total += value;
             player.inventory.clearItem(item.type.identifier, amount);
-            player.info(`§eSold §a${Utils.formatString(item.type.identifier)} §7x§c${amount} §efor §6$${Utils.formatInt(value)} §eat §3$${Utils.formatInt(sellInfo.money * multiplier)} §eeach.`);
+            player.info(`§eSold §a${Utils.formatString(item.type.identifier)} §7x§c${amount} §efor §6$${Utils.formatInt(value)} §eat §3$${Utils.formatInt(Math.floor(sellInfo.money * multiplier))} §eeach.`);
         }
         if (total > 0) player.addMoney(Math.floor(total));
+        else player.info("§eFound no items in your inventory to sell.");
     })
 ).register("Rank")

@@ -108,9 +108,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
       const premiumData = await PremiumDatabase.instance.getByXUID(player.xuid);
       if (!premiumData) {
         await PremiumDatabase.instance.create({
-          xuid: player.xuid,
-          ranks: [PlayerRank.GUEST],
-          vanity: []
+          ...DEFAULT_PREMIUM_DATA
         });
       } else {
         let premiumUpdated = false;
@@ -186,6 +184,9 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
       this.logger.info(`Loaded session for player ${player.username}.`);
     }
 
+    // Reload player rank permissions.
+    player.permissions.permissions.filter((x) => !x.startsWith("rank."));
+
     // Load island into cache
     const islandName = player.getIslandName();
     if (islandName) {
@@ -201,6 +202,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
             return;
           }
         }
+        // Update island perks permissions.
         if (island!.isOwner(player.xuid)) IslandPerkUnlocks.applyPermissions(player, island);
         this.logger.info(`Loaded island §e${islandName}§r into cache for ${player.username}.`);
       } else {

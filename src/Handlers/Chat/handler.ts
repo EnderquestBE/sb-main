@@ -70,7 +70,8 @@ class ChatHandler {
 
     private static format(player: Player, island: Island | null, message: string) {
         const level = island?.getLevel() ?? 0
-        return `${player.getChatSize() ? "" : "§f➙ "}${island ? `§7~${this.chooseIslandLevelColor(level)}${level}§7~ §f*${island.getData().owner.xuid === player.xuid ? "*" : ""} §5${island.getName()} ` : ""}${player.getActiveRanks().reverse().map((x) => `§7[${x.displayName}§7]`).join("")} §a${player.username} §7» ${Color[player.getChatColor() as keyof typeof Color]}${message}`
+        const chatSize = player.getChatSize()
+        return `${chatSize ? "" : "§f➙ "}${island ? `§7~${this.chooseIslandLevelColor(level)}${level}§7~ §f*${island.getData().owner.xuid === player.xuid ? "*" : ""} §5${island.getName()} ` : ""}${player.getActiveRanks().reverse().map((x) => `§7[${chatSize ? x.displayName.replace(/\|\|/g, "§kc§r") : x.displayName}§7]`).join("")} ${Color[player.getNameColor() as keyof typeof Color]}${player.username} §7» ${Color[player.getChatColor() as keyof typeof Color]}${message}`
     }
 
     public static chooseIslandLevelColor(level: number) {

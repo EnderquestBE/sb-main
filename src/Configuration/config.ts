@@ -62,3 +62,6 @@ export * from "./Block"
 
 /* Vanity */
 import "./Vanity";
+
+/* Compressable */
+export * from "./Compressable/compressable"

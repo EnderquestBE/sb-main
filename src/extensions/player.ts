@@ -54,16 +54,21 @@ declare module "@serenityjs/core" {
 
     // Ranks & Customization
     getRankIds(): string[];
-    hasRank(rankId: string): boolean;
-    addRank(rankId: string): Promise<OperationResult>;
-    removeRank(rankId: string): Promise<OperationResult>;
+    hasRank(rankId: keyof typeof PlayerRank): boolean;
+    addRank(rankId: keyof typeof PlayerRank): Promise<OperationResult>;
+    removeRank(rankId: keyof typeof PlayerRank): Promise<OperationResult>;
     getPrimaryRank(): RankInfo;
+    setPrimaryRank(rankId: keyof typeof PlayerRank): Promise<OperationResult>;
     getActiveRanks(): RankInfo[];
-    pushActiveRank(rankId: string): Promise<OperationResult>;
-    popActiveRank(): Promise<OperationResult>;
+    getActiveRankIds(): string[];
+    setActiveRanks(rankIds: (keyof typeof PlayerRank)[]): Promise<OperationResult>;
+    pushActiveRank(rankId: keyof typeof PlayerRank): Promise<OperationResult>;
+    popActiveRank(rankId: keyof typeof PlayerRank): Promise<OperationResult>;
     updateRanks(): void;
     getChatSize(): boolean;
     setChatSize(large: boolean): Promise<OperationResult>;
+    getNameColor(): string;
+    setNameColor(color: string): Promise<OperationResult>;
     getChatColor(): string;
     setChatColor(color: string): Promise<OperationResult>;
 
@@ -316,9 +321,33 @@ Player.prototype.getPrimaryRank = function (this: Player): RankInfo {
   const session = PlayerExtension.getSession(this);
   return session ? session.getPrimaryRank() : RANKS.get("GUEST")!;
 }
+Player.prototype.setPrimaryRank = async function (this: Player, rankId: keyof typeof PlayerRank): Promise<OperationResult> {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return PlayerExtension['NO_SESSION_RESULT'];
+  return session.setPrimaryRank(rankId).then((result) => {
+    if (result.success) {
+      this.updateRanks();
+    }
+    return result;
+  });
+}
 Player.prototype.getActiveRanks = function (this: Player): RankInfo[] {
   const session = PlayerExtension.getSession(this);
   return session ? session.getActiveRanks() : [RANKS.get("GUEST")!];
+}
+Player.prototype.getActiveRankIds = function (this: Player): string[] {
+  const session = PlayerExtension.getSession(this);
+  return session ? session.getActiveRankIds() : [];
+}
+Player.prototype.setActiveRanks = async function (this: Player, rankIds: (keyof typeof PlayerRank)[]): Promise<OperationResult> {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return PlayerExtension['NO_SESSION_RESULT'];
+  return session.setActiveRanks(rankIds).then((result) => {
+    if (result.success) {
+      this.updateRanks();
+    }
+    return result;
+  });
 }
 Player.prototype.pushActiveRank = async function (this: Player, rankId: keyof typeof PlayerRank): Promise<OperationResult> {
   const session = PlayerExtension.getSession(this);
@@ -330,10 +359,10 @@ Player.prototype.pushActiveRank = async function (this: Player, rankId: keyof ty
     return result;
   });
 }
-Player.prototype.popActiveRank = async function (this: Player): Promise<OperationResult> {
+Player.prototype.popActiveRank = async function (this: Player, rankId: keyof typeof PlayerRank): Promise<OperationResult> {
   const session = PlayerExtension.getSession(this);
   if (!session) return PlayerExtension['NO_SESSION_RESULT'];
-  return session.popActiveRank().then((result) => {
+  return session.popActiveRank(rankId).then((result) => {
     if (result.success) {
       this.updateRanks();
     }
@@ -354,8 +383,10 @@ Player.prototype.updateRanks = function (this: Player): void {
   this.permissions.permissions = newPermissions
   // Send available commands.
   this.getTrait(PlayerCommandExecutorTrait).sendAvailableCommands();
+  // Set name color.
+  this.setNameColor(ranks[0]!.nameColor);
   // Set chat color.
-  this.setChatColor(ranks[0]!.color)
+  this.setChatColor(ranks[0]!.color);
 }
 Player.prototype.getChatSize = function (this: Player): boolean {
   const session = PlayerExtension.getSession(this);
@@ -365,6 +396,15 @@ Player.prototype.setChatSize = async function (this: Player, large: boolean): Pr
   const session = PlayerExtension.getSession(this);
   if (!session) return PlayerExtension['NO_SESSION_RESULT'];
   return session.setChatSize(large);
+}
+Player.prototype.getNameColor = function (this: Player): string {
+  const session = PlayerExtension.getSession(this);
+  return session ? session.getNameColor() : "white";
+}
+Player.prototype.setNameColor = async function (this: Player, color: string): Promise<OperationResult> {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return PlayerExtension['NO_SESSION_RESULT'];
+  return session.setNameColor(color);
 }
 Player.prototype.getChatColor = function (this: Player): string {
   const session = PlayerExtension.getSession(this);

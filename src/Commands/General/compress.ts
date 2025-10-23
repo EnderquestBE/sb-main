@@ -1,15 +1,7 @@
 import { EntityInventoryTrait, ItemIdentifier, ItemStack, Player } from "@serenityjs/core";
 import { CommandBuilder, CommandOverload } from "../../Classes";
 import { Utils } from "../../Utils/utils";
-
-const CompressableMap = new Map([
-    [ItemIdentifier.Coal, ItemIdentifier.CoalBlock],
-    [ItemIdentifier.IronIngot, ItemIdentifier.IronBlock],
-    [ItemIdentifier.GoldIngot, ItemIdentifier.GoldBlock],
-    [ItemIdentifier.LapisLazuli, ItemIdentifier.LapisBlock],
-    [ItemIdentifier.Diamond, ItemIdentifier.DiamondBlock],
-    [ItemIdentifier.Emerald, ItemIdentifier.EmeraldBlock],
-]);
+import { CompressableMap } from "../../Configuration/config";
 
 new CommandBuilder("compress", "Compresses the item in your hand.")
     .setAliases(["compress"])

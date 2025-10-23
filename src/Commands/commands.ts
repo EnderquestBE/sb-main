@@ -61,6 +61,7 @@ import "./Rank/chatsize"
 import "./Rank/sellall"
 import "./Rank/sellallxp"
 import "./Rank/repair"
+import "./Rank/compressall"
 
 /** Enchantment Commands */
 import "./Enchantment/merge"

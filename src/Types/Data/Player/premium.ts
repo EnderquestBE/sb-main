@@ -7,6 +7,10 @@ export interface PremiumData {
      */
     ranks: (keyof typeof PlayerRank)[]
     /**
+ * The ranks the player is currently using.
+ */
+    activeRanks: (keyof typeof PlayerRank)[]
+    /**
     * List of vanity item IDs the player owns.
     */
     vanity: string[];

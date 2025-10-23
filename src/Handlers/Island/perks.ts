@@ -1,4 +1,4 @@
-import { Player } from "@serenityjs/core"
+import { Player, PlayerCommandExecutorTrait } from "@serenityjs/core"
 import { Island } from "../../Classes"
 
 interface IslandPerkType {
@@ -25,13 +25,21 @@ class IslandPerkUnlocks {
         }
 
     public static applyPermissions(player: Player, island: Island) {
-        // Remove all island perk permissions first.
-        const newPermissions = player.permissions.permissions.filter((x) => !x.startsWith("island."))
-        newPermissions.push(...island.getPerks().flatMap((perkId) => {
-            const perk = this.perks[perkId as keyof typeof this.perks];
-            return perk?.unlock.permissions ?? []
-        }))
-        player.permissions.permissions = newPermissions
+        const perks = island.getPerks();
+        let permissionsChanged = false;
+        for (const perk of perks) {
+            const info = this.perks[perk as keyof typeof this.perks];
+            if (info.unlock.permissions)
+                for (const permission of info.unlock.permissions) {
+                    if (!player.hasPermission(permission)) {
+                        player.addPermission(permission);
+                        permissionsChanged = true;
+                    }
+                }
+        }
+        if (permissionsChanged) {
+            player.getTrait(PlayerCommandExecutorTrait).sendAvailableCommands();
+        }
     }
 
     public static getAll(): IslandPerkType[] {
@@ -42,18 +50,21 @@ class IslandPerkUnlocks {
         return this.perks[id]
     }
 
-    public static update(island: Island) {
+    public static async update(island: Island) {
         const currentCeil = island.getLevelCeil();
+        let perksChanged = false;
         for (const perk of Object.values(this.perks)) {
             if (island.hasPerk(perk.id)) continue;
 
             if (currentCeil >= perk.level) {
-                island.addPerk(perk.id).then(() => {
-                    const onlineOwners = island.getOnlineOwners();
-                    for (const owner of onlineOwners) {
-                        this.applyPermissions(owner, island);
-                    }
-                });
+                await island.addPerk(perk.id);
+                perksChanged = true;
+            }
+        }
+        if (perksChanged) {
+            const onlineOwners = island.getOnlineOwners();
+            for (const owner of onlineOwners) {
+                this.applyPermissions(owner, island);
             }
         }
     }

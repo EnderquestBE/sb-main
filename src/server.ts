@@ -1,7 +1,6 @@
 import { Player, Serenity } from "@serenityjs/core";
 import { Logger, LoggerColors } from "@serenityjs/logger";
 import { Multiplier } from "./Types/types";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { GlobalDataManager } from "./Classes";
 
 class Server {
@@ -11,7 +10,7 @@ class Server {
 
     private static multipliers: Multiplier[] = [];
 
-    public static globalMultiplier: number = 0;
+    public static globalMultiplier: number = 1;
 
     public static instance: Serenity;
 
@@ -71,33 +70,6 @@ class Server {
     private static updateGlobalMultiplier() {
         this.globalMultiplier = this.multipliers.reduce((add, curr) => add + curr.factor, 1);
         this.queryMultipliers();
-    }
-
-    private static readMultipliers() {
-        const path = `./properties.json`;
-        if (existsSync(path)) {
-            const data = readFileSync(path, "utf-8");
-            const properties = JSON.parse(data);
-            properties.enderquest ??= {};
-            properties.enderquest.multipliers ??= [];
-            properties.enderquest.multipliers = properties.enderquest.multipliers.filter((m: Multiplier) => {
-                // Filter out expired multipliers.
-                return !m.endsAt || m.endsAt > Date.now();
-            });
-        }
-        this.updateGlobalMultiplier();
-    }
-
-    private static writeMultipliers() {
-        const path = `./properties.json`;
-        if (existsSync(path)) {
-            const data = readFileSync(path, "utf-8");
-            const properties = JSON.parse(data);
-            properties.enderquest ??= {};
-            properties.enderquest.multipliers ??= [];
-            properties.enderquest.multipliers = this.multipliers;
-            writeFileSync(path, JSON.stringify(properties, null, 2), "utf-8");
-        }
     }
 }
 

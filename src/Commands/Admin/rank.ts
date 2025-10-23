@@ -1,92 +1,146 @@
-// src/Commands/Admin/rank.ts
-import { CustomEnum, Player } from "@serenityjs/core";
+import { ActionForm, ModalForm, Player } from "@serenityjs/core";
 import { CommandBuilder, CommandOverload, PlayerEnum } from "../../Classes";
-import { PlayerRank, RANKS } from "../../Configuration/Ranks/ranks";
+import { PlayerRank } from "../../Configuration/config";
 
-// Enum for the rank command actions
-class RankActionEnum extends CustomEnum {
-    public static readonly identifier = "rankAction";
-    public static options = ["add", "remove", "push", "pop"];
-}
+function showRankForm(player: Player, target: Player) {
+    const form = new ActionForm("Manage Ranks")
+    form.content = `Managing ranks for §b${target.username}§f.`;
+    form.button("Set Primary Rank");
+    form.button("Push Rank");
+    form.button("Pop Rank");
+    form.button("Reset Active Ranks");
+    form.button("Add Rank");
+    form.button("Remove Rank");
+    form.show(player, (result, error) => {
+        if (result === null || error) return;
 
-// Enum for the available ranks
-class RankEnum extends CustomEnum {
-    public static readonly identifier = "rankEnum";
-    public static options = Object.keys(PlayerRank);
+        switch (result) {
+            case 0:
+                // Set Primary Rank
+                const primaryForm = new ModalForm("Set Primary Rank");
+                const ranks = target.getRankIds();
+                primaryForm.dropdown("Select new primary rank", ranks, ranks.indexOf(target.getPrimaryRank().id));
+                primaryForm.show(player, (result, error) => {
+                    if (result === null || error) return showRankForm(player, target);
+
+                    const selectedRank = ranks[result[0] as number] as PlayerRank;
+                    target.setPrimaryRank(selectedRank).then((result) => {
+                        if (!result.success) {
+                            player.error(`Failed to set primary rank: ${result.reason ?? "No reason provided."}`);
+                            return;
+                        }
+                        player.info(`§bSet primary rank to §f${selectedRank} §afor §e${target.username}§a.`);
+                    })
+                })
+                break;
+            case 1:
+                // Push Rank
+                const pushForm = new ModalForm("Push Rank");
+                const pushRanks = target.getRankIds();
+                pushForm.dropdown("Select owned rank to push", pushRanks);
+                pushForm.show(player, (result, error) => {
+                    if (result === null || error) return showRankForm(player, target);
+                    const selectedRank = pushRanks[result[0] as number] as PlayerRank;
+                    target.pushActiveRank(selectedRank).then((result) => {
+                        if (!result.success) {
+                            player.error(`Failed to push rank: ${result.reason ?? "No reason provided."}`);
+                            return;
+                        }
+                        player.info(`§aPushed rank §f${selectedRank} §ato §e${target.username}§a.`);
+                    })
+                })
+                break;
+            case 2:
+                // Pop Rank
+                const popForm = new ModalForm("Pop Rank");
+                const popRanks = target.getActiveRankIds();
+                if (popRanks.length === 0) {
+                    player.error("Target player has no active ranks to pop.");
+                    return;
+                }
+                popForm.dropdown("Select active rank to pop", popRanks);
+                popForm.show(player, (result, error) => {
+                    if (result === null || error) return showRankForm(player, target);
+                    const selectedRank = popRanks[result[0] as number] as PlayerRank;
+                    target.popActiveRank(selectedRank).then((result) => {
+                        if (!result.success) {
+                            player.error(`Failed to pop rank: ${result.reason ?? "No reason provided."}`);
+                            return;
+                        }
+                        player.info(`§cPopped rank §f${selectedRank} §cfrom §e${target.username}§c.`);
+                    })
+                })
+                break;
+            case 3:
+                // Reset Active Ranks
+                target.setActiveRanks(["GUEST"]).then((result) => {
+                    if (!result.success) {
+                        player.error(`Failed to reset active ranks: ${result.reason ?? "No reason provided."}`);
+                        return;
+                    }
+                    player.info(`§aReset active ranks for §e${target.username}§a.`);
+                });
+                break;
+            case 4:
+                // Add Rank
+                const addForm = new ModalForm("Add Rank");
+                const ownedRanks = target.getRankIds();
+                const addRanks = Object.keys(PlayerRank).filter(r => !ownedRanks.includes(r));
+                addForm.dropdown("Select rank to add", addRanks);
+                addForm.show(player, (result, error) => {
+                    if (result === null || error) return showRankForm(player, target);
+                    const selectedRank = addRanks[result[0] as number] as PlayerRank;
+                    target.addRank(selectedRank).then((result) => {
+                        if (!result.success) {
+                            player.error(`Failed to add rank: ${result.reason ?? "No reason provided."}`);
+                            return;
+                        }
+                        player.info(`§aAdded rank §f${selectedRank} §ato §e${target.username}§a.`);
+                    })
+                })
+                break;
+            case 5:
+                // Remove Rank
+                const removeForm = new ActionForm("Remove Rank");
+                const activeRanks = target.getRankIds();
+                if (activeRanks.length === 0) {
+                    player.error("Target player has no ranks to remove.");
+                    return;
+                }
+                for (const rank of activeRanks) {
+                    removeForm.button(rank);
+                }
+                removeForm.show(player, (result, error) => {
+                    if (result === null || error) return showRankForm(player, target);
+                    const selectedRank = activeRanks[result] as PlayerRank;
+                    target.removeRank(selectedRank).then((result) => {
+                        if (!result.success) {
+                            player.error(`Failed to remove rank: ${result.reason ?? "No reason provided."}`);
+                            return;
+                        }
+                        player.info(`§cRemoved rank §f${selectedRank} §cfrom §e${target.username}§c.`);
+                    })
+                });
+                break;
+        }
+    })
 }
 
 new CommandBuilder("rank", "Manages player ranks.")
     .setPermissions(["serenity.operator"])
     .addOverload(
         new CommandOverload({
-            action: RankActionEnum,
             player: PlayerEnum,
-            rank: RankEnum
-        }).onCallback((origin, { action, player, rank }) => {
-            if (!(origin instanceof Player)) return;
+        }).onCallback((player, { player: targetName }) => {
+            if (!(player instanceof Player)) return;
 
-            const target = origin.world.serenity.getPlayerByUsername(player.result as string);
+            const target = player.world.serenity.getPlayerByUsername(targetName.result as string);
             if (!target) {
-                return origin.error("Player not found.");
+                player.error("Player not found.");
+                return;
             }
 
-            const rankId = rank.result as keyof typeof PlayerRank;
-            if (action.result !== "pop" && !rankId) {
-                return origin.error("Invalid rank specified.");
-            }
-
-            const rankInfo = RANKS.get(rankId);
-
-            if (action.result !== "pop" && !rankInfo) {
-                return origin.error("Invalid rank specified.");
-            }
-
-            switch (action.result) {
-                case "add": {
-                    target.addRank(rankId).then((result) => {
-                        if (result.success) {
-                            origin.info(`§aSuccessfully added the ${rankInfo!.displayName} §arank to §e${target.username}§a.`);
-                            target.info(`§aYou have been given the ${rankInfo!.displayName} §arank!`);
-                        } else {
-                            origin.error(result.reason ?? "Failed to add rank.");
-                        }
-                    })
-                    break;
-                }
-                case "remove": {
-                    target.removeRank(rankId).then((result) => {
-                        if (result.success) {
-                            origin.info(`§aSuccessfully removed the ${rankInfo!.displayName} §arank from §e${target.username}§a.`);
-                            target.info(`§cYour ${rankInfo!.displayName} §crank has been removed.`);
-                        } else {
-                            origin.error(result.reason ?? "Failed to remove rank.");
-                        }
-                    })
-                    break;
-                }
-                case "push": {
-                    target.pushActiveRank(rankId).then((result) => {
-                        if (result.success) {
-                            origin.info(`§aSuccessfully pushed the ${rankInfo!.displayName} §arank to §e${target.username}§a's active ranks.`);
-                            target.info(`§aYour active ranks now include ${rankInfo!.displayName}§a.`);
-                        } else {
-                            origin.error(result.reason ?? "Failed to push rank.");
-                        }
-                    })
-                    break;
-                }
-                case "pop": {
-                    target.popActiveRank().then((result) => {
-                        if (result.success) {
-                            origin.info(`§aSuccessfully popped a rank from §e${target.username}§a's active ranks.`);
-                            target.info(`§cOne of your active ranks has been removed.`);
-                        } else {
-                            origin.error(result.reason ?? "Failed to pop rank.");
-                        }
-                    })
-                    break;
-                }
-            }
+            showRankForm(player, target);
         })
     )
     .register("Admin");

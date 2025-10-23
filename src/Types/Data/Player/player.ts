@@ -23,9 +23,9 @@ interface PlayerData {
     xp: number;
   }
   /**
-   * The ranks the player is currently using.
+   * The name color the player is currently using.
    */
-  activeRanks: (keyof typeof PlayerRank)[]
+  nameColor: string
   /**
    * The chat color the player is currently using.
    */
