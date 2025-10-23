@@ -15,8 +15,7 @@ function randomSpawner(player: Player, amount: number) {
 
 
 const DivineCrateLoot: WeightedItem<CrateLoot>[] = [
-    { value: { function: giveItem.bind({ id: ItemIdentifier.LapisBlock, display: "§6Lapis Block §8x§c128" }), amount: 128 }, weight: 10 },
-    { value: { function: giveItem.bind({ id: ItemIdentifier.DiamondBlock, display: "§6Diamond Block §8x§c64" }), amount: 64 }, weight: 10 },
+    { value: { function: giveItem.bind({ id: ItemIdentifier.LapisBlock, display: "§6Lapis Block §8x§c128" }), amount: 128 }, weight: 5 },
     { value: { function: giveItem.bind({ id: ItemIdentifier.DiamondBlock, display: "§6Diamond Block §8x§c128" }), amount: 128 }, weight: 10 },
     { value: { function: giveItem.bind({ id: ItemIdentifier.Bedrock, display: "§6Bedrock §8x§c128" }), amount: 128 }, weight: 5 },
     { value: { function: giveItem.bind({ id: ItemIdentifier.QuartzBlock, display: "§6Quartz Block §8x§c256" }), amount: 256 }, weight: 10 },

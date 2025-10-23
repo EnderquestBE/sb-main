@@ -232,7 +232,11 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
       const form = new ActionForm("Early Access");
       form.content = " \n       §l§eWelcome to §dEnderquest§e!§r§f\n\n  Thank you for your interest in this\n  server! Before you proceed, please\n    note that the server is still in\n development; features are incomplete\n       and you may lose progress.\n  If you encounter any issues, please\n         report them on Discord.\n\n   Thank you for your understanding!\n "
       form.button("Acknowledge");
-      form.show(player);
+      form.show(player, (_result, _error) => {
+        // Load vanity data.
+        if (player)
+          player.updateVanity();
+      });
     }, 3000);
     resolve();
   }
@@ -243,10 +247,6 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     // Update XP.
     const leveling = player.getTrait(PlayerLevelingTrait) ?? player.addTrait(PlayerLevelingTrait)
     leveling.setExperience(player.getXp());
-    ServerTaskHandler.queueTask(() => {
-      // Load vanity data.
-      player.updateVanity();
-    }, 2000);
   }
 
   public async onPlayerLeave({ player }: PlayerLeaveSignal): Promise<void> {
