@@ -227,14 +227,6 @@ function augmentGeometry(
                     }
                     skipBone = true;
                 }
-                else {
-                    newBone.name = `${newBone.name}-v${vanityIndex + 1}`;
-                }
-            }
-
-            // Only set the parent for the root bones of the vanity.
-            else if (!newBone.parent) {
-                newBone.parent = vanity.bone;
             }
 
             if (!skipBone) {
@@ -271,16 +263,18 @@ class VanitySkin {
         // Check if player is using a persona skin.
         const serializedSkin = player.skin.getSerialized();
         const oldIdentifier = serializedSkin.identifier;
-        if (serializedSkin.isPersona && !serializedSkin.identifier.endsWith(".vanity")) {
-            VanitySkin.steve(player);
-            player.error("Persona skins are not supported on this server, your skin has been reset to default.");
-            return;
-        }
         const textureFormat = serializedSkin.skinImage.height === 64 ? "modern" : "legacy";
-        if (serializedSkin.skinImage.width > 64 || serializedSkin.skinImage.height > 64) {
-            player.error("HD skins are not supported on this server, your skin has been reset to default.");
-            VanitySkin.steve(player);
-            return;
+        if (!serializedSkin.identifier.endsWith(".vanity")) {
+            if (serializedSkin.isPersona) {
+                VanitySkin.steve(player);
+                player.error("Persona skins are not supported on this server, your skin has been reset to default.");
+                return;
+            }
+            if (serializedSkin.skinImage.width > 64 || serializedSkin.skinImage.height > 64) {
+                player.error("HD skins are not supported on this server, your skin has been reset to default.");
+                VanitySkin.steve(player);
+                return;
+            }
         }
         // Get current skin information.
         const identifier = uuid() + "." + "vanity";
@@ -313,7 +307,11 @@ class VanitySkin {
         }
         const newGeometry = augmentGeometry(geo, formatVersion, geometryKey, textureFormat, vanityItems);
         // Construct new serialized skin.
-        const newSkin = new SerializedSkin(identifier, serializedSkin.playFabIdentifier, serializedSkin.resourcePatch, { width: 128, height: 128, data: newSkinImage }, [], serializedSkin.capeImage ?? new SkinImage(0, 0, Buffer.from([])), JSON.stringify(newGeometry), geometry.format_version, "", serializedSkin.capeIdentifier, identifier, serializedSkin.armSize, "#0", [], [], true, true, false, true, true);
+        const newSkin = new SerializedSkin(identifier, serializedSkin.playFabIdentifier, serializedSkin.resourcePatch, { width: 128, height: 128, data: newSkinImage }, [], serializedSkin.capeImage ?? new SkinImage(0, 0, Buffer.from([])), JSON.stringify(newGeometry), geometry.format_version, "", serializedSkin.capeIdentifier, identifier, serializedSkin.armSize, "#0", [], [], true, false, false, true, false);
+
+        // Set player's skin to new vanity skin.
+        //@ts-ignore
+        player.vanitySkin = newSkin;
 
         // Send skin update packet.
         const packet = new PlayerSkinPacket();
@@ -578,13 +576,17 @@ class VanitySkin {
         const animations = vanityItems.filter((v): v is VanityInfo => v !== null && !!v.animations).flatMap(v => v.animations!) as SkinAnimation[];
         const newSkin = new SerializedSkin(identifier, serializedSkin.playFabIdentifier, JSON.stringify({ geometry: { default: geometryKey } }), { width: 128, height: 128, data: newSkinImage }, animations ?? [], new SkinImage(0, 0, Buffer.from([])), JSON.stringify(newGeometry), newGeometry.format_version, "", serializedSkin.capeIdentifier, identifier, serializedSkin.armSize, "#0", [], [], true, true, false, true, true);
 
+        // Set player's skin to new steve skin.
+        //@ts-ignore
+        player.vanitySkin = newSkin;
+
         // Send skin update packet.
         const packet = new PlayerSkinPacket();
         packet.uuid = player.uuid;
         packet.skin = newSkin;
         packet.skinName = identifier;
         packet.oldSkinName = oldIdentifier;
-        packet.isVerified = true;
+        packet.isVerified = false;
 
         player.world.broadcast(packet)
     }

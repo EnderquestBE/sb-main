@@ -3,7 +3,7 @@ import { CommandOverload, Island } from "../../Classes";
 
 class IslandDelHomeEnum extends CustomEnum {
     public static readonly identifier = "islandDelHome";
-    public static options = ["delhome"];
+    public static options = ["delhome", "rmhome"];
 }
 
 const IslandDelHomeCommand = new CommandOverload({

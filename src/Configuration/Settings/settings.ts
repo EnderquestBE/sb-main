@@ -3,7 +3,8 @@ import { UserSetting } from "../../Types/types"
 
 enum Setting {
     hudMode = "hudMode",
-    showXpOverlay = "showXpOverlay"
+    showXpOverlay = "showXpOverlay",
+    blockPartyRequests = "blockPartyRequests",
 }
 
 
@@ -24,6 +25,12 @@ const USERSETTINGS = new Map<keyof typeof Setting, UserSetting>([
         Setting.showXpOverlay,
         {
             name: "Show XP Overlay"
+        }
+    ],
+    [
+        Setting.blockPartyRequests,
+        {
+            name: "Block Party Requests"
         }
     ]
 ])

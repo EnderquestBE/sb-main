@@ -1,9 +1,8 @@
-import { Entity, Player } from "@serenityjs/core";
+import { Player } from "@serenityjs/core";
 import { ServerWarp } from "../../Types/types";
 import { WarpLocation } from "../../Configuration/Warp/warpLocation";
 import { CommandBuilder, CommandOverload } from "..";
-import { AbilityIndex, Gamemode, Vector3f } from "@serenityjs/protocol";
-import { ServerTaskHandler } from "../../Handlers";
+import { Vector3f } from "@serenityjs/protocol";
 
 class Warp {
     private static readonly _warps: Map<keyof typeof WarpLocation, ServerWarp> = new Map();

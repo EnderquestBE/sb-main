@@ -16,9 +16,12 @@ const DEFAULT_PLAYER_DATA: PlayerData = {
     chatSize: false,
     island: "",
     memberOf: [],
+    homes: [],
+    nickname: "",
     settings: {
         hudMode: "scoreboard",
-        showXpOverlay: true
+        showXpOverlay: true,
+        blockPartyRequests: false
     },
     timePlayed: 0,
     stats: {
@@ -45,6 +48,11 @@ const DEFAULT_PREMIUM_DATA: PremiumData = {
     activeRanks: [PlayerRank.GUEST],
     ranks: [PlayerRank.GUEST],
     vanity: [],
+    slots: {
+        homes: 0,
+        auction: 3,
+        membership: 3
+    }
 }
 
 export { DEFAULT_PLAYER_DATA, DEFAULT_PREMIUM_DATA }

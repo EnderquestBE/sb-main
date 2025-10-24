@@ -7,9 +7,8 @@ new CommandBuilder("morph", "Changes the player's skin data.")
     .addOverload(
         new CommandOverload({
             morphId: StringEnum
-        }).onCallback((origin, { morphId }) => {
-            if (!(origin instanceof Player)) return;
-            const player = origin;
+        }).onCallback((player, { morphId }) => {
+            if (!(player instanceof Player)) return;
             const morph = morphId.result;
             if (!morph) {
                 player.error("You must specify a morph ID.");

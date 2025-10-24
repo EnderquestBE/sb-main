@@ -1,4 +1,4 @@
-import { PERMISSION_INTEGER, PlayerRank } from "../../../Configuration/config";
+import { PERMISSION_INTEGER } from "../../../Configuration/config";
 import { Setting } from "../../../Configuration/Settings/settings";
 import { PlayerStatCriteria } from "./stats";
 
@@ -54,6 +54,22 @@ interface PlayerData {
     2: string | null; // Vanity item ID for slot 2
     3: string | null; // Vanity item ID for slot 3
   };
+  /**
+   * The global home locations the player has set.
+   */
+  homes: {
+    name: string;
+    location: {
+      x: number;
+      y: number;
+      z: number;
+    };
+    world: string;
+  }[];
+  /**
+   * Nickname that shows up instead of username for nametag if set.
+   */
+  nickname: string;
   /**
    * The amount of time in seconds the user has spent on the server.
    */

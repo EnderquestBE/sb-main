@@ -166,6 +166,8 @@ class Island extends DataManager<IslandData, IslandDatabase> {
       return false;
     }
     player.teleport(this.getSpawn(), dimension);
+    //@ts-ignore
+    player.updateGamerules();
     return true;
   }
 

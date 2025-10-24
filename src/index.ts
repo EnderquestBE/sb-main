@@ -15,11 +15,11 @@ import { resolve } from "node:path";
 import { BlockTraits, ItemTraits, EntityTraits } from "./Traits";
 import { PlayerCommandCooldownTrait, PlayerListCustomTrait } from "./Traits/Entity/Player";
 import { EntityStackTrait } from "./Traits/Entity/traits";
-import { ContainerType, DataPacket } from "@serenityjs/protocol";
+import { ContainerType, DataPacket, PlayerSkinPacket } from "@serenityjs/protocol";
 import { EntityPersistenceTrait } from "./Traits/Entity/Persistence/persistence";
 import { PlayerBoundaryTrait } from "./Traits/Entity/Boundary/boundary";
 import { EntityClientRenderTrait } from "./Traits/Entity/Slapper/clientRender";
-import { DEFAULT_PLAYER_DATA, DEFAULT_PREMIUM_DATA, PlayerRank, STAFF_PERMISSIONS } from "./Configuration/config";
+import { DEFAULT_PLAYER_DATA, DEFAULT_PREMIUM_DATA, STAFF_PERMISSIONS } from "./Configuration/config";
 import { isDevEnvironment } from "./config";
 import { BlockTileEntityUpdateTrait } from "./Traits/Block/traits";
 import { EntityItemHandlerTrait } from "./Traits/Entity/Persistence/item";
@@ -425,6 +425,54 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
         if (packets.length > 0) player.send(...packets);
       }, 100);
     }
+
+    // Handle updating skins of players in the new dimension for the joining player.
+
+    // Get vanity skin cache.
+    //@ts-ignore
+    const skins: { [key: string]: string } = player.vanitySkinCache;
+    //@ts-ignore
+    if (!skins) player.vanitySkinCache = {};
+
+    // Iterate through players in the dimension.
+    for (const p of toDimension.getPlayers()) {
+      if (p.xuid === player.xuid) continue;
+      // Check if the player has cached their vanity skin.
+      const cachedId = skins[p.uuid];
+      //@ts-ignore
+      if (cachedId !== p.skin.identifier) {
+        // Update vanity skin cache.
+        //@ts-ignore
+        player.vanitySkinCache[p.uuid] = p.skin.identifier;
+
+        // Send skin update packet.
+        const packet = new PlayerSkinPacket();
+        packet.uuid = p.uuid;
+        //@ts-ignore
+        packet.skin = p.vanitySkin ?? p.skin.getSerialized();
+        //@ts-ignore
+        packet.skinName = p.vanitySkin.identifier ?? p.skin.identifier;
+        //@ts-ignore
+        packet.oldSkinName = cachedId ?? p.skin.identifier;
+        packet.isVerified = true;
+
+        player.send(packet);
+      }
+    }
+
+    // Handle updating the player's skin to others in the new dimension.
+    // Send skin update packet.
+    const packet = new PlayerSkinPacket();
+    packet.uuid = player.uuid;
+    //@ts-ignore
+    packet.skin = player.vanitySkin ?? player.skin.getSerialized();
+    //@ts-ignore
+    packet.skinName = player.vanitySkin.identifier ?? player.skin.identifier;
+    //@ts-ignore
+    packet.oldSkinName = player.skin.identifier;
+    packet.isVerified = true;
+
+    toDimension.broadcast(packet);
   }
 }
 

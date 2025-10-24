@@ -1,4 +1,4 @@
-import { Color } from "../types"
+import { Color, PremiumData } from "../types"
 
 interface RankInfo {
     id: string // ID for the rank.
@@ -8,6 +8,7 @@ interface RankInfo {
     color: keyof typeof Color // Color associated with rank for display purposes.
     permissions: string[] // Permission strings associated with rank.
     kits: string[] // IDs of the kits this rank can claim.
+    slots: Partial<PremiumData["slots"]> // The extra slots permitted by this rank.
 }
 
 export { RankInfo }

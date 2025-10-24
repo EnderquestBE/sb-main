@@ -34,7 +34,6 @@ new CommandBuilder("compressall", "Compresses all items in your inventory.")
                 // Clear the slot.
                 inv.clearSlot(item.slot);
             }
-            console.log(JSON.stringify(amounts));
             if (Object.keys(amounts).length === 0) {
                 return player.info("§eFound no items in your inventory to compress.");
             } else {
@@ -53,7 +52,6 @@ new CommandBuilder("compressall", "Compresses all items in your inventory.")
                         delete amounts[itemId as ItemIdentifier];
                     }
                 }
-                console.log(JSON.stringify(amounts));
                 // Add all compressed and remainder items.
                 for (const [itemId, amount] of Object.entries(amounts)) {
                     inv.addItem(new ItemStack(itemId as ItemIdentifier, { stackSize: amount }));

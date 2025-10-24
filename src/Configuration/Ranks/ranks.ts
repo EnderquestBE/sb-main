@@ -39,7 +39,8 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
             nameColor: "Green",
             color: "White",
             permissions: [],
-            kits: []
+            kits: [],
+            slots: {}
         }
     ],
     /**
@@ -54,7 +55,11 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
             nameColor: "Green",
             color: "Green",
             permissions: ["rank.fly", "rank.sellall", "rank.sellallxp"],
-            kits: []
+            kits: [],
+            slots: {
+                auction: 2,
+                membership: 2
+            }
         }
     ],
     [
@@ -66,7 +71,11 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
             nameColor: "Green",
             color: "Green",
             permissions: ["rank.fly", "rank.sellall", "rank.sellallxp", "rank.repair", "rank.compressall"],
-            kits: []
+            kits: [],
+            slots: {
+                auction: 2,
+                membership: 2
+            }
         }
     ],
     [
@@ -78,7 +87,11 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
             displayName: "§6Legend",
             color: "Green",
             permissions: ["rank.fly", "rank.sellall", "rank.sellallxp", "rank.repair", "rank.compressall", "rank.feed", "rank.time"],
-            kits: []
+            kits: [],
+            slots: {
+                auction: 2,
+                membership: 2
+            }
         }
     ],
     [
@@ -90,7 +103,11 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
             nameColor: "Green",
             color: "Aqua",
             permissions: ["rank.fly", "rank.sellall", "rank.sellallxp", "rank.repair", "rank.compressall", "rank.feed", "rank.time", "rank.weather", "rank.rename"],
-            kits: []
+            kits: [],
+            slots: {
+                auction: 3,
+                membership: 3
+            }
         }
     ],
     [
@@ -101,8 +118,13 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
             displayName: "§l§cTitan§r",
             nameColor: "Green",
             color: "Aqua",
-            permissions: ["rank.fly", "rank.sellall", "rank.sellallxp", "rank.repair", "rank.compressall", "rank.feed", "rank.time", "rank.weather", "rank.rename", "rank.party", "rank.sethome"],
-            kits: []
+            permissions: ["rank.fly", "rank.sellall", "rank.sellallxp", "rank.repair", "rank.compressall", "rank.feed", "rank.time", "rank.weather", "rank.rename", "rank.party", "rank.home"],
+            kits: [],
+            slots: {
+                homes: 3,
+                auction: 4,
+                membership: 4
+            }
         }
     ],
     [
@@ -110,11 +132,16 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
         {
             id: PlayerRank.IMMORTAL,
             name: "Immortal",
-            displayName: "§6||§l§eImmortal§r§6||",
+            displayName: "§6§l||§eImmortal§6||§r",
             nameColor: "Green",
             color: "Aqua",
-            permissions: ["rank.fly", "rank.sellall", "rank.sellallxp", "rank.repair", "rank.compressall", "rank.feed", "rank.time", "rank.weather", "rank.rename", "rank.party", "rank.sethome", "rank.nickname", "rank.chatsize"],
-            kits: []
+            permissions: ["rank.fly", "rank.sellall", "rank.sellallxp", "rank.repair", "rank.compressall", "rank.feed", "rank.time", "rank.weather", "rank.rename", "rank.party", "rank.home", "rank.nickname", "rank.chatsize"],
+            kits: [],
+            slots: {
+                homes: 4,
+                auction: 5,
+                membership: 5
+            }
         }
     ],
     [
@@ -122,11 +149,16 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
         {
             id: PlayerRank.CELESTIAL,
             name: "Celestial",
-            displayName: "§b||§l§dCel§best§eial§r§b||",
+            displayName: "§b§l||§dCel§best§eial§b||§r",
             nameColor: "LightPurple",
             color: "Aqua",
-            permissions: ["rank.fly", "rank.sellall", "rank.sellallxp", "rank.repair", "rank.compressall", "rank.feed", "rank.time", "rank.weather", "rank.rename", "rank.party", "rank.sethome", "rank.nickname", "rank.chatsize", "rank.rainbow"],
-            kits: []
+            permissions: ["rank.fly", "rank.sellall", "rank.sellallxp", "rank.repair", "rank.compressall", "rank.feed", "rank.time", "rank.weather", "rank.rename", "rank.party", "rank.home", "rank.nickname", "rank.chatsize", "rank.rainbow"],
+            kits: [],
+            slots: {
+                homes: 5,
+                auction: 7,
+                membership: 7
+            }
         }
     ],
     /**
@@ -141,7 +173,8 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
             nameColor: "Green",
             color: "White",
             permissions: ["rank.fly", "rank.sellall", "rank.sellallxp"],
-            kits: []
+            kits: [],
+            slots: {}
         }
     ],
     /**
@@ -156,7 +189,8 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
             nameColor: "White",
             color: "Yellow",
             permissions: [],
-            kits: []
+            kits: [],
+            slots: {}
         }
     ],
     [
@@ -168,7 +202,8 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
             nameColor: "White",
             color: "Yellow",
             permissions: ["rank.chatsize"],
-            kits: []
+            kits: [],
+            slots: {}
         }
     ],
     [
@@ -180,7 +215,8 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
             nameColor: "White",
             color: "Green",
             permissions: [],
-            kits: []
+            kits: [],
+            slots: {}
         }
     ],
     [
@@ -192,7 +228,8 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
             nameColor: "White",
             color: "Yellow",
             permissions: ["rank.chatsize"],
-            kits: []
+            kits: [],
+            slots: {}
         }
     ],
     [
@@ -204,7 +241,8 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
             nameColor: "White",
             color: "Yellow",
             permissions: ["rank.chatsize"],
-            kits: []
+            kits: [],
+            slots: {}
         }
     ],
     [
@@ -216,7 +254,8 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
             nameColor: "White",
             color: "Yellow",
             permissions: ["rank.chatsize"],
-            kits: []
+            kits: [],
+            slots: {}
         }
     ],
     [
@@ -228,7 +267,8 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
             nameColor: "White",
             color: "Yellow",
             permissions: ["rank.chatsize"],
-            kits: []
+            kits: [],
+            slots: {}
         }
     ],
     [
@@ -240,7 +280,8 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
             nameColor: "White",
             color: "Yellow",
             permissions: ["rank.chatsize"],
-            kits: []
+            kits: [],
+            slots: {}
         }
     ],
     [
@@ -252,7 +293,8 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
             nameColor: "Yellow",
             color: "Yellow",
             permissions: ["rank.chatsize"],
-            kits: []
+            kits: [],
+            slots: {}
         }
     ]
 ])

@@ -11,7 +11,7 @@ async function validifyIslandName(name: string, db: IslandDatabase): Promise<{ s
   } else if (name.length > 14) {
     return { success: false, message: "Your island name must be less than 14 characters long." }
   } else if (/^[a-zA-Z0-9]+$/.test(name) === false) {
-    return { success: false, message: "Your island name must only contain letters." }
+    return { success: false, message: "Your island name must only contain letters and numbers." }
   }
   return {
     success: true

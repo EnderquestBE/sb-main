@@ -1,8 +1,8 @@
 
 import { Player, PlayerCommandExecutorTrait } from "@serenityjs/core";
 import { Island, PlayerDatabase, PlayerSession, PremiumDatabase, VanitySkin } from "../Classes";
-import { OperationResult, PlayerData, PlayerStatCriteria, RankInfo, VanityInfo } from "../Types/types";
-import { ChatSource, DEFAULT_PLAYER_DATA, PERMISSION_INTEGER } from "../Configuration/config";
+import { OperationResult, PlayerData, PlayerStatCriteria, PremiumData, RankInfo, VanityInfo } from "../Types/types";
+import { ChatSource, DEFAULT_PLAYER_DATA, DEFAULT_PREMIUM_DATA, PERMISSION_INTEGER } from "../Configuration/config";
 import { PlayerRank, RANKS } from "../Configuration/Ranks/ranks";
 import { Setting } from "../Configuration/Settings/settings";
 import { PlayerInventory } from "./inventory";
@@ -71,6 +71,14 @@ declare module "@serenityjs/core" {
     setNameColor(color: string): Promise<OperationResult>;
     getChatColor(): string;
     setChatColor(color: string): Promise<OperationResult>;
+    getNickname(): string;
+    setNickname(nickname: string): Promise<OperationResult>;
+
+    // Slots
+    getSlots(key: keyof PremiumData["slots"]): number;
+    setSlots(key: keyof PremiumData["slots"], amount: number): Promise<OperationResult>;
+    addSlots(key: keyof PremiumData["slots"], amount: number): Promise<OperationResult>;
+    removeSlots(key: keyof PremiumData["slots"], amount: number): Promise<OperationResult>;
 
     // Vanity
     equipVanity(slot: 1 | 2 | 3, vanityId: string): void;
@@ -97,6 +105,12 @@ declare module "@serenityjs/core" {
     isMemberOfIsland(islandName: string): boolean;
     setMemberOfIsland(islandName: string): Promise<OperationResult>;
     unsetMemberOfIsland(islandName: string): Promise<OperationResult>;
+
+    // Homes
+    addHome(home: { name: string; location: { x: number; y: number; z: number; }, world: string }): Promise<OperationResult>;
+    removeHome(name: string): Promise<OperationResult>;
+    hasHome(name: string): boolean;
+    getHomes(): { name: string; location: { x: number; y: number; z: number; }, world: string }[];
 
     // Settings
     getSettings(): { [key in Setting]: string | boolean };
@@ -383,10 +397,17 @@ Player.prototype.updateRanks = function (this: Player): void {
   this.permissions.permissions = newPermissions
   // Send available commands.
   this.getTrait(PlayerCommandExecutorTrait).sendAvailableCommands();
+  // Get primary rank.
+  const primary = ranks[0]!;
   // Set name color.
-  this.setNameColor(ranks[0]!.nameColor);
+  this.setNameColor(primary.nameColor);
   // Set chat color.
-  this.setChatColor(ranks[0]!.color);
+  this.setChatColor(primary.color);
+  // Update slots.
+  const slots = Object.entries(DEFAULT_PREMIUM_DATA.slots) as [keyof PremiumData["slots"], number][];
+  for (const [slot, value] of slots) {
+    this.setSlots(slot, value + (primary.slots[slot] || 0));
+  }
 }
 Player.prototype.getChatSize = function (this: Player): boolean {
   const session = PlayerExtension.getSession(this);
@@ -414,6 +435,27 @@ Player.prototype.setChatColor = async function (this: Player, color: string): Pr
   const session = PlayerExtension.getSession(this);
   if (!session) return PlayerExtension['NO_SESSION_RESULT'];
   return session.setChatColor(color);
+}
+Player.prototype.getNickname = function (this: Player): string {
+  const session = PlayerExtension.getSession(this);
+  return session ? session.getNickname() : "";
+}
+Player.prototype.setNickname = async function (this: Player, nickname: string): Promise<OperationResult> {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return PlayerExtension['NO_SESSION_RESULT'];
+  return session.setNickname(nickname);
+}
+
+// Slots
+Player.prototype.getSlots = function (this: Player, key: keyof PremiumData["slots"]): number {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return 0;
+  return session.getSlots(key);
+}
+Player.prototype.setSlots = async function (this: Player, key: keyof PremiumData["slots"], amount: number): Promise<OperationResult> {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return PlayerExtension['NO_SESSION_RESULT'];
+  return session.setSlots(key, amount);
 }
 
 // Vanity
@@ -531,6 +573,28 @@ Player.prototype.unsetMemberOfIsland = async function (this: Player, islandName:
   const session = PlayerExtension.getSession(this);
   if (!session) return PlayerExtension['NO_SESSION_RESULT'];
   return session.unsetMemberOfIsland(islandName);
+}
+
+// Homes
+Player.prototype.addHome = async function (this: Player, home: { name: string; location: { x: number; y: number; z: number; }, world: string }): Promise<OperationResult> {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return PlayerExtension['NO_SESSION_RESULT'];
+  return session.addHome(home);
+}
+Player.prototype.removeHome = async function (this: Player, name: string): Promise<OperationResult> {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return PlayerExtension['NO_SESSION_RESULT'];
+  return session.removeHome(name);
+}
+Player.prototype.hasHome = function (this: Player, name: string): boolean {
+  const session = PlayerExtension.getSession(this);
+  if (!session) return false;
+  const homes = session.getHomes();
+  return homes.some((home) => home.name.toLowerCase() === name.toLowerCase());
+}
+Player.prototype.getHomes = function (this: Player): { name: string; location: { x: number; y: number; z: number; }, world: string }[] {
+  const session = PlayerExtension.getSession(this);
+  return session ? session.getHomes() : [];
 }
 
 // Settings

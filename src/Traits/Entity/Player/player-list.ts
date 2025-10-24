@@ -61,7 +61,8 @@ class PlayerListCustomTrait extends PlayerTrait {
             uuid: player.uuid,
             xuid: player.xuid,
             username: player.username,
-            skin: player.skin.getSerialized(),
+            //@ts-ignore
+            skin: player.vanitySkin ?? player.skin.getSerialized(),
             platformBuild: player.clientSystemInfo.os,
             platformChatIdentifier: "",
             isHost: false,

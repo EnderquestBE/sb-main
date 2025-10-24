@@ -99,6 +99,9 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
   public async getIslandAsync(): Promise<Island | null> { return await Island.load(this.data.island) }
   public getIslandsMemberOf(): string[] { return this.data.memberOf; }
   public isMemberOfIsland(islandName: string): boolean { return this.data.memberOf.includes(islandName); }
+  public getHomes(): { name: string; location: { x: number; y: number; z: number; }, world: string }[] {
+    return this.data.homes;
+  }
   public getSettings(): { [key in Setting]: string | boolean } { return this.data.settings; }
   public getLastSeen(): Date { return this.data.lastSeen; }
   public getLastUpdated(): Date { return this.data.lastUpdated; }
@@ -404,6 +407,51 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
     return this.updateOne({ $set: { chatColor: color } });
   }
 
+  /**
+   * Sets the player's nickname.
+   * @param nickname The new nickname.
+   */
+  public async setNickname(nickname: string): Promise<OperationResult> {
+    return this.updateOne({ $set: { nickname: nickname } });
+  }
+
+  /**
+   * Gets the player's nickname.
+   */
+  public getNickname(): string {
+    return this.data.nickname;
+  }
+
+  /**
+   * @tab Slots Methods
+   */
+  public getSlots(key: keyof PremiumData["slots"]): number {
+    return this.premiumData.slots[key];
+  }
+
+  public async setSlots(key: keyof PremiumData["slots"], amount: number): Promise<OperationResult> {
+    const premiumDB = PremiumDatabase.instance;
+    const result = await premiumDB.updateOne(this.getXuid(), { $set: { [`slots.${key}`]: amount } });
+    if (result.modifiedCount > 0) {
+      this.premiumData.slots[key] = amount;
+      return { success: true };
+    }
+    return { success: false };
+  }
+
+  public async addSlots(key: keyof PremiumData["slots"], amount: number): Promise<OperationResult> {
+    const newAmount = this.getSlots(key) + amount;
+    return this.setSlots(key, newAmount);
+  }
+
+  public async removeSlots(key: keyof PremiumData["slots"], amount: number): Promise<OperationResult> {
+    const newAmount = this.getSlots(key) - amount;
+    if (newAmount < 0) {
+      return { success: false, reason: "Slots cannot be negative." };
+    }
+    return this.setSlots(key, newAmount);
+  }
+
   // Vanity
 
   /**
@@ -457,6 +505,22 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
    */
   public ownsVanity(vanityId: string): boolean {
     return this.premiumData.vanity.includes(vanityId);
+  }
+
+  /**
+   * Adds a home location for the player.
+   * @param home The home location to add.
+   */
+  public async addHome(home: { name: string; location: { x: number; y: number; z: number; }; world: string }): Promise<OperationResult> {
+    return this._addToArray("homes", home);
+  }
+
+  /**
+   * Removes a home location by name.
+   * @param name The name of the home location to remove.
+   */
+  public async removeHome(name: string): Promise<OperationResult> {
+    return this._removeFromArrayByField("homes", "name", name);
   }
 
   /**
