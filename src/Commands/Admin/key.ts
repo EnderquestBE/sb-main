@@ -62,7 +62,7 @@ new CommandBuilder("key", "Gives a specified crate key.")
                     CrateItem = new VoterCrateKey(amountValue);
                     break;
                 case "Seasonal":
-                    CrateItem = new SeasonalCrateKey(amountValue);
+                    CrateItem = new SeasonalCrateKey(undefined, amountValue);
                     break;
                 default:
                     return player.error("Crate type is invalid.");
