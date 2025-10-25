@@ -5,6 +5,7 @@ import { GeometryDefinition, MinecraftGeometryFile, VanityInfo } from "../../Typ
 import { PlayerSkinPacket, SerializedSkin, SkinAnimation, SkinImage } from '@serenityjs/protocol';
 import { resolve } from 'node:path';
 import { readFile } from 'node:fs/promises';
+import { writeFileSync } from 'node:fs';
 
 async function augmentSkinAndUV(
     skinImage: Jimp.Bitmap,
@@ -238,6 +239,7 @@ function augmentGeometry(
     // 7. Return final geometry.
     switch (formatVersion) {
         case "1.8.0":
+            //writeFileSync(resolve(`./debug_${geometryKey}.json`), JSON.stringify({ format_version: "1.12.0", "minecraft:geometry": [{ description: { identifier: geometryKey, texturewidth: 128, textureheight: 128 }, ...finalGeometry }] }, null, 2));
             return {
                 format_version: "1.12.0",
                 "minecraft:geometry": [{
@@ -250,6 +252,7 @@ function augmentGeometry(
                 }],
             } as MinecraftGeometryFile;
         default:
+            //writeFileSync(resolve(`./debug_${geometryKey}.json`), JSON.stringify({ format_version: "1.12.0", "minecraft:geometry": [finalGeometry] }, null, 2));
             return {
                 format_version: "1.12.0",
                 "minecraft:geometry": [finalGeometry]

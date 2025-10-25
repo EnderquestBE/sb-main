@@ -1,5 +1,4 @@
 import { Block, Container } from "@serenityjs/core";
-import { PlayerRank } from "../config";
 
 type KitData = {
     /* Identifier for the kit. */
@@ -8,8 +7,6 @@ type KitData = {
     name: string;
     /* Display name shown on the kit item. */
     displayName: string;
-    /* Rank required to access the kit. */
-    rank: keyof typeof PlayerRank;
     /* Cooldown time after redeeming in hours. */
     cooldown: number;
     /* Function to execute on the chest when placed to populate its contents. */

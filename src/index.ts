@@ -160,7 +160,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
 
   public beforePlayerJoin({ player }: PlayerJoinSignal): boolean {
     // Manage whitelist.
-    if (!GlobalDataManager.instance.isWhitelisted(player)) {
+    if (!GlobalDataManager?.instance?.isWhitelisted(player)) {
       player.disconnect("§cThe server is currently closed for play testing.\n§dIf you are interested, join our discord:\n§9https://discord.ender.quest")
       return false;
     }
@@ -427,6 +427,8 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     }
 
     // Handle updating skins of players in the new dimension for the joining player.
+    //@ts-ignore
+    if (!player?.vanitySkin) return;
 
     // Get vanity skin cache.
     //@ts-ignore

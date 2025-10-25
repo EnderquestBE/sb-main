@@ -6,7 +6,7 @@ import { CompoundTag, StringTag } from "@serenityjs/nbt";
 
 class KitEnum extends CustomEnum {
     public static readonly identifier = "kit";
-    public static options = Kit.keys;
+    public static options = [...Kit.keys, "claimall"];
 }
 
 function showKitMenu(player: Player, kits: KitData[]) {
@@ -18,13 +18,19 @@ function showKitMenu(player: Player, kits: KitData[]) {
         if (result === null || error) return;
         const selectedKit = kits[result];
         if (!selectedKit) return;
+        const ranks = player.getActiveRanks();
+        const requiredRank = RANKS.values().find((x) => x.kits.includes(selectedKit.id));
         const details = new ActionForm(selectedKit.name);
-        details.content = `§b§lName: §f${selectedKit.name}§r\n§cCooldown: §f${selectedKit.cooldown}h\n${selectedKit.rank !== "GUEST" ? ((player.hasRank(selectedKit.rank) ? "§a" : "§c") + `Requires §f${RANKS.get(selectedKit.rank)?.displayName}`) : ""}`;
+        details.content = `§b§lName: §f${selectedKit.displayName}§r\n§cCooldown: §f${selectedKit.cooldown}h\n${((ranks.some((rank) => rank.kits.includes(selectedKit.id)) ? "§a" : "§c") + `Required Rank: §f${requiredRank?.displayName}`)}`;
         details.button("Redeem");
         details.button("Back");
         details.show(player, (selection, error) => {
-            if (selection === null || error) return;
+            if (selection === null || error) return showKitMenu(player, kits);
             if (selection === 0) {
+                if (!ranks.some((rank) => rank.kits.includes(selectedKit.id))) {
+                    player.error("You do not have access to this kit.");
+                    return;
+                }
                 redeemKit(player, selectedKit);
             } else {
                 showKitMenu(player, kits);
@@ -34,8 +40,6 @@ function showKitMenu(player: Player, kits: KitData[]) {
 }
 
 function redeemKit(player: Player, kit: KitData) {
-    const kitItem = new KitItem(kit.id);
-    const inv = player.getTrait(EntityInventoryTrait).container;
     // Check if the kit is on cooldown.
     let kitEntries = player.getStorageEntry<CompoundTag>("KitCooldown")
     if (kitEntries) {
@@ -46,7 +50,7 @@ function redeemKit(player: Player, kit: KitData) {
             const elapsedHours = (now - lastDate) / 3600000;
             if (elapsedHours < kit.cooldown) {
                 const remaining = (kit.cooldown - elapsedHours).toFixed(1);
-                player.sendMessage(`§cKit is on cooldown for §4${remaining} §cmore hours.`);
+                player.error(`Kit is on cooldown for ${remaining} more hours.`);
                 return;
             }
         }
@@ -57,12 +61,14 @@ function redeemKit(player: Player, kit: KitData) {
     kitEntries.set(kit.id, new StringTag(new Date().toISOString(), kit.id));
     player.setStorageEntry("KitCooldown", kitEntries);
     // Check if player's inventory is full.
+    const inv = player.getTrait(EntityInventoryTrait).container;
     if (inv.emptySlotsCount === 0) {
-        player.sendMessage("§cYour inventory is full.");
+        player.error("Your inventory is full.");
         return;
     }
+    const kitItem = new KitItem(kit.id);
     inv.addItem(kitItem);
-    player.sendMessage(`§bRedeemed §f${kit.displayName}§b!`);
+    player.info(`§bRedeemed §f${kit.displayName} Kit§b!`);
 }
 
 new CommandBuilder("kit", "Opens the kit selection menu.")
@@ -75,10 +81,19 @@ new CommandBuilder("kit", "Opens the kit selection menu.")
             //@ts-ignore
             const kitId = identifier?.result;
             if (kitId) {
-                const kit = Kit.get(kitId);
-                if (!kit) return player.error("That kit does not exist.");
-                // Redeem the kit.
-                redeemKit(player, kit);
+                if (kitId === "claimall") {
+                    const kits = Kit.getAll();
+                    const ranks = player.getActiveRanks();
+                    for (const kit of kits) {
+                        if (!ranks.some((rank) => rank.kits.includes(kit.id))) continue;
+                        redeemKit(player, kit);
+                    }
+                } else {
+                    const kit = Kit.get(kitId);
+                    if (!kit) return player.error("That kit does not exist.");
+                    // Redeem the kit.
+                    redeemKit(player, kit);
+                }
             } else {
                 showKitMenu(player, Kit.getAll());
             }

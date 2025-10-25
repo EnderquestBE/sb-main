@@ -17,8 +17,8 @@ const CommonCrateLoot: WeightedItem<CrateLoot>[] = [
     { value: { function: giveItem.bind({ id: ItemIdentifier.LapisBlock, display: "§6Lapis Block §8x§c4" }), amount: 4 }, weight: 10 },
     { value: { function: giveItem.bind({ id: ItemIdentifier.DiamondBlock, display: "§6Diamond Block §8x§c4" }), amount: 4 }, weight: 10 },
     { value: { function: giveItem.bind({ id: ItemIdentifier.GrassBlock, display: "§6Grass Block §8x§c32" }), amount: 32 }, weight: 10 },
+    { value: { function: giveMoney, amount: 5000 }, weight: 10 },
     { value: { function: giveMoney, amount: 10000 }, weight: 10 },
-    { value: { function: giveMoney, amount: 20000 }, weight: 10 },
     { value: { function: giveItemStack.bind({ item: () => RareCrateKey, args: [] }), amount: 1 }, weight: 20 },
     { value: { function: giveItemStack.bind({ item: () => RefinementScroll, args: [] }), amount: 1 }, weight: 10 }
 ];

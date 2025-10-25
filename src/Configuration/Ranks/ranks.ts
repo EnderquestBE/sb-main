@@ -39,8 +39,9 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
             nameColor: "Green",
             color: "White",
             permissions: [],
-            kits: [],
-            slots: {}
+            kits: ["starter", "weekly"],
+            slots: {},
+            description: "The default rank for all players."
         }
     ],
     /**
@@ -55,11 +56,12 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
             nameColor: "Green",
             color: "Green",
             permissions: ["rank.fly", "rank.sellall", "rank.sellallxp"],
-            kits: [],
+            kits: ["starter", "weekly", "nomad"],
             slots: {
                 auction: 2,
                 membership: 2
-            }
+            },
+            description: "The mark of a kind soul who supported this server!"
         }
     ],
     [
@@ -71,12 +73,13 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
             nameColor: "Green",
             color: "Green",
             permissions: ["rank.fly", "rank.sellall", "rank.sellallxp", "rank.repair", "rank.compressall"],
-            kits: [],
+            kits: ["starter", "weekly", "nomad", "elite"],
             slots: {
                 auction: 2,
                 membership: 2
-            }
-        }
+            },
+            description: "They know what they're doing."
+        },
     ],
     [
         PlayerRank.LEGEND,
@@ -87,11 +90,12 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
             displayName: "§6Legend",
             color: "Green",
             permissions: ["rank.fly", "rank.sellall", "rank.sellallxp", "rank.repair", "rank.compressall", "rank.feed", "rank.time"],
-            kits: [],
+            kits: ["starter", "weekly", "nomad", "elite", "legend"],
             slots: {
                 auction: 2,
                 membership: 2
-            }
+            },
+            description: "You absolute legend."
         }
     ],
     [
@@ -103,11 +107,12 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
             nameColor: "Green",
             color: "Aqua",
             permissions: ["rank.fly", "rank.sellall", "rank.sellallxp", "rank.repair", "rank.compressall", "rank.feed", "rank.time", "rank.weather", "rank.rename"],
-            kits: [],
+            kits: ["starter", "weekly", "nomad", "elite", "legend", "master"],
             slots: {
                 auction: 3,
                 membership: 3
-            }
+            },
+            description: "A true master of the craft."
         }
     ],
     [
@@ -119,12 +124,13 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
             nameColor: "Green",
             color: "Aqua",
             permissions: ["rank.fly", "rank.sellall", "rank.sellallxp", "rank.repair", "rank.compressall", "rank.feed", "rank.time", "rank.weather", "rank.rename", "rank.party", "rank.home"],
-            kits: [],
+            kits: ["starter", "weekly", "nomad", "elite", "legend", "master", "titan"],
             slots: {
                 homes: 3,
                 auction: 4,
                 membership: 4
-            }
+            },
+            description: "A titan among mortals, standing tall and unyielding."
         }
     ],
     [
@@ -136,12 +142,13 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
             nameColor: "Green",
             color: "Aqua",
             permissions: ["rank.fly", "rank.sellall", "rank.sellallxp", "rank.repair", "rank.compressall", "rank.feed", "rank.time", "rank.weather", "rank.rename", "rank.party", "rank.home", "rank.nickname", "rank.chatsize"],
-            kits: [],
+            kits: ["starter", "weekly", "nomad", "elite", "legend", "master", "titan", "immortal"],
             slots: {
                 homes: 4,
                 auction: 5,
                 membership: 5
-            }
+            },
+            description: "Larger than life, transcending our expectations."
         }
     ],
     [
@@ -153,12 +160,13 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
             nameColor: "LightPurple",
             color: "Aqua",
             permissions: ["rank.fly", "rank.sellall", "rank.sellallxp", "rank.repair", "rank.compressall", "rank.feed", "rank.time", "rank.weather", "rank.rename", "rank.party", "rank.home", "rank.nickname", "rank.chatsize", "rank.rainbow"],
-            kits: [],
+            kits: ["starter", "weekly", "nomad", "elite", "legend", "master", "titan", "immortal", "celestial"],
             slots: {
                 homes: 5,
                 auction: 7,
                 membership: 7
-            }
+            },
+            description: "Radiates the ethereal power of super generousity!"
         }
     ],
     /**
@@ -173,8 +181,9 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
             nameColor: "Green",
             color: "White",
             permissions: ["rank.fly", "rank.sellall", "rank.sellallxp"],
-            kits: [],
-            slots: {}
+            kits: ["starter", "weekly", "youtuber"],
+            slots: {},
+            description: "An exclusive rank for content creators obtained through application."
         }
     ],
     /**

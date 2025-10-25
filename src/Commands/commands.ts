@@ -51,6 +51,7 @@ import "./General/rules"
 import "./General/kit"
 import "./General/wardrobe"
 import "./General/multiplier"
+import "./General/rank"
 
 /** Island Commands */
 import "./Island/island"
