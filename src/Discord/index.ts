@@ -83,7 +83,7 @@ export class DiscordClient {
         this.client.on("interactionCreate", async (interaction) => {
             try {
                 if (interaction.isCommand()) {
-                    //if (isDevEnvironment) return;
+                    if (isDevEnvironment) return;
                     const execution = this.executions[interaction.commandName];
                     if (execution) {
                         if (interaction.isChatInputCommand()) {
