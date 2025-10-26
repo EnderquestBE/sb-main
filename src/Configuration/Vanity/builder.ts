@@ -109,7 +109,8 @@ if (existsSync(vanityPath)) {
                         ...vanityInfo,
                         geometry: geometry,
                         texture: readFileSync(texturePath).toString("base64"),
-                        animations: animations
+                        animations: animations,
+                        hideBones: vanityInfo.hideBones
                     });
                     console.log(`[Vanity] Loaded vanity item: ${vanityInfo.name}`);
                 } else {

@@ -26,7 +26,8 @@ const SeasonalCrateLoot: WeightedItem<CrateLoot>[] = [
     { value: { function: giveItemStack.bind({ item: () => VanityVoucher, args: ["skeleton_mask"] }), amount: 1 }, weight: 10 },
     { value: { function: giveItemStack.bind({ item: () => VanityVoucher, args: ["iron_golem_mask"] }), amount: 1 }, weight: 10 },
     { value: { function: giveItemStack.bind({ item: () => VanityVoucher, args: ["creeper_mask"] }), amount: 1 }, weight: 10 },
-    { value: { function: giveItemStack.bind({ item: () => VanityVoucher, args: ["2025_candy_bucket"] }), amount: 1 }, weight: 5 }
+    { value: { function: giveItemStack.bind({ item: () => VanityVoucher, args: ["2025_candy_bucket"] }), amount: 1 }, weight: 5 },
+    { value: { function: giveItemStack.bind({ item: () => VanityVoucher, args: ["2025_jack_o_head"] }), amount: 1 }, weight: 5 }
 ];
 
 const SeasonalCrateSelector = new WeightedSelector(SeasonalCrateLoot);

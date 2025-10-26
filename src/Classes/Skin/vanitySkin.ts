@@ -125,6 +125,20 @@ function augmentGeometry(
 
     const validVanityItems = vanityItems.filter((v): v is VanityInfo => v !== null);
 
+    // Check for bones that should be hidden first.
+    for (const vanity of validVanityItems) {
+        // Check if bones should be hidden.
+        if (vanity.hideBones) {
+            for (const id of vanity.hideBones) {
+                const boneIndex = finalGeometry.bones.findIndex((b: any) => b.name === id);
+                if (boneIndex !== -1) {
+                    finalGeometry.bones[boneIndex].cubes = [];
+                    if (finalGeometry.poly_mesh) finalGeometry.bones[boneIndex].poly_mesh = [];
+                }
+            }
+        }
+    }
+
     // Iterate through vanity items.
     for (const [vanityIndex, vanity] of validVanityItems.entries()) {
         const vanityGeometryData = JSON.parse(JSON.stringify(vanity.geometry));

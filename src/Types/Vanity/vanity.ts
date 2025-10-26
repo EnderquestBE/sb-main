@@ -5,6 +5,7 @@ type VanityInfo = {
     animations?: object[];
     texture: string;
     bone: string;
+    hideBones?: string[];
 }
 
 export { VanityInfo }
