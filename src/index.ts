@@ -23,6 +23,7 @@ import { DEFAULT_PLAYER_DATA, DEFAULT_PREMIUM_DATA, STAFF_PERMISSIONS } from "./
 import { isDevEnvironment } from "./config";
 import { BlockTileEntityUpdateTrait } from "./Traits/Block/traits";
 import { EntityItemHandlerTrait } from "./Traits/Entity/Persistence/item";
+import { Changelog } from "./changelog";
 
 /**
  * @IMPORTS
@@ -49,7 +50,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
   private database!: DatabaseService;
 
   public constructor() {
-    super("enderquest", "0.0.1+indev");
+    super("enderquest", Changelog.version);
   }
 
   public onInitialize(): void {
