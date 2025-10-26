@@ -6,8 +6,7 @@ import { Logger, LoggerColors } from "@serenityjs/logger";
 
 /* BACKUPS SETTINGS */
 const WORLDS_DIR = resolve('./worlds');
-const DEFAULT_WORLD_NAME = 'default';
-const SOURCE_PATH = resolve(WORLDS_DIR, DEFAULT_WORLD_NAME);
+const SOURCE_PATH = resolve(WORLDS_DIR, "default", "players");
 
 const BACKUPS_DIR = resolve('./backups');
 const LOG_FILE = resolve(BACKUPS_DIR, 'backups.log');
@@ -96,7 +95,7 @@ async function cleanupOldBackups(): Promise<void> {
 
 // Create backup.
 async function createBackup(): Promise<void> {
-    logMessage(`[INFO] Starting new backup process for '${DEFAULT_WORLD_NAME}'...`);
+    logMessage(`[INFO] Starting new backup process for player data...`);
     try {
         try {
             await access(SOURCE_PATH);
