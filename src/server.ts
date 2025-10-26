@@ -20,6 +20,7 @@ class Server {
 
     public static initializeMultipliers() {
         this.multipliers = GlobalDataManager.instance.globalMultipliers;
+        this.updateGlobalMultiplier();
     }
 
     public static updatePlayerCount() {

@@ -12,11 +12,11 @@ const Questions = [
     },
     {
         question: "Can I play on console?",
-        answer: "If you are apart of the early-access group, we have not implemented an official route for console players to join *yet*, though we definitely will when the server is publicly released. In the interim, you can still join using third-party software such as **Bedrock Connect**."
+        answer: "Absolutely! To make it as easy as possible for you to join from console, you can join our realm that acts as a 'portal' to the main server!\n**Realm Code:** https://realms.gg/WqQbAQyYiLBDP9k"
     },
     {
         question: "When will the server release?",
-        answer: "The server is already in a playable state, but we want to ensure a stable experience before officially releasing. We don't know for sure how long this will take, but we are hoping to be able to open for our first official season within a month or two."
+        answer: "We plan to release in beta to to the public by the end of 2025! Stay tuned for exciting updates on that in this discord server!"
     }
 ]
 
@@ -28,6 +28,6 @@ const faqEmbed = new EmbedBuilder()
     })
     .setTitle("Frequent Questions")
     .setDescription(Questions.map(q => `► **Q: __${q.question}__**\n> **A:** ${q.answer}`).join("\n\n"))
-    .setTimestamp(1759201200000);
+    .setTimestamp(1761516000000);
 
 (DiscordClient.client.channels.cache.get("1420117563773423686") as TextChannel).messages.fetch("1422415096671371344").then((msg) => msg.edit({ embeds: [faqEmbed] }));

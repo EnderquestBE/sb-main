@@ -155,6 +155,7 @@ export class DiscordClient {
                     }
                 }
                 else if (interaction.isButton()) {
+                    if (isDevEnvironment) return;
                     if (interaction.customId === "tester_accept") {
                         if (!interaction.memberPermissions?.has("ManageMessages")) {
                             interaction.reply({ content: "You do not have permission to do this.", flags: "Ephemeral" });
@@ -202,7 +203,7 @@ export class DiscordClient {
                                 iconURL: user.displayAvatarURL()
                             })
                             .setTitle("Application Accepted")
-                            .setDescription(`You have been accepted into **early access**, welcome to the server! I really hope you enjoy your time playing. Please be sure to report any issues that you encounter during your experience.\n## What now?\n► Join the server: \`play.enderquest.me\`\n► Read the server rules: <#1420116331524522106>\n► Follow updates and changes: <#1420118855019397202>\n► Report issues by creating a ticket: <#1420119180086349944>\n► If you have any questions, feel free to reach out to a staff member.`)
+                            .setDescription(`You have been accepted into **early access**, welcome to the server! I really hope you enjoy your time playing. Please be sure to report any issues that you encounter during your experience.\n## What now?\n► Join the server: \`play.enderquest.me\`\n-# For console players, use the latest realm code in <#1420117563773423686>\n► Read the server rules: <#1420116331524522106>\n► Follow updates and changes: <#1420118855019397202>\n► Report issues by creating a ticket: <#1420119180086349944>\n► If you have any questions, feel free to reach out to a staff member.`)
                             .setTimestamp();
                         user.send({ embeds: [embed] });
                     } else if (interaction.customId === "tester_deny") {
