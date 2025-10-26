@@ -58,10 +58,10 @@ class BlockNoInteractTrait extends ItemStackTrait {
             player.dimension.broadcast(sound);
 
             // Decrement item stack.
-            if (this.item.stackSize > 1) {
+            if (this.item.getStackSize() > 1) {
                 this.item.decrementStack();
             } else {
-                this.item.container?.clearSlot(this.item.slot)
+                this.item.container?.clearSlot(this.item.getSlot())
             }
         }
         return true;

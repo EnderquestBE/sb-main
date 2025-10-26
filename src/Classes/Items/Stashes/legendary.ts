@@ -17,7 +17,7 @@ class LegendaryStash extends StashItem {
             LegendaryStash.StashType,
             "§eLegendary",
         );
-        this.stackSize = amount;
+        this.setStackSize(amount);
     }
 }
 

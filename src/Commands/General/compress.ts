@@ -17,21 +17,21 @@ new CommandBuilder("compress", "Compresses the item in your hand.")
                 return player.error("Hold the item you would like to compress.");
             }
 
-            const compressAmount = item.stackSize;
+            const compressAmount = item.getStackSize();
             const compressedItem = CompressableMap.get(item.type.identifier as ItemIdentifier);
             if (!compressedItem) {
                 return player.error("This item cannot be compressed.");
             }
-            const amount = Math.floor(item.stackSize / 9);
+            const amount = Math.floor(item.getStackSize() / 9);
             if (amount < 1) {
                 return player.error("You do not have enough of this item to compress.");
             }
-            const remainder = item.stackSize % 9;
+            const remainder = item.getStackSize() % 9;
             // Take items from hand.
             if (remainder === 0) {
                 inv.clearSlot(player.getSelectedSlot());
             } else {
-                item.stackSize = remainder;
+                item.setStackSize(remainder);
             }
             // Add compressed item.
             inv.addItem(new ItemStack(compressedItem, { stackSize: amount }));

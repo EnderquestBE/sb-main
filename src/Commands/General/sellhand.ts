@@ -23,7 +23,7 @@ new CommandBuilder("sellhand", "Sells the item in your hand.")
             }
 
             const multiplier = Server.globalMultiplier;
-            const amount = item.stackSize;
+            const amount = item.getStackSize();
             const value = Math.floor(sellInfo.money * amount * multiplier);
             inv.clearSlot(player.getSelectedSlot());
             player.addMoney(value);

@@ -71,7 +71,6 @@ new CommandBuilder("merge", "Combines enchantment tomes in your inventory onto y
 
                     heldItem.strength = Math.min(100, heldStrength + strength);
                     inventory.clearSlot(slot);
-                    heldItem.update();
                     player.info(`§a> ${enchantDisplayName} §ehas merged with another tome powering a new strength of §c${heldItem.strength}%%§e!`);
                     return;
                 }
@@ -156,9 +155,6 @@ new CommandBuilder("merge", "Combines enchantment tomes in your inventory onto y
             if (tomeCount === 0) {
                 return player.info("§cNo valid tomes were found in your inventory.");
             }
-
-            // Update item.
-            heldItem.update();
         })
     )
     .register("Enchantment");

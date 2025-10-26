@@ -88,7 +88,7 @@ class BlockCropTrait extends BlockTrait {
         this.grow(fertilizerGrowth)
 
         // Remove a piece of bonemeal from the player.
-        if (item.stackSize > 1) item.decrementStack()
+        if (item.getStackSize() > 1) item.decrementStack()
         else {
             const inv = player.getTrait(EntityInventoryTrait).container
             inv.clearSlot(inv.storage.indexOf(item))

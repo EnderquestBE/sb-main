@@ -17,7 +17,7 @@ class CommonCrateKey extends CrateKey {
             CommonCrateKey.crateType,
             "§fCommon",
         );
-        this.stackSize = amount;
+        this.setStackSize(amount);
     }
 }
 

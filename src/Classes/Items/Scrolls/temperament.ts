@@ -20,7 +20,7 @@ class TemperamentScroll extends Scroll {
                 "§r§dUse /temper on equipment."
             ],
         );
-        this.stackSize = amount;
+        this.setStackSize(amount);
     }
 }
 

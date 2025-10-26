@@ -22,7 +22,7 @@ class VanityVoucher extends ItemVoucher {
         if (info) {
             this.nbt.set("VanityID", new StringTag(id, "VanityID"));
             this.setLore(this.getLore().concat([`§r§6Unlocks: §d${info.name}`]));
-            this.stackSize = amount;
+            this.setStackSize(amount);
         }
     }
 }

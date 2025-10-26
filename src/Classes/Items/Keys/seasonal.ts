@@ -27,7 +27,7 @@ class SeasonalCrateKey extends CrateKey {
             SeasonalCrateKey.crateType,
             "§dSeasonal",
         );
-        this.stackSize = amount;
+        this.setStackSize(amount);
         // Set the expiration date on the key in either 30 days or the end of the current season, whichever is sooner.
         let expirationDate: Date | null = expires;
         if (!expires) {

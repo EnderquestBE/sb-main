@@ -19,7 +19,7 @@ new CommandBuilder("sellall", "Sells all items in your inventory.").setAliases([
             const sellInfo = SellableItems.get(item.type.identifier as any);
             if (!sellInfo || !sellInfo.money) continue;
 
-            const amount = item.stackSize;
+            const amount = item.getStackSize();
             const value = Math.floor(sellInfo.money * amount * multiplier);
             total += value;
             player.inventory.clearItem(item.type.identifier, amount);

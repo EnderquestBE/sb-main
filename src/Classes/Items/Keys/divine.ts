@@ -17,7 +17,7 @@ class DivineCrateKey extends CrateKey {
             DivineCrateKey.crateType,
             "§l§cDivine",
         );
-        this.stackSize = amount;
+        this.setStackSize(amount);
     }
 }
 

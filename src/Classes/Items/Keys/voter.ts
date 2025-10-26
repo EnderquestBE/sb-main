@@ -17,7 +17,7 @@ class VoterCrateKey extends CrateKey {
             VoterCrateKey.crateType,
             "§aVoter",
         );
-        this.stackSize = amount;
+        this.setStackSize(amount);
     }
 }
 

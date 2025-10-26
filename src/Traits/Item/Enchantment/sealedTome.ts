@@ -72,7 +72,7 @@ class SealedTomeTrait extends ItemStackTrait {
         form2.button2 = "Cancel";
         form2.show(player, (result, error) => {
             if (error || !result) return;
-            if (this.item.stackSize > 0) {
+            if (this.item.getStackSize() > 0) {
                 this._openTome(player, price, rarity);
             }
         })

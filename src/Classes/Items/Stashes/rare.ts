@@ -17,7 +17,7 @@ class RareStash extends StashItem {
             RareStash.StashType,
             "§bRare",
         );
-        this.stackSize = amount;
+        this.setStackSize(amount);
     }
 }
 

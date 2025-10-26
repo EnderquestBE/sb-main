@@ -17,7 +17,7 @@ class EpicCrateKey extends CrateKey {
             EpicCrateKey.crateType,
             "§5Epic",
         );
-        this.stackSize = amount;
+        this.setStackSize(amount);
     }
 }
 

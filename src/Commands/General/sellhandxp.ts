@@ -23,7 +23,7 @@ new CommandBuilder("sellhandxp", "Sells the item in your hand for xp.")
             }
 
             const multiplier = Server.globalMultiplier;
-            const amount = item.stackSize;
+            const amount = item.getStackSize();
             const value = Math.floor(sellInfo.xp * amount * multiplier);
             inv.clearSlot(player.getSelectedSlot());
             player.addXp(value);

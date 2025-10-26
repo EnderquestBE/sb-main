@@ -17,7 +17,7 @@ class RareCrateKey extends CrateKey {
             RareCrateKey.crateType,
             "§bRare",
         );
-        this.stackSize = amount;
+        this.setStackSize(amount);
     }
 }
 

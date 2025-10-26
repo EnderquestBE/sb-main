@@ -18,11 +18,11 @@ new CommandBuilder("compressall", "Compresses all items in your inventory.")
             // Check all items in inventory for compressible items.
             for (const [_, item] of items) {
                 if (!item) continue;
-                originalAmounts[item.identifier as ItemIdentifier] = (originalAmounts[item.identifier as ItemIdentifier] || 0) + item.stackSize;
+                originalAmounts[item.identifier as ItemIdentifier] = (originalAmounts[item.identifier as ItemIdentifier] || 0) + item.getStackSize();
                 const compressedItem = CompressableMap.get(item.type.identifier as ItemIdentifier);
                 if (!compressedItem) continue;
-                const amount = Math.floor(item.stackSize / 9);
-                const remainder = item.stackSize % 9;
+                const amount = Math.floor(item.getStackSize() / 9);
+                const remainder = item.getStackSize() % 9;
                 if (amount > 1) {
                     // Increment count for compressed and remainder items.
                     amounts[compressedItem] = (amounts[compressedItem] || 0) + amount;
@@ -32,7 +32,7 @@ new CommandBuilder("compressall", "Compresses all items in your inventory.")
                     amounts[item.identifier as ItemIdentifier] = (amounts[item.identifier as ItemIdentifier] || 0) + remainder;
                 }
                 // Clear the slot.
-                inv.clearSlot(item.slot);
+                inv.clearSlot(item.getSlot());
             }
             if (Object.keys(amounts).length === 0) {
                 return player.info("§eFound no items in your inventory to compress.");

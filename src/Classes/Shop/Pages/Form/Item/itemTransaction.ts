@@ -32,7 +32,7 @@ class ShopItemTransactionPage extends ShopTransactionPage {
             // Give item.
             if (this.item.item) {
                 const item = this.item.item
-                item.stackSize = amount
+                item.setStackSize(amount);
                 inventory.addItem(item)
             }
             else inventory.giveItem(this.item.id, amount);
