@@ -29,6 +29,7 @@ declare module "@serenityjs/core" {
     // Data
     getDataString(): string
     getDataProperty(key: keyof PlayerData): any;
+    getPremiumData(): PremiumData | null;
 
     // Chat
     info(message: string, source?: keyof typeof ChatSource): void
@@ -169,6 +170,11 @@ Player.prototype.updateUsername = async function (this: Player): Promise<Operati
   const session = PlayerExtension.getSession(this);
   if (!session) return PlayerExtension["NO_SESSION_RESULT"]
   return session.updateUsername(this.username);
+};
+
+Player.prototype.getPremiumData = function (this: Player): PremiumData | null {
+  const session = PlayerExtension.getSession(this);
+  return session ? session.getPremiumData() : null;
 };
 
 Player.prototype.getTimePlayed = function (this: Player): number {

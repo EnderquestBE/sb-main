@@ -41,7 +41,7 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
             permissions: [],
             kits: ["starter", "weekly"],
             slots: {},
-            description: "The default rank for all players."
+            description: "The default rank for all players.",
         }
     ],
     /**
@@ -61,7 +61,8 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
                 auction: 2,
                 membership: 2
             },
-            description: "The mark of a kind soul who supported this server!"
+            description: "The mark of a kind soul who supported this server!",
+            discordRoleId: "1420130669303955566"
         }
     ],
     [
@@ -78,7 +79,8 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
                 auction: 2,
                 membership: 2
             },
-            description: "They know what they're doing."
+            description: "They know what they're doing.",
+            discordRoleId: "1431824471718891521"
         },
     ],
     [
@@ -95,7 +97,8 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
                 auction: 2,
                 membership: 2
             },
-            description: "You absolute legend."
+            description: "You absolute legend.",
+            discordRoleId: "1431824591495495840"
         }
     ],
     [
@@ -112,7 +115,8 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
                 auction: 3,
                 membership: 3
             },
-            description: "A true master of the craft."
+            description: "A true master of the craft.",
+            discordRoleId: "1431826262510403706"
         }
     ],
     [
@@ -130,7 +134,8 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
                 auction: 4,
                 membership: 4
             },
-            description: "A titan among mortals, standing tall and unyielding."
+            description: "A titan among mortals, standing tall and unyielding.",
+            discordRoleId: "1431824821054083082"
         }
     ],
     [
@@ -148,7 +153,8 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
                 auction: 5,
                 membership: 5
             },
-            description: "Larger than life, transcending our expectations."
+            description: "Larger than life, transcending our expectations.",
+            discordRoleId: "1431824885356822578"
         }
     ],
     [
@@ -166,7 +172,8 @@ const RANKS = new Map<keyof typeof PlayerRank, RankInfo>([
                 auction: 7,
                 membership: 7
             },
-            description: "Radiates the ethereal power of super generousity!"
+            description: "Radiates the ethereal power of super generousity!",
+            discordRoleId: "1431824936883978361"
         }
     ],
     /**

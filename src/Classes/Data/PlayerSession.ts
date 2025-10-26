@@ -121,6 +121,10 @@ class PlayerSession extends DataManager<PlayerData, PlayerDatabase> {
     return this.updateOne({ $set: { timePlayed: value } });
   }
 
+  public getPremiumData(): PremiumData | null {
+    return this.premiumData;
+  }
+
   public getAllCriteria(): { [key in keyof PlayerData["stats"]]: number } {
     return this.data.stats;
   }

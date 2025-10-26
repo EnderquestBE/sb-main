@@ -29,7 +29,7 @@ Slapper.registerSlapper({
     identifier: "slapper:auctionhouse",
     name: "§l§cAuction House§r",
     position: new Vector3f(-15.5, 66, -10.5),
-    skinURL: "https://drive.usercontent.google.com/u/0/uc?id=125tbDFQQPj5VslnjRWKIWtbpr1_dNVZW&export=download",
+    texture: "auctioneer.png",
     rotation: new Rotation(-90, 0, -90),
     function: (player) => {
         player.info("§7This feature is coming soon!")
@@ -95,7 +95,7 @@ Slapper.registerSlapper({
     identifier: "slapper:pvp",
     name: "§l§4PvP Arena§r",
     position: new Vector3f(16.5, 66, -10.5),
-    skinURL: "https://drive.usercontent.google.com/u/0/uc?id=1BQDLca-q7rahtz24qIufA-aN1rr9HwPf&export=download",
+    texture: "pvp.png",
     rotation: new Rotation(90, 0, 90),
     skinOptions: { armSize: "slim" },
     function: (player) => {
@@ -105,16 +105,14 @@ Slapper.registerSlapper({
 */
 
 // Kits
-/*
 Slapper.registerSlapper({
     identifier: "slapper:kits",
     name: "§l§6Kits§r",
     position: new Vector3f(19.5, 66, -6.5),
-    skinURL: "https://drive.usercontent.google.com/u/0/uc?id=1EEYfoMSic5YK3pvlfXwByj39lwAO_027&export=download",
+    texture: "kits.png",
     rotation: new Rotation(90, 0, 90),
     skinOptions: { armSize: "slim" },
     function: (player) => {
-        player.info("§7This feature is coming soon!")
+        player.executeCommand("kits")
     }
 })
-*/

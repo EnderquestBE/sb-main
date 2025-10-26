@@ -10,6 +10,7 @@ interface RankInfo {
     kits: string[] // IDs of the kits this rank can claim.
     slots: Partial<PremiumData["slots"]> // The extra slots permitted by this rank.
     description?: string; // Rank description for /helpme command.
+    discordRoleId?: string; // Associated discord role ID for this rank.
 }
 
 export { RankInfo }

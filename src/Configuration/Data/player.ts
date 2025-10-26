@@ -52,7 +52,8 @@ const DEFAULT_PREMIUM_DATA: PremiumData = {
         homes: 0,
         auction: 3,
         membership: 3
-    }
+    },
+    discordId: ""
 }
 
 export { DEFAULT_PLAYER_DATA, DEFAULT_PREMIUM_DATA }

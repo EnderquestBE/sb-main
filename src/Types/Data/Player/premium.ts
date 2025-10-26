@@ -25,4 +25,8 @@ export interface PremiumData {
         /* How many islands a player can be a member of. */
         membership: number;
     }
+    /**
+     * Linked discord ID.
+     */
+    discordId: string;
 }

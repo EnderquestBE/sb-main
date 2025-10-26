@@ -22,6 +22,12 @@ class PremiumDatabase extends CollectionManager<PremiumData> {
         const player = await this.collection.findOne(query as Filter<PremiumData>) as PremiumData | null;
         return player;
     }
+
+    public async getByDiscordId(discordId: string): Promise<PremiumData | null> {
+        const query = { discordId: discordId };
+        const player = await this.collection.findOne(query as Filter<PremiumData>) as PremiumData | null;
+        return player;
+    }
 }
 
 export { PremiumDatabase };
