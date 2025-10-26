@@ -12,15 +12,42 @@ interface IslandPerkType {
 
 class IslandPerkUnlocks {
     private static perks: {
-        flight: IslandPerkType
+        sellall: IslandPerkType,
+        sellallxp: IslandPerkType,
+        flight: IslandPerkType,
+        compressall: IslandPerkType
     } = {
+            sellall: {
+                id: "sellall",
+                name: "/sa Access",
+                unlock: {
+                    permissions: ["rank.sellall"]
+                },
+                level: 50
+            },
+            sellallxp: {
+                id: "sellallxp",
+                name: "/saxp Access",
+                unlock: {
+                    permissions: ["rank.sellallxp"]
+                },
+                level: 50
+            },
             flight: {
                 id: "flight",
-                name: "Flight",
+                name: "/fly Access",
                 unlock: {
                     permissions: ["rank.fly"]
                 },
                 level: 100
+            },
+            compressall: {
+                id: "compressall",
+                name: "/compressall Access",
+                unlock: {
+                    permissions: ["rank.compressall"]
+                },
+                level: 125
             }
         }
 
