@@ -4,7 +4,7 @@ import { CustomSkin, GlobalDataManager } from "../Classes";
 import { Utils } from "../Utils/utils";
 import { FormApplication } from "./Applications/form";
 import { Applications } from "./Applications/applications";
-import { BOT_TOKEN, isDevEnvironment } from "../config";
+import { BOT_TOKEN, DEV_BOT_TOKEN, isDevEnvironment } from "../config";
 
 export class DiscordClient {
 
@@ -17,6 +17,17 @@ export class DiscordClient {
     private static executions: { [key: string]: (interaction: ChatInputCommandInteraction) => any } = {};
 
     public static client = new Client({
+        intents: [
+            "Guilds",
+            "GuildMembers",
+            "GuildMessages",
+            "MessageContent",
+            "GuildMessageReactions",
+            "DirectMessages"
+        ],
+    });
+
+    public static developerClient = new Client({
         intents: [
             "Guilds",
             "GuildMembers",
@@ -69,21 +80,30 @@ export class DiscordClient {
         })
 
         await import("./Commands/index")
-        // Login
+        // Login main discord bot.
         this.client.login(BOT_TOKEN);
+        // Login developer discord bot.
+        if (isDevEnvironment) {
+            console.log("Development environment detected, logging in developer bot...");
+            this.developerClient.login(DEV_BOT_TOKEN);
+        }
     }
 
     public static async disconnect() {
         await this.logStop();
         this.client.destroy();
         this.client = null!;
+        if (isDevEnvironment) {
+            this.developerClient.destroy();
+            this.developerClient = null!;
+        }
     }
 
     public static onInteraction() {
-        this.client.on("interactionCreate", async (interaction) => {
+        const client = isDevEnvironment ? this.developerClient : this.client;
+        client.on("interactionCreate", async (interaction) => {
             try {
                 if (interaction.isCommand()) {
-                    if (isDevEnvironment) return;
                     const execution = this.executions[interaction.commandName];
                     if (execution) {
                         if (interaction.isChatInputCommand()) {
@@ -96,7 +116,7 @@ export class DiscordClient {
                         const selected = interaction.values[0];
                         if (!selected) return;
                         // Check if player has already submitted an application.
-                        const guild = this.client.guilds.cache.get("1420107089472262207")!;
+                        const guild = client.guilds.cache.get("1420107089472262207")!;
                         const member = guild.members.cache.get(interaction.user.id);
                         if (member?.roles.cache.has("1422453759174377482")) {
                             interaction.reply({ content: "You are already a play tester.", flags: "Ephemeral" });
@@ -130,7 +150,7 @@ export class DiscordClient {
 
                         const row = new ActionRowBuilder().addComponents(accept, deny).toJSON();
                         if (type === "play_tester") {
-                            (this.client.channels.cache.get("1422419850248196137") as TextChannel).send({ embeds: [embed!], components: [row] });
+                            (client.channels.cache.get("1422419850248196137") as TextChannel).send({ embeds: [embed!], components: [row] });
                         }
                     }
                 }
@@ -143,7 +163,7 @@ export class DiscordClient {
                         const author = interaction.message.embeds[0]?.author!.name;
                         // Get user.
                         const username = author?.substring(0, author.indexOf(" ("));
-                        const user = this.client.users.cache.find(u => u.username === username);
+                        const user = client.users.cache.find(u => u.username === username);
                         if (!user) {
                             interaction.reply({ content: "Could not find user.", flags: "Ephemeral" });
                             return;
@@ -163,7 +183,7 @@ export class DiscordClient {
                         interaction.message.edit({ components: [row] });
 
                         // Give play tester role.
-                        const guild = this.client.guilds.cache.get("1420107089472262207")!;
+                        const guild = client.guilds.cache.get("1420107089472262207")!;
                         const member = guild.members.cache.get(user.id);
                         if (!member) {
                             interaction.reply({ content: "Could not find user in guild.", flags: "Ephemeral" });
@@ -193,7 +213,7 @@ export class DiscordClient {
                         const author = interaction.message.embeds[0]?.author!.name;
                         // Get user.
                         const username = author?.substring(0, author.indexOf(" ("));
-                        const user = this.client.users.cache.find(u => u.username === username);
+                        const user = client.users.cache.find(u => u.username === username);
                         if (!user) {
                             interaction.reply({ content: "Could not find user.", flags: "Ephemeral" });
                             return;

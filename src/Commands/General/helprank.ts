@@ -9,8 +9,7 @@ class RankEnum extends CustomEnum {
     public static options = RANKS.entries().toArray().filter((x) => x[1].description).map(([key]) => key);
 }
 
-new CommandBuilder("rank", "Shows perks for a rank.")
-    .setAliases(["helprank"])
+new CommandBuilder("helprank", "Shows perks for a rank.")
     .addOverload(
         new CommandOverload({
             rank: RankEnum
