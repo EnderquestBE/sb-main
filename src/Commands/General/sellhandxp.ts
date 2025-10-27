@@ -27,7 +27,7 @@ new CommandBuilder("sellhandxp", "Sells the item in your hand for xp.")
             const value = Math.floor(sellInfo.xp * amount * multiplier);
             inv.clearSlot(player.getSelectedSlot());
             player.addXp(value);
-            player.info(`§eSold §a${Utils.formatString(item.type.identifier)} §7x§c${amount} §efor §a${Utils.formatInt(value)} XP §eat §3${Utils.formatInt(sellInfo.xp * multiplier)} XP §eeach.`);
+            player.info(`§eSold §a${Utils.formatString(item.type.identifier)} §7x§c${amount} §efor §a${Utils.formatInt(value)} XP §eat §3${Utils.formatInt(Math.floor(sellInfo.xp * multiplier))} XP §eeach.`);
         })
     )
     .register("General");
