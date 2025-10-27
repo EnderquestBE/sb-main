@@ -1,5 +1,5 @@
 import { ItemIdentifier, ItemStack } from "@serenityjs/core";
-import { StringTag } from "@serenityjs/nbt";
+import { ByteTag, StringTag } from "@serenityjs/nbt";
 import { CrateIdentifier } from "../../../Types/types";
 
 abstract class CrateKey extends ItemStack {
@@ -11,7 +11,7 @@ abstract class CrateKey extends ItemStack {
         this.setDisplayName(`§r${name} Key§r`);
         this.setLore([`§r§7Use on a crate at §6/crates§7!`]);
         this.nbt.set("Crate", new StringTag(crateType.toString(), "Crate"));
-        this.setDynamicProperty("bypassInteract", true);
+        this.getStorage().set("bypassInteract", new ByteTag(1, "bypassInteract"));
     }
 }
 

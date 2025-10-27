@@ -1,5 +1,5 @@
 import { ItemIdentifier, ItemStack } from "@serenityjs/core";
-import { StringTag } from "@serenityjs/nbt";
+import { ByteTag, StringTag } from "@serenityjs/nbt";
 
 abstract class ItemVoucher extends ItemStack {
     public static readonly identifier: ItemIdentifier;
@@ -10,7 +10,7 @@ abstract class ItemVoucher extends ItemStack {
         this.setDisplayName(`§r${name} Voucher§r`);
         this.setLore([`§r§7Use to open!`]);
         this.nbt.set("Voucher", new StringTag(type, "Voucher"));
-        this.setDynamicProperty("bypassInteract", true);
+        this.getStorage().set("bypassInteract", new ByteTag(1, "bypassInteract"));
     }
 }
 
