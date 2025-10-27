@@ -8,10 +8,10 @@ function giveItemStack(
 ) {
     const ItemConstructor = this.item();
     const newItem = new ItemConstructor(...this.args);
-    newItem.setStackSize(amount);
+    newItem.stackSize = amount;
     player.inventory.addItem(newItem);
-    return newItem.getStackSize() > 1
-        ? `§6${newItem.getDisplayName()} §8x§c${newItem.getStackSize()}`
+    return newItem.stackSize > 1
+        ? `§6${newItem.getDisplayName()} §8x§c${newItem.stackSize}`
         : `a §6${newItem.getDisplayName()}`;
 }
 

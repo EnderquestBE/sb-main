@@ -17,7 +17,7 @@ class CommonStash extends StashItem {
             CommonStash.StashType,
             "§fCommon",
         );
-        this.setStackSize(amount);
+        this.stackSize = amount;
     }
 }
 

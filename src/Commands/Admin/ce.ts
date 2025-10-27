@@ -31,6 +31,7 @@ new CommandBuilder("ce", "Adds or removes a custom enchantment from the held ite
             }
 
             item.removeCustomEnchantment(id);
+            item.update()
             origin.info(`§aSuccessfully removed §e${id} §afrom your held item.`);
         })
     )
@@ -60,6 +61,7 @@ new CommandBuilder("ce", "Adds or removes a custom enchantment from the held ite
             }
 
             item.addCustomEnchantment(id, enchantLevel);
+            item.update()
             origin.info(`§aSuccessfully added §e${id} ${enchantLevel} §ato your held item.`);
         })
     )

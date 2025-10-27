@@ -19,7 +19,7 @@ class RestorationScroll extends Scroll {
                 "§r§dUse /restore on equipment."
             ],
         );
-        this.setStackSize(amount);
+        this.stackSize = amount;
     }
 }
 

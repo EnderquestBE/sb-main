@@ -20,7 +20,7 @@ class RefinementScroll extends Scroll {
                 "§r§dUse /refine on equipment."
             ],
         );
-        this.setStackSize(amount);
+        this.stackSize = amount;
     }
 }
 

@@ -20,7 +20,7 @@ class MoneyVoucher extends ItemVoucher {
         );
         this.nbt.set("Value", new IntTag(value, "Value"));
         this.setLore(this.getLore().concat([`§r§dRedeems: §6$${Utils.formatInt(value)}`]));
-        this.setStackSize(amount);
+        this.stackSize = amount;
     }
 }
 

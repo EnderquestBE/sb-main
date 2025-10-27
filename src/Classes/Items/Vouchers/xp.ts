@@ -20,7 +20,7 @@ class XPVoucher extends ItemVoucher {
         );
         this.nbt.set("Value", new IntTag(value, "Value"));
         this.setLore(this.getLore().concat([`§r§dRedeems: §a${Utils.formatInt(value)} XP`]));
-        this.setStackSize(amount);
+        this.stackSize = amount;
     }
 }
 

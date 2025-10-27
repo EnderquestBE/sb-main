@@ -59,7 +59,7 @@ class BlockFurnaceTrait extends BlockTrait {
             if (!item) continue
             const smeltable = ItemSmeltableMap.get(item.identifier as ItemIdentifier)
             if (!smeltable) continue
-            form.button(`${Utils.formatString(item.identifier)} x§c${item.getStackSize()} §r-> §6${Utils.formatString(smeltable)}`)
+            form.button(`${Utils.formatString(item.identifier)} x§c${item.stackSize} §r-> §6${Utils.formatString(smeltable)}`)
             smeltableItems.push(item)
         }
         form.show(player, (result, _error) => {
@@ -101,7 +101,7 @@ class BlockFurnaceTrait extends BlockTrait {
                 return false;
             }
             this.setItemSmelting(item)
-            inv.clearSlot(item.getSlot())
+            inv.clearSlot(item.slot)
         })
         return false;
     }
@@ -141,7 +141,7 @@ class BlockFurnaceTrait extends BlockTrait {
 
         const smeltTag = new CompoundTag()
         const itemTag = new StringTag(item.identifier, "Item")
-        const amountTag = new IntTag(item.getStackSize(), "Amount")
+        const amountTag = new IntTag(item.stackSize, "Amount")
         const startTag = new StringTag(new Date().toISOString(), "Start")
 
         smeltTag.push(itemTag)

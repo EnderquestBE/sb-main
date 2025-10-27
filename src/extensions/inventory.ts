@@ -16,7 +16,7 @@ class PlayerInventory {
   public readonly getItemCount = (itemId: string) => {
     const { container } = this.player.getTrait(EntityInventoryTrait);
     return container.storage.reduce((sum, item) => {
-      return sum + (item?.identifier === itemId && item.getDisplayName() === "" && item.maxStackSize === 64 ? item?.getStackSize() : 0);
+      return sum + (item?.identifier === itemId && item.getDisplayName() === "" && item.maxStackSize === 64 ? item?.stackSize : 0);
     }, 0);
   };
 
@@ -38,12 +38,12 @@ class PlayerInventory {
       while (giveCount > 0) {
         if (giveCount > maxStackSize) {
           const stack = itemStack();
-          stack.setStackSize(maxStackSize);
+          stack.stackSize = maxStackSize;
           container.addItem(stack);
           giveCount -= maxStackSize;
         } else {
           const stack = itemStack();
-          stack.setStackSize(giveCount);
+          stack.stackSize = giveCount;
           stack.isStackable = giveCount > 1;
           container.addItem(stack);
           break;
@@ -59,11 +59,11 @@ class PlayerInventory {
       let giveCount = amount;
       while (giveCount > 0) {
         if (giveCount > 64) {
-          itemStack.setStackSize(64);
+          itemStack.stackSize = 64;
           container.addItem(itemStack);
           giveCount -= 64;
         } else {
-          itemStack.setStackSize(giveCount);
+          itemStack.stackSize = giveCount;
           container.addItem(itemStack);
           break;
         }
@@ -86,7 +86,7 @@ class PlayerInventory {
         continue;
       }
 
-      const stackAmount = itemStack.getStackSize();
+      const stackAmount = itemStack.stackSize;
       const amountLeftToClear = (clearAmount ?? 1) - clearCount;
 
       if (stackAmount <= amountLeftToClear) {
@@ -121,7 +121,7 @@ class PlayerInventory {
         if (!matches) continue;
       }
 
-      const stackAmount = itemStack.getStackSize();
+      const stackAmount = itemStack.stackSize;
       const amountLeftToConsume = (consumeAmount ?? 1) - consumeCount;
 
       if (stackAmount <= amountLeftToConsume) {

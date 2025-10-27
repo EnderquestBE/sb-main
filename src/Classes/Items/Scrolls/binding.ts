@@ -20,7 +20,7 @@ class BindingScroll extends Scroll {
                 "§r§dUse /binding on an open tome."
             ],
         );
-        this.setStackSize(amount);
+        this.stackSize = amount;
     }
 }
 

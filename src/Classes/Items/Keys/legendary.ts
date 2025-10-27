@@ -17,7 +17,7 @@ class LegendaryCrateKey extends CrateKey {
             LegendaryCrateKey.crateType,
             "§eLegendary",
         );
-        this.setStackSize(amount);
+        this.stackSize = amount;
     }
 }
 

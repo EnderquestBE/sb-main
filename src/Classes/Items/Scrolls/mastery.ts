@@ -20,7 +20,7 @@ class MasteryScroll extends Scroll {
                 "§r§dUse /master on equipment."
             ],
         );
-        this.setStackSize(amount);
+        this.stackSize = amount;
     }
 }
 

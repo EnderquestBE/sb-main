@@ -119,7 +119,7 @@ class ItemSeedTrait extends ItemStackTrait {
         cropBlock.update()
 
         // Decrement the item stack.
-        if (this.item.getStackSize() > 1) this.item.decrementStack()
+        if (this.item.stackSize > 1) this.item.decrementStack()
         else {
             const inv = player.getTrait(EntityInventoryTrait).container
             inv.clearSlot(inv.storage.indexOf(this.item))

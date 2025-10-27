@@ -20,7 +20,7 @@ class ExpulsionScroll extends Scroll {
                 "§r§dUse /expel on equipment."
             ]
         );
-        this.setStackSize(amount);
+        this.stackSize = amount;
     }
 }
 

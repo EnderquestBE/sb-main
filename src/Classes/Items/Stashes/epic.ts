@@ -17,7 +17,7 @@ class EpicStash extends StashItem {
             EpicStash.StashType,
             "§5Epic",
         );
-        this.setStackSize(amount);
+        this.stackSize = amount;
     }
 }
 

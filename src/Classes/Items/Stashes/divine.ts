@@ -17,7 +17,7 @@ class DivineStash extends StashItem {
             DivineStash.StashType,
             "§cDivine",
         );
-        this.setStackSize(amount);
+        this.stackSize = amount;
     }
 }
 
