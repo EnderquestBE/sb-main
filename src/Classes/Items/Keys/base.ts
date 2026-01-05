@@ -11,7 +11,7 @@ abstract class CrateKey extends ItemStack {
         this.setDisplayName(`§r${name} Key§r`);
         this.setLore([`§r§7Use on a crate at §6/crates§7!`]);
         this.nbt.set("Crate", new StringTag(crateType.toString(), "Crate"));
-        this.getStorage().set("bypassInteract", new ByteTag(1, "bypassInteract"));
+        this.nbt.set("bypassInteract", new ByteTag(1, "bypassInteract"));
     }
 }
 

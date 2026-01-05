@@ -1,10 +1,53 @@
 import { Plugin, PluginEvents } from "@serenityjs/plugins";
-import { ActionForm, CustomEntityType, EntityDimensionChangeSignal, EntityHealthTrait, EntityHitSignal, EntitySpawnedSignal, Player, PlayerBreakBlockSignal, PlayerChatSignal, PlayerInteractWithBlockSignal, PlayerJoinSignal, PlayerLeaveSignal, PlayerLevelingTrait, PlayerOpenedContainerSignal, PlayerPlaceBlockSignal, WorldEvent, WorldInitializeSignal } from "@serenityjs/core";
-import { BlockHandler, ChatHandler, IslandPerkUnlocks, LeaderboardHandler, NametagHandler, PermissionsHandler, PlayerHud, ServerTaskHandler, SpawnerHandler, HologramHandler } from "./Handlers";
+import {
+  ActionForm,
+  CustomEntityType,
+  EntityDimensionChangeSignal,
+  EntityHealthTrait,
+  EntityHitSignal,
+  EntitySpawnedSignal,
+  Player,
+  PlayerBreakBlockSignal,
+  PlayerChatSignal,
+  PlayerInteractWithBlockSignal,
+  PlayerJoinSignal,
+  PlayerLeaveSignal,
+  PlayerLevelingTrait,
+  PlayerOpenedContainerSignal,
+  PlayerPlaceBlockSignal,
+  WorldEvent,
+  WorldInitializeSignal,
+} from "@serenityjs/core";
+import {
+  BlockHandler,
+  ChatHandler,
+  IslandPerkUnlocks,
+  LeaderboardHandler,
+  NametagHandler,
+  PermissionsHandler,
+  PlayerHud,
+  ServerTaskHandler,
+  SpawnerHandler,
+  HologramHandler,
+} from "./Handlers";
 import { IslandGenerator } from "./Classes/Island/generator";
 import { PlayerEnum } from "./Classes/Command/Enums/player";
 import { PlayerExtension } from "./extensions/player";
-import { CommandBuilder, CustomItemRegistry, DatabaseService, Island, IslandDatabase, PlayerDatabase, Slapper, VendorDatabase, Warp, IslandProvider, PremiumDatabase, GlobalDatabase, GlobalDataManager } from "./Classes";
+import {
+  CommandBuilder,
+  CustomItemRegistry,
+  DatabaseService,
+  Island,
+  IslandDatabase,
+  PlayerDatabase,
+  Slapper,
+  VendorDatabase,
+  Warp,
+  IslandProvider,
+  PremiumDatabase,
+  GlobalDatabase,
+  GlobalDataManager,
+} from "./Classes";
 import { Utils } from "./Utils/utils";
 import { registerIslandHelpCommands } from "./Commands/Island/help";
 import { Server } from "./server";
@@ -13,13 +56,24 @@ import { MorphManager } from "./Classes/Morph";
 import { DiscordClient } from "./Discord";
 import { resolve } from "node:path";
 import { BlockTraits, ItemTraits, EntityTraits } from "./Traits";
-import { PlayerCommandCooldownTrait, PlayerListCustomTrait } from "./Traits/Entity/Player";
+import {
+  PlayerCommandCooldownTrait,
+  PlayerListCustomTrait,
+} from "./Traits/Entity/Player";
 import { EntityStackTrait } from "./Traits/Entity/traits";
-import { ContainerType, DataPacket, PlayerSkinPacket } from "@serenityjs/protocol";
+import {
+  ContainerType,
+  DataPacket,
+  PlayerSkinPacket,
+} from "@serenityjs/protocol";
 import { EntityPersistenceTrait } from "./Traits/Entity/Persistence/persistence";
 import { PlayerBoundaryTrait } from "./Traits/Entity/Boundary/boundary";
 import { EntityClientRenderTrait } from "./Traits/Entity/Slapper/clientRender";
-import { DEFAULT_PLAYER_DATA, DEFAULT_PREMIUM_DATA, STAFF_PERMISSIONS } from "./Configuration/config";
+import {
+  DEFAULT_PLAYER_DATA,
+  DEFAULT_PREMIUM_DATA,
+  STAFF_PERMISSIONS,
+} from "./Configuration/config";
 import { isDevEnvironment } from "./config";
 import { BlockTileEntityUpdateTrait } from "./Traits/Block/traits";
 import { EntityItemHandlerTrait } from "./Traits/Entity/Persistence/item";
@@ -28,25 +82,24 @@ import { Changelog } from "./changelog";
 /**
  * @IMPORTS
  */
-import "./config"
-import "./Utils/logger"
-import "./Utils/backups"
-import "./Traits"
+import "./config";
+import "./Utils/logger";
+import "./Utils/backups";
+import "./Traits";
 import "./Classes/Items/itemRegistry";
-import "./CustomEnchantments/enchantments"
-import "./Handlers/Enchantment/handler"
-import "./extensions/itemStack"
-import "./extensions"
+import "./CustomEnchantments/enchantments";
+import "./Handlers/Enchantment/handler";
+import "./extensions/itemStack";
+import "./extensions";
 
-import "./Configuration/config"
-import "./Configuration/Slapper/slapper"
-import "./Configuration/Morph/morph"
+import "./Configuration/config";
+import "./Configuration/Slapper/slapper";
+import "./Configuration/Morph/morph";
 
-import "./Commands/commands"
-import "./Traits/Block/Liquid/liquidInteraction"
+import "./Commands/commands";
+import "./Traits/Block/Liquid/liquidInteraction";
 
 class EnderquestPlugin extends Plugin implements PluginEvents {
-
   private database!: DatabaseService;
 
   public constructor() {
@@ -54,31 +107,45 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
   }
 
   public onInitialize(): void {
-    this.database = new DatabaseService()
+    this.database = new DatabaseService();
     // Register database.
-    this.registerDBService()
+    this.registerDBService();
     // Register island world provider.
-    this.serenity.registerProvider(IslandProvider, { path: "./islands" })
+    this.serenity.registerProvider(IslandProvider, { path: "./islands" });
     // Register warp locations and commands.
-    Warp.registerAll()
+    Warp.registerAll();
     // Register commands.
     CommandBuilder.registerAll(this.serenity.commandPalette);
     // Register island command helper.
-    registerIslandHelpCommands(this.serenity.commandPalette.commands.get("island")!.registry.overloads.keys().map((x) => {
-      const parameters = Object.keys(x)
-      return {
-        //@ts-ignore
-        name: x[parameters[0]!].identifier.substring(6).toLowerCase(), params: parameters.slice(1).map((p) => {
-          const arg = x[p]!
-          if (Array.isArray(arg)) return { type: arg[0].identifier, name: p, optional: arg[1] }
-          else return { type: arg.identifier, name: Utils.formatString(p), optional: false }
+    registerIslandHelpCommands(
+      this.serenity.commandPalette.commands
+        .get("island")!
+        .registry.overloads.keys()
+        .map((x) => {
+          const parameters = Object.keys(x);
+          return {
+            //@ts-ignore
+            name: x[parameters[0]!].identifier.substring(6).toLowerCase(),
+            params: parameters.slice(1).map((p) => {
+              const arg = x[p]!;
+              if (Array.isArray(arg))
+                return { type: arg[0].identifier, name: p, optional: arg[1] };
+              else
+                return {
+                  type: arg.identifier,
+                  name: Utils.formatString(p),
+                  optional: false,
+                };
+            }),
+          };
         })
-      }
-    }).toArray().sort((a, b) => a.name.localeCompare(b.name)));
+        .toArray()
+        .sort((a, b) => a.name.localeCompare(b.name))
+    );
     // Start hud runtime.
     this.serenity.on(WorldEvent.WorldTick, async (event) => {
-      PlayerHud.runtime(event)
-    })
+      PlayerHud.runtime(event);
+    });
   }
 
   private async registerDBService() {
@@ -93,7 +160,9 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     // Initialize holograms.
     HologramHandler.initialize(this.serenity.getWorld());
     // Update missing player data properties if applicable.
-    const players = await PlayerDatabase.instance.collection.find({}).toArray() as any[];
+    const players = (await PlayerDatabase.instance.collection
+      .find({})
+      .toArray()) as any[];
     for (const player of players) {
       let updated = false;
       for (const key of Object.keys(DEFAULT_PLAYER_DATA)) {
@@ -109,7 +178,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
       const premiumData = await PremiumDatabase.instance.getByXUID(player.xuid);
       if (!premiumData) {
         await PremiumDatabase.instance.create({
-          ...DEFAULT_PREMIUM_DATA
+          ...DEFAULT_PREMIUM_DATA,
         });
       } else {
         let premiumUpdated = false;
@@ -120,7 +189,10 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
           }
         }
         if (premiumUpdated) {
-          await PremiumDatabase.instance.update(premiumData!.xuid, premiumData!);
+          await PremiumDatabase.instance.update(
+            premiumData!.xuid,
+            premiumData!
+          );
         }
       }
     }
@@ -132,10 +204,10 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     // Register island world generator.
     this.serenity.registerGenerator(IslandGenerator);
     // Start server tasks.
-    ServerTaskHandler.initialize(this.serenity)
+    ServerTaskHandler.initialize(this.serenity);
     // Initialize handlers.
-    BlockHandler.initialize()
-    SpawnerHandler.initialize()
+    BlockHandler.initialize();
+    SpawnerHandler.initialize();
     // Initialize discord bot.
     DiscordClient.initialize();
     // Mark server as started.
@@ -145,7 +217,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
   public async onShutDown(): Promise<void> {
     // Allow time for player disconnection and other ongoing processes.
     while (this.serenity.players.size > 0) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
     // Disconnect database.
     await this.database.disconnect();
@@ -158,11 +230,12 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     process.exit(0);
   }
 
-
   public beforePlayerJoin({ player }: PlayerJoinSignal): boolean {
     // Manage whitelist.
     if (!GlobalDataManager?.instance?.isWhitelisted(player)) {
-      player.disconnect("§cThe server is currently closed for play testing.\n§dIf you are interested, join our discord:\n§9https://discord.ender.quest")
+      player.disconnect(
+        "§cThe server is currently closed for play testing.\n§dIf you are interested, join our discord:\n§9https://discord.ender.quest"
+      );
       return false;
     }
     return true;
@@ -197,17 +270,25 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
         // Load island world from storage.
         if (island.getOnlineOwners().length <= 1) {
           //@ts-ignore
-          const world = await IslandProvider.loadWorld(this.serenity, island.getWorldPath());
+          const world = await IslandProvider.loadWorld(
+            this.serenity,
+            island.getWorldPath()
+          );
           if (!world) {
             player.disconnect("§cFailed to join. Please try again later.");
             return;
           }
         }
         // Update island perks permissions.
-        if (island!.isOwner(player.xuid)) IslandPerkUnlocks.applyPermissions(player, island);
-        this.logger.info(`Loaded island §e${islandName}§r into cache for ${player.username}.`);
+        if (island!.isOwner(player.xuid))
+          IslandPerkUnlocks.applyPermissions(player, island);
+        this.logger.info(
+          `Loaded island §e${islandName}§r into cache for ${player.username}.`
+        );
       } else {
-        this.logger.error(`§cFailed to load island data for ${player.username}.`)
+        this.logger.error(
+          `§cFailed to load island data for ${player.username}.`
+        );
       }
     }
     // Apply staff permissions.
@@ -223,9 +304,9 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     // Disable flight if active from previous session.
     player.disableFlight();
     // Show chat join message.
-    ChatHandler.onJoin(player, this.serenity)
+    ChatHandler.onJoin(player, this.serenity);
     // Update nametag.
-    NametagHandler.format(player)
+    NametagHandler.format(player);
     // Add username to player enum.
     PlayerEnum.update(this.serenity);
     // Update player count.
@@ -233,12 +314,12 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     // Show welcome form.
     ServerTaskHandler.queueTask(() => {
       const form = new ActionForm("Early Access");
-      form.content = " \n       §l§eWelcome to §dEnderquest§e!§r§f\n\n  Thank you for your interest in this\n  server! Before you proceed, please\n    note that the server is still in\n development; features are incomplete\n       and you may lose progress.\n  If you encounter any issues, please\n         report them on Discord.\n\n   Thank you for your understanding!\n "
+      form.content =
+        " \n       §l§eWelcome to §dEnderquest§e!§r§f\n\n  Thank you for your interest in this\n  server! Before you proceed, please\n    note that the server is still in\n development; features are incomplete\n       and you may lose progress.\n  If you encounter any issues, please\n         report them on Discord.\n\n   Thank you for your understanding!\n ";
       form.button("Acknowledge");
       form.show(player, (_result, _error) => {
         // Load vanity data.
-        if (player)
-          player.updateVanity();
+        if (player) player.updateVanity();
       });
     }, 3000);
     resolve();
@@ -248,14 +329,18 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     if (!event.initialSpawn || !(event.entity instanceof Player)) return;
     const player = event.entity;
     // Update XP.
-    const leveling = player.getTrait(PlayerLevelingTrait) ?? player.addTrait(PlayerLevelingTrait)
+    const leveling =
+      player.getTrait(PlayerLevelingTrait) ??
+      player.addTrait(PlayerLevelingTrait);
     leveling.setExperience(player.getXp());
   }
 
   public async onPlayerLeave({ player }: PlayerLeaveSignal): Promise<void> {
     try {
       // Stop whileOnEquipped check
-      for (const key of Object.keys(player.whileEquippedCheck) as unknown[] as (keyof typeof player.whileEquippedCheck)[]) {
+      for (const key of Object.keys(
+        player.whileEquippedCheck
+      ) as unknown[] as (keyof typeof player.whileEquippedCheck)[]) {
         if (player.whileEquippedCheck[key]) {
           clearTimeout(player.whileEquippedCheck[key]!);
           player.whileEquippedCheck[key] = null;
@@ -275,46 +360,48 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
               const players = world.getPlayers();
               for (const survivor of players) {
                 Warp.to(survivor, "SPAWN");
-                survivor.info(`§cYou have been kicked from §e${island.getName()}§c: Island has gone offline.`);
+                survivor.info(
+                  `§cYou have been kicked from §e${island.getName()}§c: Island has gone offline.`
+                );
               }
               // Unload island from storage.
               this.serenity.unregisterWorld(world);
             }
           }
-          this.logger.info(`Unloaded island §e${islandName}§r from cache.`)
+          this.logger.info(`Unloaded island §e${islandName}§r from cache.`);
         }
       }
       // Uncache player data.
-      player.setTimePlayed(player.getTimePlayed())
+      player.setTimePlayed(player.getTimePlayed());
       PlayerExtension.removeSession(player);
       this.logger.info(`Removed session for player ${player.username}.`);
       // Show chat leave message.
-      ChatHandler.onLeave(player, this.serenity)
+      ChatHandler.onLeave(player, this.serenity);
       // Remove username from player enum.
       PlayerEnum.update(this.serenity);
       // Update player count.
       Server.updatePlayerCount();
       resolve();
-    } catch (e) { }
+    } catch (e) {}
   }
 
   public onWorldInitialize({ world }: WorldInitializeSignal): void {
     // Register global player traits.
-    world.entityPalette.registerTrait(PlayerListCustomTrait)
-    world.entityPalette.registerTrait(PlayerCommandCooldownTrait)
+    world.entityPalette.registerTrait(PlayerListCustomTrait);
+    world.entityPalette.registerTrait(PlayerCommandCooldownTrait);
     world.entityPalette.registerTrait(PlayerBoundaryTrait);
     // Register global entity traits.
-    world.entityPalette.unregisterTrait(EntityHealthTrait)
-    world.entityPalette.registerTrait(EntitySlapperTrait)
-    world.entityPalette.registerTrait(EntityPersistenceTrait)
-    world.entityPalette.registerTrait(EntityItemHandlerTrait)
-    world.entityPalette.registerTrait(EntityClientRenderTrait)
+    world.entityPalette.unregisterTrait(EntityHealthTrait);
+    world.entityPalette.registerTrait(EntitySlapperTrait);
+    world.entityPalette.registerTrait(EntityPersistenceTrait);
+    world.entityPalette.registerTrait(EntityItemHandlerTrait);
+    world.entityPalette.registerTrait(EntityClientRenderTrait);
     // Register global item traits.
     for (const trait of EntityTraits) {
-      world.entityPalette.registerTrait(trait)
+      world.entityPalette.registerTrait(trait);
     }
     for (const trait of ItemTraits) {
-      world.itemPalette.registerTrait(trait)
+      world.itemPalette.registerTrait(trait);
     }
     if (world.identifier.startsWith("sb_")) {
       // Register island block and entity traits.
@@ -330,19 +417,19 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
       CustomItemRegistry.registerDefault(world);
       ServerTaskHandler.queueTask(() => {
         // Initialize slappers.
-        const slappers = Slapper.getAll()
+        const slappers = Slapper.getAll();
         for (const slapper of slappers) {
           // Register type.
-          const type = new CustomEntityType(slapper.identifier)
-          world.entityPalette.registerType(type)
+          const type = new CustomEntityType(slapper.identifier);
+          world.entityPalette.registerType(type);
           // Spawn entity.
-          const dimension = world.getDimension()
-          const entity = dimension.spawnEntity(type, slapper.position, false)
+          const dimension = world.getDimension();
+          const entity = dimension.spawnEntity(type, slapper.position, false);
           if (slapper.rotation) {
-            entity.setRotation(slapper.rotation)
+            entity.setRotation(slapper.rotation);
           }
-          entity.setGravityForce(0)
-          entity.addTrait(EntitySlapperTrait)
+          entity.setGravityForce(0);
+          entity.addTrait(EntitySlapperTrait);
           entity.spawn();
         }
       }, 3000);
@@ -350,25 +437,27 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
   }
 
   public beforePlayerChat(event: PlayerChatSignal): boolean {
-    return ChatHandler.onChat(event, this.serenity)
+    return ChatHandler.onChat(event, this.serenity);
   }
 
   // World permissions events.
 
   public beforePlayerBreakBlock(event: PlayerBreakBlockSignal): boolean {
-    return PermissionsHandler.onBreak(event)
+    return PermissionsHandler.onBreak(event);
   }
 
   public beforePlayerPlaceBlock(event: PlayerPlaceBlockSignal): boolean {
-    return PermissionsHandler.onPlace(event)
+    return PermissionsHandler.onPlace(event);
   }
 
-  public beforePlayerInteractWithBlock(event: PlayerInteractWithBlockSignal): boolean {
+  public beforePlayerInteractWithBlock(
+    event: PlayerInteractWithBlockSignal
+  ): boolean {
     if (event.itemStack?.nbt.has("bypassInteract")) {
-      if (event.itemStack.traits.size > 0) {
-        for (const trait of event.itemStack.traits.values()) {
+      if (event.itemStack.getAllTraits().length > 0) {
+        for (const trait of event.itemStack.getAllTraits()) {
           //@ts-ignore
-          trait.onUseOnBlock?.(event.source, { targetBlock: event.block })
+          trait.onUseOnBlock?.(event.source, { targetBlock: event.block });
         }
       }
       return false;
@@ -376,36 +465,49 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     return PermissionsHandler.onInteract(event);
   }
 
-  public beforePlayerOpenedContainer(event: PlayerOpenedContainerSignal): boolean {
+  public beforePlayerOpenedContainer(
+    event: PlayerOpenedContainerSignal
+  ): boolean {
     if (event.container.type === ContainerType.Inventory) return true;
     else return PermissionsHandler.onContainerOpen(event);
   }
 
   public beforeEntityHit(event: EntityHitSignal): boolean {
     if (event.hitEntity.hasTrait(EntitySlapperTrait)) {
-      event.hitEntity.getTrait(EntitySlapperTrait)!.slapperInteract(event.damagingEntity as Player)
-      return false
-    } else return PermissionsHandler.onEntityHit(event)
+      event.hitEntity
+        .getTrait(EntitySlapperTrait)!
+        .slapperInteract(event.damagingEntity as Player);
+      return false;
+    } else return PermissionsHandler.onEntityHit(event);
   }
 
   // Point events.
 
-  public onPlayerBreakBlock({ player, block, itemStack }: PlayerBreakBlockSignal): void {
-    BlockHandler.onBreak(player, itemStack, block)
+  public onPlayerBreakBlock({
+    player,
+    block,
+    itemStack,
+  }: PlayerBreakBlockSignal): void {
+    BlockHandler.onBreak(player, itemStack, block);
   }
 
   public afterPlayerPlaceBlock(event: PlayerPlaceBlockSignal): void {
-    BlockHandler.onPlace(event)
+    BlockHandler.onPlace(event);
   }
 
   public afterEntityHit(event: EntityHitSignal): void {
     if (event.hitEntity.hasTrait(EntityStackTrait)) {
-      (event.hitEntity.getTrait(EntityStackTrait) as EntityStackTrait).onDamage(event.damagingEntity)
+      (event.hitEntity.getTrait(EntityStackTrait) as EntityStackTrait).onDamage(
+        event.damagingEntity
+      );
     }
   }
 
   // Fix for rendering update for tile entities (chests).
-  public afterEntityDimensionChange({ toDimension, entity: player }: EntityDimensionChangeSignal) {
+  public afterEntityDimensionChange({
+    toDimension,
+    entity: player,
+  }: EntityDimensionChangeSignal) {
     if (!(player instanceof Player)) return;
 
     // Handle updating tile entities in new dimension.
@@ -414,11 +516,15 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
       const packets: DataPacket[] = [];
 
       // Get the blocks in the dimension.
-      const blocks = toDimension.blocks.values().filter((x) => x.hasTrait(BlockTileEntityUpdateTrait));
+      const blocks = toDimension.blocks
+        .values()
+        .filter((x) => x.hasTrait(BlockTileEntityUpdateTrait));
 
       // Iterate through blocks that have the container update trait.
       for (const block of blocks) {
-        packets.push(...block.getTrait(BlockTileEntityUpdateTrait).updateTileEntity());
+        packets.push(
+          ...block.getTrait(BlockTileEntityUpdateTrait).updateTileEntity()
+        );
       }
 
       // Send the update packets.

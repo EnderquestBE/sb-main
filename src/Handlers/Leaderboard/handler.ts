@@ -54,14 +54,18 @@ class LeaderboardHandler {
     }
 
     public static async initialize(world: World) {
+
         // Cache leaderboard scores.
         const playerCollection = PlayerDatabase.instance.collection;
+
         const islandCollection = IslandDatabase.instance.collection;
+
         // Rank by top money.
         this.scores.set("money", (await playerCollection.find().sort({ "balance.money": -1 }).toArray()).reduce((map, obj, index) => {
             map.set(obj.xuid ?? obj.username, { rank: index + 1, name: obj.username, value: obj.balance.money });
             return map;
         }, new Map<string, LeaderboardEntry>()))
+
         // Rank by top xp.
         this.scores.set("xp", (await playerCollection.find().sort({ "balance.xp": -1 }).toArray()).reduce((map, obj, index) => {
             map.set(obj.xuid ?? obj.username, { rank: index + 1, name: obj.username, value: obj.balance.xp });
@@ -83,6 +87,7 @@ class LeaderboardHandler {
         // Spawn leaderboard displays.
         for (const { id, position } of this.displays) {
             const entity = new Entity(dimension, EntityIdentifier.Tadpole);
+
             entity.position = position;
             entity.addTrait(EntityNameableTrait);
             entity.setNametag("Loading...");

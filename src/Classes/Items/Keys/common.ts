@@ -3,22 +3,21 @@ import { CrateKey } from "./base";
 import { CrateIdentifier } from "../../../Types/types";
 import { ItemCustomCrateKeyTrait } from "../../../Traits/Item/traits";
 
-const CommonCrateKeyType = new CustomItemType("cratekey:common", { isComponentBased: true })
-CommonCrateKeyType.components.setIcon({ default: "spawn_egg_chicken" })
-CommonCrateKeyType.registerTrait(ItemCustomCrateKeyTrait)
+const CommonCrateKeyType = new CustomItemType("cratekey:common", {
+  isComponentBased: true,
+});
+CommonCrateKeyType.components.setIcon({ default: "spawn_egg_chicken" });
+CommonCrateKeyType.registerTrait(ItemCustomCrateKeyTrait);
 
 class CommonCrateKey extends CrateKey {
-    public static readonly identifier = CommonCrateKeyType.identifier as ItemIdentifier;
-    public static readonly crateType = CrateIdentifier.Common;
+  public static readonly identifier =
+    CommonCrateKeyType.identifier as ItemIdentifier;
+  public static readonly crateType = CrateIdentifier.Common;
 
-    constructor(amount: number = 1) {
-        super(
-            CommonCrateKey.identifier,
-            CommonCrateKey.crateType,
-            "§fCommon",
-        );
-        this.stackSize = amount;
-    }
+  constructor(amount: number = 1) {
+    super(CommonCrateKey.identifier, CommonCrateKey.crateType, "§fCommon");
+    this.setStackSize(amount);
+  }
 }
 
 export { CommonCrateKey, CommonCrateKeyType };

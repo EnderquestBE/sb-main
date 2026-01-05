@@ -1,6 +1,6 @@
 import { Entity, EntityIdentifier, EntityNameableTrait, World } from "@serenityjs/core";
 import { ByteTag } from "@serenityjs/nbt";
-import { ActorDataId, ActorDataType, IPosition, Vector3f } from "@serenityjs/protocol";
+import { IPosition, Vector3f } from "@serenityjs/protocol";
 import { EntityClientRenderTrait } from "../../Traits/Entity/Slapper/clientRender";
 
 class HologramHandler {

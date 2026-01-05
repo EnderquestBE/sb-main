@@ -5,7 +5,6 @@ import { GeometryDefinition, MinecraftGeometryFile, VanityInfo } from "../../Typ
 import { PlayerSkinPacket, SerializedSkin, SkinAnimation, SkinImage } from '@serenityjs/protocol';
 import { resolve } from 'node:path';
 import { readFile } from 'node:fs/promises';
-import { writeFileSync } from 'node:fs';
 
 async function augmentSkinAndUV(
     skinImage: Jimp.Bitmap,

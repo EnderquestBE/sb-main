@@ -10,7 +10,7 @@ abstract class ItemVoucher extends ItemStack {
         this.setDisplayName(`§r${name} Voucher§r`);
         this.setLore([`§r§7Use to open!`]);
         this.nbt.set("Voucher", new StringTag(type, "Voucher"));
-        this.getStorage().set("bypassInteract", new ByteTag(1, "bypassInteract"));
+        this.nbt.set("bypassInteract", new ByteTag(1, "bypassInteract"));
     }
 }
 

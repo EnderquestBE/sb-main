@@ -12,11 +12,11 @@
   },
   "keywords": [],
   "peerDependencies": {
-    "@serenityjs/core": "0.8.14-beta-20251019001742",
-    "@serenityjs/logger": "0.8.14-beta-20251019001742",
-    "@serenityjs/nbt": "0.8.14-beta-20251019001742",
-    "@serenityjs/plugins": "0.8.14-beta-20251019001742",
-    "@serenityjs/protocol": "0.8.14-beta-20251019001742"
+    "@serenityjs/core": "0.8.17-beta-20251217200233",
+    "@serenityjs/logger": "0.8.17-beta-20251217200233",
+    "@serenityjs/nbt": "0.8.17-beta-20251217200233",
+    "@serenityjs/plugins": "0.8.17-beta-20251217200233",
+    "@serenityjs/protocol": "0.8.17-beta-20251217200233"
   },
   "devDependencies": {
     "@types/node": "^24.7.0",
@@ -29,7 +29,6 @@
     "uuid": "^11.1.0"
   },
   "dependencies": {
-    "dotenv": "^17.2.3",
-    "enderquest-sb": "file:"
+    "dotenv": "^17.2.3"
   }
 }

@@ -16,6 +16,8 @@ class DatabaseService {
 
   public logger = new Logger("Database Service", LoggerColors.Yellow)
 
+  public isInitialized: boolean = false;
+
   constructor() {
     this.client = new MongoClient(CONNECTION_STRING);
   }
@@ -36,6 +38,7 @@ class DatabaseService {
       this._global = this.db.collection<GlobalServerData>('global');
 
       this.logger.success("Database connection has been established.")
+      this.isInitialized = true;
     } catch (error) {
       this.logger.error("Failed to connect to database.")
       throw error;
