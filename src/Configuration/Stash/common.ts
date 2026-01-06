@@ -10,7 +10,7 @@ const CommonStashLoot: WeightedItem<StashLoot>[] = [
     { value: { function: giveItemStack.bind({ item: () => SealedTome, args: [EnchantmentRarity.Common] }), amount: [1, 1] }, weight: 10 },
     { value: { function: giveItemStack.bind({ item: () => SealedTome, args: [EnchantmentRarity.Rare] }), amount: [1, 1] }, weight: 5 },
     { value: { function: giveItemStack.bind({ item: () => CommonCrateKey, args: [] }), amount: [1, 1] }, weight: 5 },
-    { value: { function: giveItemStack.bind({ item: () => SeasonalCrateKey, args: [new Date(1762214400000)] }), amount: [1, 1] }, weight: 20 }
+    //{ value: { function: giveItemStack.bind({ item: () => SeasonalCrateKey, args: [new Date(1762214400000)] }), amount: [1, 1] }, weight: 20 }
 ];
 
 const CommonStashSelector = new WeightedSelector(CommonStashLoot);

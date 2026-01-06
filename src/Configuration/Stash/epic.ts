@@ -11,7 +11,7 @@ const EpicStashLoot: WeightedItem<StashLoot>[] = [
     { value: { function: giveItemStack.bind({ item: () => SealedTome, args: [EnchantmentRarity.Legendary] }), amount: [1, 1] }, weight: 20 },
     { value: { function: giveItemStack.bind({ item: () => SealedTome, args: [EnchantmentRarity.Exotic] }), amount: [1, 1] }, weight: 2 },
     { value: { function: giveItemStack.bind({ item: () => RareCrateKey, args: [] }), amount: [1, 3] }, weight: 20 },
-    { value: { function: giveItemStack.bind({ item: () => SeasonalCrateKey, args: [new Date(1762214400000)] }), amount: [1, 3] }, weight: 60 }
+    //{ value: { function: giveItemStack.bind({ item: () => SeasonalCrateKey, args: [new Date(1762214400000)] }), amount: [1, 3] }, weight: 60 }
 ];
 
 const EpicStashSelector = new WeightedSelector(EpicStashLoot);

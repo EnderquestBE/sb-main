@@ -5,6 +5,7 @@ import { ItemIdentifier } from "@serenityjs/core";
 import { CommonCrateKey, MasteryScroll, RareCrateKey, RefinementScroll, VanityVoucher } from "../../Classes";
 
 const SeasonalCrateLoot: WeightedItem<CrateLoot>[] = [
+    /*
     { value: { function: giveItem.bind({ id: ItemIdentifier.OakLog, display: "§6Oak Log §8x§c32" }), amount: 32 }, weight: 5 },
     { value: { function: giveItem.bind({ id: ItemIdentifier.Apple, display: "§6Apple §8x§c16" }), amount: 16 }, weight: 5 },
     { value: { function: giveItem.bind({ id: ItemIdentifier.IronIngot, display: "§6Iron Ingot §8x§c32" }), amount: 32 }, weight: 5 },
@@ -28,6 +29,7 @@ const SeasonalCrateLoot: WeightedItem<CrateLoot>[] = [
     { value: { function: giveItemStack.bind({ item: () => VanityVoucher, args: ["creeper_mask"] }), amount: 1 }, weight: 10 },
     { value: { function: giveItemStack.bind({ item: () => VanityVoucher, args: ["2025_candy_bucket"] }), amount: 1 }, weight: 5 },
     { value: { function: giveItemStack.bind({ item: () => VanityVoucher, args: ["2025_jack_o_head"] }), amount: 1 }, weight: 5 }
+     */
 ];
 
 const SeasonalCrateSelector = new WeightedSelector(SeasonalCrateLoot);
