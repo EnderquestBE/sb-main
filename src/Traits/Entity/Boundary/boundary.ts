@@ -1,6 +1,7 @@
 import { EntityIdentifier, Player, PlayerTrait, TraitOnTickDetails } from "@serenityjs/core";
 import { Vector3f } from "@serenityjs/protocol";
 import { Warp } from "../../../Classes";
+import { ServerTaskHandler } from "../../../Handlers";
 class PlayerBoundaryTrait extends PlayerTrait {
     public static readonly identifier = "boundary";
     public static readonly types = [EntityIdentifier.Player];
@@ -10,18 +11,21 @@ class PlayerBoundaryTrait extends PlayerTrait {
         // Void save.
         const elevation = this.player.position.y
         if (elevation < -18) {
-            if (this.player.isWorldIsland()) {
-                const island = this.player.getWorldIsland()
-                if (island) {
-                    if (!island.teleport(this.player)) {
-                        Warp.to(this.player, "SPAWN");
-                        return;
+            this.player.camera.setFade({ fadeTime: { fadeInTime: 0.1, holdTime: 0.05, fadeOutTime: 0.1 } })
+            ServerTaskHandler.queueTask(() => {
+                if (this.player.isWorldIsland()) {
+                    const island = this.player.getWorldIsland()
+                    if (island) {
+                        if (!island.teleport(this.player)) {
+                            Warp.to(this.player, "SPAWN");
+                            return;
+                        }
+                        this.player.info(
+                            `§eYou have been teleported to island §a${island.getName()}§e's spawn!`
+                        );
                     }
-                    this.player.info(
-                        `§eYou have been teleported to island §a${island.getName()}§e's spawn!`
-                    );
-                }
-            } else Warp.to(this.player, "SPAWN");
+                } else Warp.to(this.player, "SPAWN");
+            }, 100);
         }
         // Boundary behavior.
         if (!this.player.isWorldIsland()) return;

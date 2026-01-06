@@ -20,9 +20,9 @@ class PlayerHud {
 
         for (const player of world.getPlayers()) {
             const hudMode = player.getSetting("hudMode")
-            if (hudMode === "scoreboard")
+            if (hudMode === "SCOREBOARD")
                 Scorebar.update(player, player.isWorldIsland() ? player.getWorldIsland() : player.getIsland(), formattedMultiplier, this.tips[this.tipIndex]!)
-            else if (hudMode === "tooltip")
+            else if (hudMode === "TOOLTIP")
                 TooltipBar.update(player, player.isWorldIsland() ? player.getWorldIsland() : player.getIsland())
             else continue
         }

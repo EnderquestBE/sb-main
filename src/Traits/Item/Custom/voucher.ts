@@ -59,7 +59,8 @@ class ItemCustomVoucherTrait extends ItemStackTrait {
                 }
                 // Unlock the vanity.
                 player.unlockVanity(vanityID);
-                player.sendMessage(`§eUnlocked vanity §d${info.name}§e.`);
+                player.info(`§6New vanity item unlocked! §7Use §e/wardrobe §7to equip it!`);
+                player.onScreenDisplay.setToast("§e§lVanity Item Unlocked!", `§d${info.name}`);
                 break;
         }
         this.item.decrementStack();

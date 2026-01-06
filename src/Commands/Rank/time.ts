@@ -25,34 +25,36 @@ class TimeActionEnum extends CustomEnum {
 }
 
 new CommandBuilder("time", "Configures the daytime of your island.").setPermissions(["rank.time"])
-    .addOverload(
-        new CommandOverload({
-            action: TimeActionEnum
-        }).onCallback((player, { action: actionRaw }) => {
-            if (!(player instanceof Player)) return;
-
-            const action = actionRaw.result as string;
-
-            const world = player.world;
-
-            if (player.getIslandName() !== world.identifier.substring(3)) {
-                player.error("You can only do this on your island.");
-                return;
-            }
-
-            if (action === "stop") {
-                //@ts-ignore
-                world.setGamerule(GameRule.DoDaylightCycle, false);
-                player.info(`§eTime has been §cstopped§e.`);
-            }
-
-            else {
-                //@ts-ignore
-                world.setGamerule(GameRule.DoDaylightCycle, true);
-                player.info(`§eTime has been §astarted§e.`);
-            }
-        })
-    )
+    /*
+        .addOverload(
+            new CommandOverload({
+                action: TimeActionEnum
+            }).onCallback((player, { action: actionRaw }) => {
+                if (!(player instanceof Player)) return;
+    
+                const action = actionRaw.result as string;
+    
+                const world = player.world;
+    
+                if (player.getIslandName() !== world.identifier.substring(3)) {
+                    player.error("You can only do this on your island.");
+                    return;
+                }
+    
+                if (action === "stop") {
+                    //@ts-ignore
+                    world.setGamerule(GameRule.DoDaylightCycle, false);
+                    player.info(`§eTime has been §cstopped§e.`);
+                }
+    
+                else {
+                    //@ts-ignore
+                    world.setGamerule(GameRule.DoDaylightCycle, true);
+                    player.info(`§eTime has been §astarted§e.`);
+                }
+            })
+        )
+            */
     .addOverload(
         new CommandOverload({
             set: TimeSetEnum,

@@ -1,4 +1,4 @@
-import { Vector3f } from "@serenityjs/protocol";
+import { GameRule, Vector3f } from "@serenityjs/protocol";
 import { Player, World, WorldProperties } from "@serenityjs/core";
 import { UpdateFilter } from "mongodb";
 import { DataManager } from "./Manager";
@@ -167,7 +167,7 @@ class Island extends DataManager<IslandData, IslandDatabase> {
     }
     player.teleport(this.getSpawn(), dimension);
     //@ts-ignore
-    player.updateGamerules();
+    //player.updateGamerules();
     return true;
   }
 

@@ -1,13 +1,14 @@
-import { ModalForm, Player } from "@serenityjs/core";
+import { ActionForm, Player } from "@serenityjs/core";
 import { Setting, USERSETTINGS } from "../../Configuration/Settings/settings";
 import { Logger, LoggerColors } from "@serenityjs/logger";
+import { ServerTaskHandler } from "../../Handlers";
 
 class Settings {
     private static readonly logger = new Logger("Settings", LoggerColors.Aqua)
 
     public static async show(player: Player) {
         try {
-            const form = new ModalForm("Settings");
+            const form = new ActionForm("Settings", "Select an option to toggle.");
             const current = player.getSettings();
             const keys: (keyof typeof Setting)[] = [];
 
@@ -16,34 +17,36 @@ class Settings {
                 keys.push(key);
                 if (info.options) {
                     const currentIndex = info.options.indexOf(currentValue as string);
-                    form.dropdown(info.name, info.options, currentIndex > -1 ? currentIndex : 0);
+                    form.button(`§d${info.name}: §6${info.options[currentIndex] ?? info.options[0]}\n§8${info.description}`);
                 } else {
-                    form.toggle(info.name, currentValue as boolean);
+                    form.button(`§d${info.name}: ${(currentValue as boolean) ? "§aEnabled" : "§cDisabled"}\n§8${info.description}`);
                 }
             }
 
-            const result = await form.show(player).then((result) => {
-                if (!result) return player.info("§cYour settings changes have been canceled.")
-                const options = result as (number | boolean)[]
-                for (let i = 0; i < options.length; i++) {
-                    const option = options[i]
-                    const key = keys[i]
-                    if (!key) return;
+            await form.show(player).then((selection) => {
+                if (selection instanceof Error) return;
+                const selected = keys[selection];
+                if (!selected) return;
 
-                    const info = USERSETTINGS.get(key)!;
-                    let finalValue: string | boolean;
+                let finalValue: string | boolean;
+                const info = USERSETTINGS.get(selected)!;
 
-                    if (typeof option === "number" && info.options) {
-                        finalValue = info.options[option]!
-                    } else {
-                        finalValue = option as boolean
-                    }
-
-                    player.setSetting(key, finalValue);
-                    info.function?.(player, finalValue);
+                if (info.options) {
+                    // Set final value to next option in list.
+                    const currentIndex = info.options.indexOf(player.getSetting(selected) as string);
+                    const nextIndex = (currentIndex + 1) % info.options.length;
+                    finalValue = info.options[nextIndex]!;
+                } else {
+                    finalValue = !(player.getSetting(selected) as boolean);
                 }
+
+                player.setSetting(selected, finalValue);
+                info.function?.(player, finalValue);
+
+                ServerTaskHandler.queueTask(() => {
+                    Settings.show(player);
+                }, 50);
             })
-            player.info("§aYour settings have been updated!");
 
         } catch (error) {
             player.error("Unable to change settings.");

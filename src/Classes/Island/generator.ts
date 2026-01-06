@@ -1,5 +1,5 @@
 import { BinaryStream } from "@serenityjs/binarystream";
-import { BlockChestTrait, BlockIdentifier, BlockPermutation, Chunk, ItemIdentifier, ItemStack, Structure, TerrainGenerator, World } from "@serenityjs/core";
+import { BlockChestTrait, BlockIdentifier, BlockPermutation, BlockSignTrait, Chunk, ItemIdentifier, ItemStack, Structure, TerrainGenerator, World } from "@serenityjs/core";
 import { CompoundTag } from "@serenityjs/nbt";
 import { Vector3f } from "@serenityjs/protocol";
 import { readFileSync } from "fs";
@@ -30,6 +30,7 @@ class IslandGenerator extends TerrainGenerator {
                 { placeAirBlocks: false }
             );
             this.starterChest()
+            this.starterSign()
             //@ts-ignore
             this.dimension.world.properties["isInitialized"] = true
         }
@@ -53,6 +54,15 @@ class IslandGenerator extends TerrainGenerator {
         inv.addItem(new ItemStack(ItemIdentifier.Bone, { stackSize: 1 }))
 
         chestBlock.update()
+    }
+
+    public async starterSign() {
+        const signBlock = this.dimension.getBlock(new Vector3f(0, 3, -1));
+        signBlock.setPermutation(BlockPermutation.resolve(BlockIdentifier.StandingSign));
+        signBlock.setState("minecraft:cardinal_direction", "south");
+        const sign = signBlock.getTrait(BlockSignTrait) ?? signBlock.addTrait(BlockSignTrait);
+        sign.setFrontText(`§aWelcome to\n§d${this.dimension.world.identifier.substring(3)}\n§eUse §6/tutorial\n§efor guidance!`)
+        signBlock.update();
     }
 
     public static registerStructure(world: World) {

@@ -63,7 +63,7 @@ class EntitySlapperTrait extends EntityTrait {
         playerPacket.properties = this.entity.sharedProperties.getSharedPropertiesAsSyncData();
         playerPacket.uniqueEntityId = this.entity.uniqueId;
         playerPacket.premissionLevel = PermissionLevel.Member;
-        playerPacket.commandPermission = CommandPermissionLevel.Normal;
+        playerPacket.commandPermission = CommandPermissionLevel.Any;
         playerPacket.abilities = [];
         playerPacket.links = [];
         playerPacket.deviceId = "";

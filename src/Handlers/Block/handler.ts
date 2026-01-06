@@ -46,6 +46,7 @@ class BlockHandler {
 
   // Message to show if the player's inventory is full.
   private static readonly INV_FULL = "§cYour inventory is full!";
+  private static readonly STARVING = "§cYou are starving!";
 
   // Cached fortune multiplier values.
   private static readonly fortunePool = new Map<number, number[]>();
@@ -57,7 +58,7 @@ class BlockHandler {
   ): void {
     const island = player.getWorldIsland();
     if (!island) return;
-    if (blocks.some((x) => this.cropBlocks.has(x.identifier)))
+    if (blocks.some((x) => this.cropBlocks.has(x.identifier as BlockIdentifier)))
       player.incrementCriteria("cropsFarmed", 1);
     else player.incrementCriteria("blocksMined", 1);
 
@@ -67,14 +68,20 @@ class BlockHandler {
 
       // Handle exhaustion.
       const hunger = player.getTrait(PlayerHungerTrait);
-      if (hunger) hunger.exhaustion += 0.05;
+      if (hunger) {
+        hunger.exhaustion += 0.05;
+        if (hunger.currentValue <= 0) {
+          player.info(this.STARVING);
+          return;
+        }
+      }
 
-      const info = BlockPointValues[block.identifier]?.break;
+      const info = BlockPointValues[block.identifier as BlockIdentifier]?.break;
       if (!info) {
         if (player.getGamemode() === Gamemode.Survival) {
           try {
             const id =
-              BlockOverrideMap.get(block.identifier) ?? block.identifier;
+              BlockOverrideMap.get(block.identifier as BlockIdentifier) ?? block.identifier;
             const item = new ItemStack(id, { stackSize: 1 });
             const inventory = player.getTrait(EntityInventoryTrait);
             if (!inventory.container.addItem(item)) {
@@ -153,7 +160,7 @@ class BlockHandler {
 
     player.incrementCriteria("blocksPlaced", 1);
 
-    const points = BlockPointValues[block.identifier]?.place?.points;
+    const points = BlockPointValues[block.identifier as BlockIdentifier]?.place?.points;
     if (points) {
       island.addPoints(points);
     }
@@ -271,7 +278,7 @@ class BlockHandler {
    * Run on server start to initialize values.
    */
   public static initialize() {
-    for (let i = 0; i < 10; ) {
+    for (let i = 0; i < 10;) {
       this._cacheFortunePool(++i);
     }
   }

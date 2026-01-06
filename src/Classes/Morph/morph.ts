@@ -25,7 +25,7 @@ class MorphManager {
         }
 
         //@ts-ignore
-        player.skin.source = morphData.skin!;
+        player.skin.setSerialized(morphData.skin!);
 
         // Apply the morph
         const packet = new PlayerSkinPacket()

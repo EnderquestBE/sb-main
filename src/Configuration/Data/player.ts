@@ -19,7 +19,7 @@ const DEFAULT_PLAYER_DATA: PlayerData = {
     homes: [],
     nickname: "",
     settings: {
-        hudMode: "scoreboard",
+        hudMode: "SCOREBOARD",
         showXpOverlay: true,
         blockPartyRequests: false
     },

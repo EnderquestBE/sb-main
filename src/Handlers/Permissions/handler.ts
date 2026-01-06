@@ -1,5 +1,5 @@
 import { BlockIdentifier, EntityHitSignal, PlayerBreakBlockSignal, PlayerInteractWithBlockSignal, PlayerOpenedContainerSignal, PlayerPlaceBlockSignal } from "@serenityjs/core";
-import { Vector3f } from "@serenityjs/protocol";
+import { ContainerType, Vector3f } from "@serenityjs/protocol";
 import { EnchantmentHandler } from "../Enchantment/handler";
 
 const MessageCooldown = new Map<string, number>()
@@ -34,7 +34,7 @@ class PermissionsHandler {
     }
 
     public static onPlace({ player, permutationBeingPlaced, block }: PlayerPlaceBlockSignal) {
-        if (this.PLACEMENT_BLACKLIST.has(permutationBeingPlaced.type.identifier)) {
+        if (this.PLACEMENT_BLACKLIST.has(permutationBeingPlaced.type.identifier as BlockIdentifier)) {
             player.error("This block cannot be placed.")
             return false
         }
@@ -56,8 +56,9 @@ class PermissionsHandler {
         return true
     }
 
+    //@ts-ignore
     public static onInteract({ source, block, placingBlock }: PlayerInteractWithBlockSignal) {
-        if (placingBlock) return true
+        if (block.identifier === BlockIdentifier.CraftingTable || placingBlock) return true
         if (!source.isWorldIsland()) {
             if (!MessageCooldown.has(source.xuid) || MessageCooldown.get(source.xuid)! < Date.now()) {
                 source.error("You do not have permission to interact here.")
@@ -82,7 +83,9 @@ class PermissionsHandler {
         return true
     }
 
-    public static onContainerOpen({ player }: PlayerOpenedContainerSignal) {
+    //@ts-ignore
+    public static onContainerOpen({ player, container }: PlayerOpenedContainerSignal) {
+        if (container.type === ContainerType.Workbench) return true;
         if (!player) return false;
         if (!player.isWorldIsland()) {
             player.error("You do not have permission to use containers here.");

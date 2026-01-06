@@ -2,6 +2,7 @@ import { Plugin, PluginEvents } from "@serenityjs/plugins";
 import {
   ActionForm,
   CustomEntityType,
+  CustomItemType,
   EntityDimensionChangeSignal,
   EntityHealthTrait,
   EntityHitSignal,
@@ -63,6 +64,7 @@ import {
 import { EntityStackTrait } from "./Traits/Entity/traits";
 import {
   ContainerType,
+  CreativeItemCategory,
   DataPacket,
   PlayerSkinPacket,
 } from "@serenityjs/protocol";
@@ -98,6 +100,7 @@ import "./Configuration/Morph/morph";
 
 import "./Commands/commands";
 import "./Traits/Block/Liquid/liquidInteraction";
+import { v4 as uuid } from 'uuid';
 
 class EnderquestPlugin extends Plugin implements PluginEvents {
   private database!: DatabaseService;
@@ -382,7 +385,7 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
       // Update player count.
       Server.updatePlayerCount();
       resolve();
-    } catch (e) {}
+    } catch (e) { }
   }
 
   public onWorldInitialize({ world }: WorldInitializeSignal): void {
@@ -576,9 +579,9 @@ class EnderquestPlugin extends Plugin implements PluginEvents {
     //@ts-ignore
     packet.skin = player.vanitySkin ?? player.skin.getSerialized();
     //@ts-ignore
-    packet.skinName = player.vanitySkin.identifier ?? player.skin.identifier;
+    packet.skinName = player.vanitySkin.identifier ?? uuid();
     //@ts-ignore
-    packet.oldSkinName = player.skin.identifier;
+    packet.oldSkinName = uuid();
     packet.isVerified = true;
 
     toDimension.broadcast(packet);

@@ -12,10 +12,11 @@ const USERSETTINGS = new Map<keyof typeof Setting, UserSetting>([
     [
         Setting.hudMode,
         {
-            name: "Hud",
-            options: ["scoreboard", "tooltip", "off"],
+            name: "HUD Mode",
+            description: "Changes your HUD style.",
+            options: ["SCOREBOARD", "TOOLTIP", "OFF"],
             function(player, newValue) {
-                if (newValue !== "scoreboard") {
+                if (newValue !== "SCOREBOARD") {
                     Scorebar.clear(player)
                 }
             }
@@ -24,13 +25,15 @@ const USERSETTINGS = new Map<keyof typeof Setting, UserSetting>([
     [
         Setting.showXpOverlay,
         {
-            name: "Show XP Overlay"
+            name: "XP Overlay",
+            description: "Toggles the XP gain overlay."
         }
     ],
     [
         Setting.blockPartyRequests,
         {
-            name: "Block Party Requests"
+            name: "Block Party Requests",
+            description: "Blocks party requests from players."
         }
     ]
 ])
